@@ -1,0 +1,34 @@
+Package: gcamextractor
+Title: gcamextractor
+Version: 0.1.0
+Authors@R: c(person("Zarrar", "Khan", email = "zarrar.khan@pnnl.gov", role = c("aut", "cre"),
+		   comment = c(ORCID ="0000-0002-8147-8553")),
+		   person("Mengqi", "Zhao", email = "mengqiz@umd.edu", role = c("aut"),
+		   comment = c(ORCID ="0000-0001-5385-2758")),
+		   person("Tom", "Wild", role = c("aut"),comment = c(ORCID ="0000-0002-8147-8553")),
+		   person("Chris", "Vernon", role = c("aut")))
+Description: Description of your R package gcamextractor.
+URL: https://github.com/JGCRI/gcamextractor
+BugReports: https://github.com/JGCRI/gcamextractor/issues
+Depends: R (>= 2.10)
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
+Imports: 
+    knitr,
+    dplyr,
+	magrittr,
+	XML,
+	stringr,
+	tibble,
+	tidyr,
+	xfun,
+	zoo,
+	rgcam
+Suggests: 
+    rmarkdown,
+    testthat
+Remotes: github::JGCRI/rgcam
+VignetteBuilder: 
+    knitr
