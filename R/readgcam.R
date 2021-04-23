@@ -2685,7 +2685,7 @@ paramx <- "emissCO2BySectorNoBio"
           grepl("cement|N fertilizer|industrial|ind ",class1,ignore.case=T)~"industry",
           grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids",class1,ignore.case=T)~"industry",
           grepl("Beef|Dairy|Pork|Poultry",class1,ignore.case=T)~"livestock",
-          grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class1,ignore.case=T)~"crops",
+          grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class1,ignore.case=T)~"crops",
           TRUE~class1))%>%
       dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
       dplyr::mutate(param = "emissCO2BySectorNoBio",
@@ -2754,7 +2754,7 @@ paramx <- "emissCO2BySectorNoBio"
             grepl("cement|N fertilizer|industrial|ind ",class2,ignore.case=T)~"industry",
             grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids",class2,ignore.case=T)~"industry",
             grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
-            grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
+            grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
             TRUE~class2))%>%
         dplyr::left_join(assumptions("GWP")%>%dplyr::rename(class1=ghg),by="class1")%>%
         dplyr::left_join(assumptions("convertGgTgMTC"),by="Units") %>%
@@ -2830,7 +2830,7 @@ paramx <- "emissCO2BySectorNoBio"
             grepl("cement|N fertilizer|industrial|ind ",class2,ignore.case=T)~"industry",
             grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids",class2,ignore.case=T)~"industry",
             grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
-            grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
+            grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
             TRUE~class2))%>%
         dplyr::left_join(assumptions("GWP")%>%dplyr::rename(class1=ghg),by="class1")%>%
         dplyr::left_join(assumptions("convertGgTgMTC"),by="Units") %>%
@@ -3216,7 +3216,7 @@ paramx <- "emissCO2BySectorNoBio"
             grepl("cement|N fertilizer|industrial|ind ",class1,ignore.case=T)~"industry",
             grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids",class1,ignore.case=T)~"industry",
             grepl("Beef|Dairy|Pork|Poultry",class1,ignore.case=T)~"livestock",
-            grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class1,ignore.case=T)~"crops",
+            grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class1,ignore.case=T)~"crops",
             TRUE~class1))%>%
         dplyr::left_join(assumptions("GWP")%>%dplyr::rename(class2=ghg),by="class2")%>%
         dplyr::left_join(assumptions("convertGgTgMTC"),by="Units") %>%
@@ -3290,7 +3290,7 @@ paramx <- "emissCO2BySectorNoBio"
           grepl("cement|N fertilizer|industrial|ind ",class2,ignore.case=T)~"industry",
           grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids",class2,ignore.case=T)~"industry",
           grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
-          grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
+          grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
           TRUE~class2))%>%
         dplyr::left_join(assumptions("GWP")%>%dplyr::rename(class1=ghg),by="class1")%>%
         dplyr::left_join(assumptions("convertGgTgMTC"),by="Units") %>%
@@ -3521,7 +3521,7 @@ paramx <- "emissBySectorGWPAR5FFI"
           grepl("cement|N fertilizer|industrial|ind ",class2,ignore.case=T)~"industry",
           grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids",class2,ignore.case=T)~"industry",
           grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
-          grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
+          grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
           TRUE~class2))%>%
         dplyr::left_join(assumptions("GWP")%>%dplyr::rename(class1=ghg),by="class1")%>%
         dplyr::left_join(assumptions("convertGgTgMTC"),by="Units") %>%
@@ -3584,7 +3584,7 @@ paramx <- "emissBySectorGWPAR5FFI"
             grepl("cement|N fertilizer|industrial|ind ",class1,ignore.case=T)~"industry",
             grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids",class1,ignore.case=T)~"industry",
             grepl("Beef|Dairy|Pork|Poultry",class1,ignore.case=T)~"livestock",
-            grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class1,ignore.case=T)~"crops",
+            grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class1,ignore.case=T)~"crops",
             TRUE~class1))%>%
         dplyr::left_join(assumptions("GWP")%>%dplyr::rename(class2=ghg),by="class2")%>%
         dplyr::left_join(assumptions("convertGgTgMTC"),by="Units") %>%
@@ -3660,7 +3660,7 @@ paramx <- "emissBySectorGWPAR5FFI"
           grepl("cement|N fertilizer|industrial|ind ",class2,ignore.case=T)~"industry",
           grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids",class2,ignore.case=T)~"industry",
           grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
-          grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
+          grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
           TRUE~class2))%>%
         dplyr::left_join(assumptions("GWP")%>%dplyr::rename(class1=ghg),by="class1")%>%
         dplyr::left_join(assumptions("convertGgTgMTC"),by="Units") %>%
@@ -3893,7 +3893,7 @@ paramx <- "emissBySectorGWPAR5FFI"
           grepl("cement|N fertilizer|industrial|ind ",class2,ignore.case=T)~"industry",
           grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids",class2,ignore.case=T)~"industry",
           grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
-          grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
+          grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
           TRUE~class2))%>%
         dplyr::mutate(param = "emissNonCO2BySectorOrigUnits",
                       sources = "Sources",
