@@ -1,0 +1,52 @@
+---
+title: "readgcam"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{readgcam}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+<!-------------------------->
+<!-------------------------->
+# Key Links
+<!-------------------------->
+<!-------------------------->
+
+- Github: https://github.com/JGCRI/gcamextractor
+- Webpage: https://jgcri.github.io/gcamextractor/
+- Cheatsheet: https://jgcri.github.io/gcamextractor/gcamextractorCheatsheet.pdf
+
+<!-------------------------->
+<!-------------------------->
+# Read GCAM database
+<!-------------------------->
+<!-------------------------->
+
+<!-------------------------->
+<!-------------------------->
+# Read GCAM .Proj file
+<!-------------------------->
+<!-------------------------->
+
+<!-------------------------->
+<!-------------------------->
+# Available Paramaters
+<!-------------------------->
+<!-------------------------->
+
+<!-- Add metis.param list figure->
+
+<!-------------------------->
+## Socio-economics
+<!-------------------------->
+
+<!-------------------------->
+## Water
+<!-------------------------->
+
+<!-------------------------->
+## Energy
+<!-------------------------->
+
