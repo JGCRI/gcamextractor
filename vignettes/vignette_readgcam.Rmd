@@ -13,6 +13,7 @@ vignette: >
 # Key Links
 <!-------------------------->
 <!-------------------------->
+<p align="center"> <img src="vignetteFigs/divider.png" width="1400"></p>
 
 - Github: https://github.com/JGCRI/gcamextractor
 - Webpage: https://jgcri.github.io/gcamextractor/
@@ -23,30 +24,195 @@ vignette: >
 # Read GCAM database
 <!-------------------------->
 <!-------------------------->
+<p align="center"> <img src="vignetteFigs/divider.png" width="1400"></p>
+
+`gcamextractor::readgcam` will return a list containing: 
+
+- data: a dataframe with the original data
+- dataAggParam: a dataframe with the data aggregated to the parameter
+- dataAggClass1: a dataframe with the data aggregated to class 1
+- dataAggclass2: a dataframe with the data aggregated to class 2
+- scenarios: A list of the scenarios
+- queries: A list of the queries used to extract the data
+
+
+```{r, eval=F}
+library(gcamextractor)
+
+Path_to_GCAMdatabase <- "E:/gcam-core-gcam-v5.3" # Change the path based on your GCAM database location
+dataGCAM <- gcamextractor::readgcam(gcamdatabase = Path_to_GCAMdatabase)
+
+df <- dataGCAM$data; df
+dfParam <- dataGCAM$dataAggParam; dfParam
+dfClass1 <- dataGCAM$dataAggClass1; dfClass1
+dfClass2 <- dataGCAM$dataAggClass1; dfClass2
+```  
+
 
 <!-------------------------->
 <!-------------------------->
 # Read GCAM .Proj file
 <!-------------------------->
 <!-------------------------->
+<p align="center"> <img src="vignetteFigs/divider.png" width="1400"></p>
+
+`gcamextractor` includes a default example .Proj file `gcamextractor::exmapleGCAMproj`.
+
+```{r, eval=F}
+library(gcamextractor)
+
+dataGCAM <- gcamextractor::readgcam(gcamdatabase = gcamextractor::exampleGCAMproj)
+
+``` 
+
+User can provide path to .Proj file to read GCAM data.
+
+```{r, eval=F}
+library(gcamextractor)
+
+Path_to_GCAMProj <- "E:/dataProj_example.proj" # Change the path to your .proj file
+dataGCAM <- gcamextractor::readgcam(gcamdatabase = Path_to_GCAMProj)
+
+```  
+
+<!-------------------------->
+<!-------------------------->
+# Output Structure
+<!-------------------------->
+<!-------------------------->
+<p align="center"> <img src="vignetteFigs/divider.png" width="1400"></p>
+
+<p align="center"> <img src="vignetteFigs/example_structure.png" width="1400"></p>
+
 
 <!-------------------------->
 <!-------------------------->
 # Available Paramaters
 <!-------------------------->
 <!-------------------------->
+<p align="center"> <img src="vignetteFigs/divider.png" width="1400"></p>
 
-<!-- Add metis.param list figure->
+<!-- Add metis.param list figure -->
+<p align="center"> <img src="vignetteFigs/ParamList.png" width="1200"></p>
 
 <!-------------------------->
-## Socio-economics
+## Socioeconomics
+<!-------------------------->
+
+<!-------------------------->
+## Electricity
+<!-------------------------->
+<a name="table2"></a>
+**Table 2:** Summary of electricity parameters.
+
+| Parameter | Description and Unit | Original GCAM Unit | Source Queries |
+|---|---|---|---|
+| [elecByTechTWh](#elecbytechtwh) | Electricity Generation by Fuel (TWh) | EJ | elec gen by gen tech USA; <br /> elec gen by gen tech and cooling tech |
+| [elecCapByFuel](#eleccapbyfuel) | Electricity Capacity by Fuel (GW) | EJ | elec gen by gen tech USA; <br /> elec gen by gen tech and cooling tech |
+| [elecFinalBySecTWh](#elecfinalbysectwh) | Final Electricity by Sector (TWh) | EJ | inputs by tech |
+| [elecFinalByFuelTWh](#elecfinalbyfueltwh) | Final Electricity by Fuel (TWh) | EJ | Final energy by detailed end-use sector and fuel |
+
+<br />
+
+<!-- <a name="elecByTechTWh"></a> -->
+### elecByTechTWh
+
+`elecByTechTWh` uses "elec gen by gen tech and cooling tech" query and converts electricity generation of GCAM raw output from EJ to TWh:
+
+$$elecByTechTWh = elecByTechEJ_{GCAM} \times convEJ2TWh$$
+where `convEJ2TWh` is the conversion constant from EJ to TWh, 1 EJ = 277.7778 TWh.
+`gcamextractor::readgcam` also aggregates "rooftop_pv" into "solar" category in the technology subsector (shown in "class1" colomn).
+
+```{r eval=F}
+library(gcamextractor)
+
+dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::exampleGCAMproj,
+                                    paramsSelect = 'elecByTechTWh',
+                                    regionsSelect = 'USA')
+```
+
+
+<br />
+
+<!-- <a name="elecCapByFuel"></a> -->
+### elecCapByFuel
+
+`elecCapByFuel` calculates electricity capacity (GW) based on the output from `elecByTechTWh`:
+
+$$elecCapByFuel = \frac{elecByTechTWh \times 1000}{8760 \times gcamCapacityFactor}$$
+
+`gcamCapacityFactor` is calculated as an average of the capacity factors of the technologies within each subsector (See [Table 3](#table3)) based on the data from:
+
+  - Global technology capacity factor from "GCAM-FOLDER\\input\\gcamdata\\inst\\extdata\\energy\\A23.globaltech_capacity_factor.csv"
+  - USA renewable technology capacity factors by States from "GCAM-FOLDER\\input\\gcamdata\\inst\\extdata\\gcam-usa\\NREL_us_re_capacity_factors.csv"
+  - Hydrogen fuel cell capacity factor from https://www.eia.gov/todayinenergy/detail.php?id=35872 and https://www.nrel.gov/analysis/tech-cap-factor.html
+
+Exceptions in calculating `gcamCapacityFactor` include:
+
+  - For "solar" capacity factor the CSP_storage capacity factor value of 0.65 was excluded from the average.
+  - The "hydro" capacity factor was sourced from Global CCS Institute "Renewable power generation costs in 2012: an overview" - 5.2 Capacity factors for hydropower, since hydropower is calculated endogenously within GCAM.
+  - No cogeneration capacity factor "n CHP" was given.
+  - rooftop_pv was assumed the same as solar average (5) grid_storage assumed to have a high cap factor equal to that of nuclear
+
+<a name="table3"></a>
+**Table 3:** Averaged capacity factor for electricity generation by generation technology.
+
+| Subsector (class1) | Average capacity factor from 1971 to 2100 |
+|---|---|
+| coal | 0.8125 |
+| gas | 0.816667 |
+| oil | 0.816667 |
+| biomass | 0.825 |
+| nuclear | 0.9 |
+| geothermal | 0.9 |
+| hydro | 0.5 |
+| wind | 0.37 |
+| solar | 0.216667 |
+| rooftop_pv | 0.216667 |
+| hydrogen | 0.8 |
+| grid_storage | 0.9 |
+
+```{r eval=F}
+library(gcamextractor)
+
+dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::exampleGCAMproj,
+                                    paramsSelect = 'elecCapByFuel',
+                                    regionsSelect = 'USA')
+```
+
+<br />
+
+<!-- <a name="elecFinalBySecTWh"></a> -->
+### elecFinalBySecTWh
+
+
+<br />
+
+<!-- <a name="elecFinalByFuelTWh"></a> -->
+### elecFinalByFuelTWh
+
+<br />
+
+<!-------------------------->
+## Transport
+<!-------------------------->
+
+<!-------------------------->
+## Agriculture
+<!-------------------------->
+
+<!-------------------------->
+## Livestock
+<!-------------------------->
+
+<!-------------------------->
+## Land
+<!-------------------------->
+
+<!-------------------------->
+## Emission
 <!-------------------------->
 
 <!-------------------------->
 ## Water
 <!-------------------------->
-
-<!-------------------------->
-## Energy
-<!-------------------------->
-
