@@ -105,6 +105,8 @@
 <a href="#key-links" class="anchor"></a>Key Links</h1>
 <!-------------------------->
 <!-------------------------->
+<p align="center">
+<img src="vignetteFigs/divider.png" width="1400"></p>
 <ul>
 <li>Github: <a href="https://github.com/JGCRI/gcamextractor" class="uri">https://github.com/JGCRI/gcamextractor</a>
 </li>
@@ -120,6 +122,27 @@
 <a href="#read-gcam-database" class="anchor"></a>Read GCAM database</h1>
 <!-------------------------->
 <!-------------------------->
+<p align="center">
+<img src="vignetteFigs/divider.png" width="1400"></p>
+<p><code><a href="../reference/readgcam.html">gcamextractor::readgcam</a></code> will return a list containing:</p>
+<ul>
+<li>data: a dataframe with the original data</li>
+<li>dataAggParam: a dataframe with the data aggregated to the parameter</li>
+<li>dataAggClass1: a dataframe with the data aggregated to class 1</li>
+<li>dataAggclass2: a dataframe with the data aggregated to class 2</li>
+<li>scenarios: A list of the scenarios</li>
+<li>queries: A list of the queries used to extract the data</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JGCRI/gcamextractor">gcamextractor</a></span><span class="op">)</span>
+
+<span class="va">Path_to_GCAMdatabase</span> <span class="op">&lt;-</span> <span class="st">"E:/gcam-core-gcam-v5.3"</span> <span class="co"># Change the path based on your GCAM database location</span>
+<span class="va">dataGCAM</span> <span class="op">&lt;-</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="fu"><a href="../reference/readgcam.html">readgcam</a></span><span class="op">(</span>gcamdatabase <span class="op">=</span> <span class="va">Path_to_GCAMdatabase</span><span class="op">)</span>
+
+<span class="va">df</span> <span class="op">&lt;-</span> <span class="va">dataGCAM</span><span class="op">$</span><span class="va">data</span>; <span class="va">df</span>
+<span class="va">dfParam</span> <span class="op">&lt;-</span> <span class="va">dataGCAM</span><span class="op">$</span><span class="va">dataAggParam</span>; <span class="va">dfParam</span>
+<span class="va">dfClass1</span> <span class="op">&lt;-</span> <span class="va">dataGCAM</span><span class="op">$</span><span class="va">dataAggClass1</span>; <span class="va">dfClass1</span>
+<span class="va">dfClass2</span> <span class="op">&lt;-</span> <span class="va">dataGCAM</span><span class="op">$</span><span class="va">dataAggClass1</span>; <span class="va">dfClass2</span></code></pre></div>
 <!-------------------------->
 <!-------------------------->
 </div>
@@ -128,6 +151,31 @@
 <a href="#read-gcam--proj-file" class="anchor"></a>Read GCAM .Proj file</h1>
 <!-------------------------->
 <!-------------------------->
+<p align="center">
+<img src="vignetteFigs/divider.png" width="1400"></p>
+<p><code>gcamextractor</code> includes a default example .Proj file <code>gcamextractor::exmapleGCAMproj</code>.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JGCRI/gcamextractor">gcamextractor</a></span><span class="op">)</span>
+
+<span class="va">dataGCAM</span> <span class="op">&lt;-</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="fu"><a href="../reference/readgcam.html">readgcam</a></span><span class="op">(</span>gcamdatabase <span class="op">=</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="va"><a href="../reference/exampleGCAMproj.html">exampleGCAMproj</a></span><span class="op">)</span></code></pre></div>
+<p>User can provide path to .Proj file to read GCAM data.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JGCRI/gcamextractor">gcamextractor</a></span><span class="op">)</span>
+
+<span class="va">Path_to_GCAMProj</span> <span class="op">&lt;-</span> <span class="st">"E:/dataProj_example.proj"</span> <span class="co"># Change the path to your .proj file</span>
+<span class="va">dataGCAM</span> <span class="op">&lt;-</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="fu"><a href="../reference/readgcam.html">readgcam</a></span><span class="op">(</span>gcamdatabase <span class="op">=</span> <span class="va">Path_to_GCAMProj</span><span class="op">)</span></code></pre></div>
+<!-------------------------->
+<!-------------------------->
+</div>
+<div id="output-structure" class="section level1">
+<h1 class="hasAnchor">
+<a href="#output-structure" class="anchor"></a>Output Structure</h1>
+<!-------------------------->
+<!-------------------------->
+<p align="center">
+<img src="vignetteFigs/divider.png" width="1400"></p>
+<p align="center">
+<img src="vignetteFigs/example_structure.png" width="1400"></p>
 <!-------------------------->
 <!-------------------------->
 </div>
@@ -136,24 +184,210 @@
 <a href="#available-paramaters" class="anchor"></a>Available Paramaters</h1>
 <!-------------------------->
 <!-------------------------->
-<!-- Add metis.param list figure->
-
+<p align="center">
+<img src="vignetteFigs/divider.png" width="1400"></p>
+<!-- Add metis.param list figure -->
+<p align="center">
+<img src="vignetteFigs/ParamList.png" width="1200"></p>
 <!-------------------------->
-<div id="socio-economics" class="section level2">
+<div id="socioeconomics" class="section level2">
 <h2 class="hasAnchor">
-<a href="#socio-economics" class="anchor"></a>Socio-economics</h2>
+<a href="#socioeconomics" class="anchor"></a>Socioeconomics</h2>
+<!-------------------------->
+<!-------------------------->
+</div>
+<div id="electricity" class="section level2">
+<h2 class="hasAnchor">
+<a href="#electricity" class="anchor"></a>Electricity</h2>
+<!-------------------------->
+<p><a name="table2"></a> <strong>Table 2:</strong> Summary of electricity parameters.</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Parameter</th>
+<th>Description and Unit</th>
+<th>Original GCAM Unit</th>
+<th>Source Queries</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><a href="#elecbytechtwh">elecByTechTWh</a></td>
+<td>Electricity Generation by Fuel (TWh)</td>
+<td>EJ</td>
+<td>elec gen by gen tech USA; <br> elec gen by gen tech and cooling tech</td>
+</tr>
+<tr class="even">
+<td><a href="#eleccapbyfuel">elecCapByFuel</a></td>
+<td>Electricity Capacity by Fuel (GW)</td>
+<td>EJ</td>
+<td>elec gen by gen tech USA; <br> elec gen by gen tech and cooling tech</td>
+</tr>
+<tr class="odd">
+<td><a href="#elecfinalbysectwh">elecFinalBySecTWh</a></td>
+<td>Final Electricity by Sector (TWh)</td>
+<td>EJ</td>
+<td>inputs by tech</td>
+</tr>
+<tr class="even">
+<td><a href="#elecfinalbyfueltwh">elecFinalByFuelTWh</a></td>
+<td>Final Electricity by Fuel (TWh)</td>
+<td>EJ</td>
+<td>Final energy by detailed end-use sector and fuel</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<!-- <a name="elecByTechTWh"></a> -->
+<div id="elecbytechtwh" class="section level3">
+<h3 class="hasAnchor">
+<a href="#elecbytechtwh" class="anchor"></a>elecByTechTWh</h3>
+<p><code>elecByTechTWh</code> uses “elec gen by gen tech and cooling tech” query and converts electricity generation of GCAM raw output from EJ to TWh:</p>
+<p><span class="math display">\[elecByTechTWh = elecByTechEJ_{GCAM} \times convEJ2TWh\]</span> where <code>convEJ2TWh</code> is the conversion constant from EJ to TWh, 1 EJ = 277.7778 TWh. <code><a href="../reference/readgcam.html">gcamextractor::readgcam</a></code> also aggregates “rooftop_pv” into “solar” category in the technology subsector (shown in “class1” colomn).</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JGCRI/gcamextractor">gcamextractor</a></span><span class="op">)</span>
+
+<span class="va">dataGCAM</span> <span class="op">&lt;-</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="fu"><a href="../reference/readgcam.html">readgcam</a></span><span class="op">(</span>dataProjFile <span class="op">=</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="va"><a href="../reference/exampleGCAMproj.html">exampleGCAMproj</a></span>,
+                                    paramsSelect <span class="op">=</span> <span class="st">'elecByTechTWh'</span>,
+                                    regionsSelect <span class="op">=</span> <span class="st">'USA'</span><span class="op">)</span></code></pre></div>
+<p><br></p>
+<!-- <a name="elecCapByFuel"></a> -->
+</div>
+<div id="eleccapbyfuel" class="section level3">
+<h3 class="hasAnchor">
+<a href="#eleccapbyfuel" class="anchor"></a>elecCapByFuel</h3>
+<p><code>elecCapByFuel</code> calculates electricity capacity (GW) based on the output from <code>elecByTechTWh</code>:</p>
+<p><span class="math display">\[elecCapByFuel = \frac{elecByTechTWh \times 1000}{8760 \times gcamCapacityFactor}\]</span></p>
+<p><code>gcamCapacityFactor</code> is calculated as an average of the capacity factors of the technologies within each subsector (See <a href="#table3">Table 3</a>) based on the data from:</p>
+<ul>
+<li>Global technology capacity factor from “GCAM-FOLDER\input\gcamdata\inst\extdata\energy\A23.globaltech_capacity_factor.csv”</li>
+<li>USA renewable technology capacity factors by States from “GCAM-FOLDER\input\gcamdata\inst\extdata\gcam-usa\NREL_us_re_capacity_factors.csv”</li>
+<li>Hydrogen fuel cell capacity factor from <a href="https://www.eia.gov/todayinenergy/detail.php?id=35872" class="uri">https://www.eia.gov/todayinenergy/detail.php?id=35872</a> and <a href="https://www.nrel.gov/analysis/tech-cap-factor.html" class="uri">https://www.nrel.gov/analysis/tech-cap-factor.html</a>
+</li>
+</ul>
+<p>Exceptions in calculating <code>gcamCapacityFactor</code> include:</p>
+<ul>
+<li>For “solar” capacity factor the CSP_storage capacity factor value of 0.65 was excluded from the average.</li>
+<li>The “hydro” capacity factor was sourced from Global CCS Institute “Renewable power generation costs in 2012: an overview” - 5.2 Capacity factors for hydropower, since hydropower is calculated endogenously within GCAM.</li>
+<li>No cogeneration capacity factor “n CHP” was given.</li>
+<li>rooftop_pv was assumed the same as solar average (5) grid_storage assumed to have a high cap factor equal to that of nuclear</li>
+</ul>
+<p><a name="table3"></a> <strong>Table 3:</strong> Averaged capacity factor for electricity generation by generation technology.</p>
+<table class="table">
+<thead><tr class="header">
+<th>Subsector (class1)</th>
+<th>Average capacity factor from 1971 to 2100</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>coal</td>
+<td>0.8125</td>
+</tr>
+<tr class="even">
+<td>gas</td>
+<td>0.816667</td>
+</tr>
+<tr class="odd">
+<td>oil</td>
+<td>0.816667</td>
+</tr>
+<tr class="even">
+<td>biomass</td>
+<td>0.825</td>
+</tr>
+<tr class="odd">
+<td>nuclear</td>
+<td>0.9</td>
+</tr>
+<tr class="even">
+<td>geothermal</td>
+<td>0.9</td>
+</tr>
+<tr class="odd">
+<td>hydro</td>
+<td>0.5</td>
+</tr>
+<tr class="even">
+<td>wind</td>
+<td>0.37</td>
+</tr>
+<tr class="odd">
+<td>solar</td>
+<td>0.216667</td>
+</tr>
+<tr class="even">
+<td>rooftop_pv</td>
+<td>0.216667</td>
+</tr>
+<tr class="odd">
+<td>hydrogen</td>
+<td>0.8</td>
+</tr>
+<tr class="even">
+<td>grid_storage</td>
+<td>0.9</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JGCRI/gcamextractor">gcamextractor</a></span><span class="op">)</span>
+
+<span class="va">dataGCAM</span> <span class="op">&lt;-</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="fu"><a href="../reference/readgcam.html">readgcam</a></span><span class="op">(</span>dataProjFile <span class="op">=</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="va"><a href="../reference/exampleGCAMproj.html">exampleGCAMproj</a></span>,
+                                    paramsSelect <span class="op">=</span> <span class="st">'elecCapByFuel'</span>,
+                                    regionsSelect <span class="op">=</span> <span class="st">'USA'</span><span class="op">)</span></code></pre></div>
+<p><br></p>
+<!-- <a name="elecFinalBySecTWh"></a> -->
+</div>
+<div id="elecfinalbysectwh" class="section level3">
+<h3 class="hasAnchor">
+<a href="#elecfinalbysectwh" class="anchor"></a>elecFinalBySecTWh</h3>
+<p><br></p>
+<!-- <a name="elecFinalByFuelTWh"></a> -->
+</div>
+<div id="elecfinalbyfueltwh" class="section level3">
+<h3 class="hasAnchor">
+<a href="#elecfinalbyfueltwh" class="anchor"></a>elecFinalByFuelTWh</h3>
+<p><br></p>
+<!-------------------------->
+</div>
+</div>
+<div id="transport" class="section level2">
+<h2 class="hasAnchor">
+<a href="#transport" class="anchor"></a>Transport</h2>
+<!-------------------------->
+<!-------------------------->
+</div>
+<div id="agriculture" class="section level2">
+<h2 class="hasAnchor">
+<a href="#agriculture" class="anchor"></a>Agriculture</h2>
+<!-------------------------->
+<!-------------------------->
+</div>
+<div id="livestock" class="section level2">
+<h2 class="hasAnchor">
+<a href="#livestock" class="anchor"></a>Livestock</h2>
+<!-------------------------->
+<!-------------------------->
+</div>
+<div id="land" class="section level2">
+<h2 class="hasAnchor">
+<a href="#land" class="anchor"></a>Land</h2>
+<!-------------------------->
+<!-------------------------->
+</div>
+<div id="emission" class="section level2">
+<h2 class="hasAnchor">
+<a href="#emission" class="anchor"></a>Emission</h2>
 <!-------------------------->
 <!-------------------------->
 </div>
 <div id="water" class="section level2">
 <h2 class="hasAnchor">
 <a href="#water" class="anchor"></a>Water</h2>
-<!-------------------------->
-<!-------------------------->
-</div>
-<div id="energy" class="section level2">
-<h2 class="hasAnchor">
-<a href="#energy" class="anchor"></a>Energy</h2>
 <!-------------------------->
 </div>
 </div>
