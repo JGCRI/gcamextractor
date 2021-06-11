@@ -25,7 +25,8 @@ Imports:
 	tidyr,
 	xfun,
 	zoo,
-	rgcam
+	rgcam,
+	markdown
 Suggests: 
     rmarkdown,
     testthat
