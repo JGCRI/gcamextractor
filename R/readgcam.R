@@ -79,17 +79,17 @@
 
 
 readgcam <- function(gcamdatabase = NULL,
-                           queryFile = NULL,
-                           dataProjFile = paste(getwd(), "/outputs/dataProj.proj", sep = ""),
-                           scenOrigNames = "All",
-                           scenNewNames = NULL,
-                           reReadData = T,
-                           dirOutputs = paste(getwd(), "/outputs", sep = ""),
-                           regionsSelect = NULL,
-                           paramsSelect="All",
-                           folderName=NULL,
-                           nameAppend="",
-                           saveData = T
+                     queryFile = NULL,
+                     dataProjFile = paste(getwd(), "/outputs/dataProj.proj", sep = ""),
+                     scenOrigNames = "All",
+                     scenNewNames = NULL,
+                     reReadData = T,
+                     dirOutputs = paste(getwd(), "/outputs", sep = ""),
+                     regionsSelect = NULL,
+                     paramsSelect = "All",
+                     folderName = NULL,
+                     nameAppend = "",
+                     saveData = T
 ){
 
 
@@ -350,23 +350,10 @@ readgcam <- function(gcamdatabase = NULL,
     }
 
     # Get names of scenarios in database
-    # Save Message from rgcam::localDBConn to a text file and then extract names
-    zz <- file(paste(getwd(),"/test.txt",sep=""), open = "wt")
-    sink(zz,type="message")
-    rgcam::localDBConn(gcamdatabasePath,gcamdatabaseName)
-    sink()
-    closeAllConnections()
-    # Read temp file
-    con <- file(paste(getwd(),"/test.txt",sep=""),open = "r")
-    first_line <- readLines(con,n=1); first_line
-    closeAllConnections()
-    if(grepl("error",first_line,ignore.case = T)){stop(paste(first_line))}
-    print(first_line)
-    if(file.exists(paste(getwd(),"/test.txt",sep=""))){unlink(paste(getwd(),"/test.txt",sep=""))}
-    # Extract scenario names from saved line
-    s1 <- gsub(".*:","",first_line);s1
-    s2 <- gsub(" ","",s1);s2
-    scenarios <- as.vector(unlist(strsplit(s2,",")))
+    x <- utils::capture.output(rgcam::localDBConn(gcamdatabasePath,gcamdatabaseName), type="message")
+    x <- gsub(", ",",",gsub(": ","",gsub("Database scenarios:  ","",x)));x
+    scenarios <- as.vector(unlist(strsplit(gsub("Database scenarios: ","",x),",")))
+    print(scenarios)
     print(paste("All scenarios in data available: ", paste(scenarios,collapse=", "), sep=""))
 
 
@@ -385,7 +372,7 @@ readgcam <- function(gcamdatabase = NULL,
           print(paste("scenOrigNames set to 'All' so using all available scenarios: ",paste(scenarios,collapse=", "),sep=""))
         } else {
           if(any(scenOrigNames %in% scenarios)){
-            print(paste("scenOrigNames available in scenarios are :",paste(scenOrigNames[scenOrigNames %in% scenarios],collapse=", "),sep=""))
+            print(paste("scenOrigNames available in scenarios are : ",paste(scenOrigNames[scenOrigNames %in% scenarios],collapse=", "),sep=""))
             if(length(scenOrigNames[!scenOrigNames %in% scenarios])>0){
             print(paste("scenOrigNames not available in scenarios are :",paste(scenOrigNames[!scenOrigNames %in% scenarios],collapse=", "),sep=""))}
             if(length(scenarios[!scenarios %in% scenOrigNames])>0){
@@ -1257,7 +1244,7 @@ readgcam <- function(gcamdatabase = NULL,
   # chart(tbl,xData="x",yData="value",useNewLabels = 0)
 
 
-   paramx <- "watConsumBySec"
+  paramx <- "watConsumBySec"
   if(paramx %in% paramsSelectx){
     # water consumption by sector
     queryx <- "water consumption by state, sector, basin (includes desal)"
@@ -2655,7 +2642,7 @@ readgcam <- function(gcamdatabase = NULL,
     }}
 
 
-paramx <- "emissCO2BySectorNoBio"
+  paramx <- "emissCO2BySectorNoBio"
   if(paramx %in% paramsSelectx){
     queryx <- "CO2 emissions by sector (no bio)"
     if (queryx %in% queriesx) {
@@ -3190,7 +3177,7 @@ paramx <- "emissCO2BySectorNoBio"
     }
 
 
- paramx <- "emissMethaneBySourceGWPAR5"
+  paramx <- "emissMethaneBySourceGWPAR5"
   if(paramx %in% paramsSelectx){
     # GHG emissions (non CO2) by subsector, using AR5 GWP values
     queryx <- "nonCO2 emissions by sector"
@@ -3328,7 +3315,8 @@ paramx <- "emissCO2BySectorNoBio"
 
 # Emissions Fossil FUels and Industry (FFI) basically everything but LUC GWP AR5
   if(any(c("emissNonCO2ByResProdGWPAR5", "emissNonCO2BySectorGWPAR5") %in% unique(datax$param))){
-paramx <- "emissBySectorGWPAR5FFI"
+
+    paramx <- "emissBySectorGWPAR5FFI"
   if(paramx %in% paramsSelectx){
     # GHG emissions by resource production, using AR5 GWP values
     totalFFINonCO2 <- datax %>% dplyr::filter(param %in% c("emissNonCO2ByResProdGWPAR5", "emissNonCO2BySectorGWPAR5")) %>%

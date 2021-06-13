@@ -27,7 +27,8 @@ Imports:
 	zoo,
 	rgcam,
 	rpackageutils,
-	markdown
+	markdown,
+	rprojroot
 Suggests: 
     rmarkdown,
     testthat
