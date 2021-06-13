@@ -25,10 +25,15 @@ Imports:
 	tidyr,
 	xfun,
 	zoo,
-	rgcam
+	rgcam,
+	rpackageutils,
+	markdown,
+	rprojroot
 Suggests: 
     rmarkdown,
     testthat
-Remotes: github::JGCRI/rgcam
+Remotes: 
+	github::JGCRI/rgcam,
+	github::JGCRI/rpackageutils	
 VignetteBuilder: 
     knitr
