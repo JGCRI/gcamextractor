@@ -3,6 +3,7 @@ library(rpackageutils)
 library(testthat)
 library(rprojroot)
 library(rgcam)
+library(dplyr)
 
 testthat::skip_on_cran()
 testthat::skip_on_travis()
@@ -25,10 +26,10 @@ testthat::skip_on_travis()
 # Tests using .proj file =======================================================
 # Test arguments
 gcamData <- gcamextractor::readgcam(queryFile = NULL,
-                                    dataProjFile = gcamextractor::exampleGCAMproj,
-                                    scenOrigNames = 'GCAM_SSP5',
-                                    scenNewNames = 'SSP5',
-                                    paramsSelect = 'elecByTechTWh',
+                                    dataProjFile = gcamextractor::example_GCAMv53_2020_proj,
+                                    scenOrigNames = 'Reference',
+                                    scenNewNames = 'Ref',
+                                    paramsSelect = 'All',
                                     regionsSelect = 'USA')
 
 
@@ -39,20 +40,20 @@ test_that("data exists", {
 
 
 test_that("scenario is selected and new name is applied", {
-  test <- unique(gcamData$data$scenario)
-  testthat::expect_equal(test, 'SSP5')
+  test <- unique((gcamData$data%>%dplyr::filter(param=="pop"))$scenario)
+  testthat::expect_equal(test, 'Ref')
 })
 
 test_that("region is selected", {
-  test <- unique(gcamData$data$region)
+  test <- unique((gcamData$data%>%dplyr::filter(param=="pop"))$region)
   testthat::expect_equal(test, 'USA')
 })
 
-test_that("parameter is selected", {
-  test <- unique(gcamData$data$param)
-  testthat::expect_equal(test, 'elecByTechTWh')
-})
 
+test_that("parameter is selected", {
+  test <- sort(unique(gcamData$data$param))
+  testthat::expect_true(all(test %in% gcamextractor::data_params))
+})
 
 # ==============================================================================
 # Test errors and warnings
@@ -73,11 +74,6 @@ test_that("throw error message if the path to .proj file doesn't exist", {
 
 # Use a modified query file and see if it works with the command.
 
-#...................
-# Test each param exists gcamextractor::mappings$mapParamQuery
-#...................
-
-# unique(gcamData$param) %in% unique(mappings$mapParamQuery$param)
 
 
 # Tests using gcamdatabase ======================================================

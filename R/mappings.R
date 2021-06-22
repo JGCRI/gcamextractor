@@ -38,6 +38,8 @@ mappings <- function(name=NULL) {
     "energy","energyPrimaryByFuelMTOE", "primary energy consumption by region (direct equivalent)","pal_hot",
     "energy","energyPrimaryRefLiqProdMTOE", "refined liquids production by subsector","pal_hot",
     "energy","energyFinalConsumBySecMTOE", "total final energy by aggregate sector","pal_hot",
+    "energy","energyFinalByFuelBySectorMTOE", "Final energy by detailed end-use sector and fuel","pal_hot",
+    "energy","energyFinalByFuelBySectorTWh", "Final energy by detailed end-use sector and fuel","pal_hot",
     "energy","energyFinalbyFuelMTOE", "Final energy by detailed end-use sector and fuel","pal_hot",
     "energy","energyFinalSubsecByFuelTranspMTOE", "transport final energy by fuel","pal_hot",
     "energy","energyFinalSubsecByFuelBuildMTOE", "building final energy by fuel","pal_hot",

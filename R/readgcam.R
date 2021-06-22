@@ -118,14 +118,14 @@ readgcam <- function(gcamdatabase = NULL,
     class_temp -> resource -> subRegAreaSum -> subsector->tblFinalNrgIntlAvShipMod -> 'transportation' ->
     'International Aviation' -> 'International Ship' -> 'International Aviation oil' -> 'a oil' ->
     'International Ship oil' -> 'International Aviation liquids' -> liquids -> 'International Ship liquids'->crop->
-    paramsSelectAll -> tblFinalNrgIntlAvShip->datax->group->basin->subRegion->query->subresource
+    paramsSelectAll -> tblFinalNrgIntlAvShip->datax->group->basin->subRegion->query->subresource-> transport
 
 
 #---------------------
 # Params and Queries
 #---------------------
 
-  paramQueryMap <- (mappings()$mapParamQuery)%>%dplyr::select(group,param,query)
+  paramQueryMap <- (gcamextractor::mappings()$mapParamQuery)%>%dplyr::select(group,param,query)
 
   # Check if queriesSelect is a querySet or one of the queries
   if(!any(c("all","All","ALL") %in% paramsSelect)){
@@ -434,6 +434,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"energyFinalConsumByIntlShpAvEJ"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "transport final energy by mode and fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -481,6 +482,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"energyFinalConsumBySecEJ"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "total final energy by aggregate sector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -523,8 +525,9 @@ readgcam <- function(gcamdatabase = NULL,
 
       if(!is.null(tblFinalNrgIntlAvShip)){
       # Separat out Intl. Shipping and Aviation from Transport
-      tblTransport <- tbl%>%dplyr::filter(class1=="transportation") %>%
-        dplyr::mutate(class2="class2",classLabel2="classLabel2",classPalette2="classPalette2") %>%
+      tblTransport <- tbl%>%dplyr::filter(class1 %in% c("transportation","transport")) %>%
+        dplyr::mutate(class2="class2",classLabel2="classLabel2",classPalette2="classPalette2",
+                      class1=dplyr::if_else(class1=="transportation","transport",class1)) %>%
         dplyr::select(-origValue)# Subset Transport Sector
       tblFinalNrgIntlAvShipMod <- tblFinalNrgIntlAvShip %>%
         dplyr::mutate(param=unique(tblTransport$param),
@@ -544,7 +547,7 @@ readgcam <- function(gcamdatabase = NULL,
       tblSepTransportIntlAvShip <- tblTransport %>%
         dplyr::bind_rows(tblFinalNrgIntlAvShipMod) %>%
         tidyr::spread(key="class1",value="value") %>%
-        dplyr::mutate(transportation=transportation-`International Aviation`-`International Ship`)%>%
+        dplyr::mutate(transport=transport-`International Aviation`-`International Ship`)%>%
         dplyr::rename(`transport intl av`=`International Aviation`,
                       `transport intl shp`=`International Ship`) %>%
         tidyr::gather(key="class1",value="value",
@@ -553,7 +556,7 @@ readgcam <- function(gcamdatabase = NULL,
                       -origScen,-origQuery,-origUnits,-origX)%>%
         dplyr::mutate(origValue=value); tblSepTransportIntlAvShip%>%as.data.frame()
       # Rbind Transport, Intl. Shipping and Aviation back to all other Final Energy types
-      tblMod<-tbl%>%dplyr::filter(class1!="transportation") %>%
+      tblMod<-tbl%>%dplyr::filter(class1!="transport") %>%
         dplyr::bind_rows(tblSepTransportIntlAvShip) # Remove Transport sector from Original tbl
 
       } else {
@@ -582,6 +585,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"energyFinalSubsecBySectorBuildEJ"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "building final energy by subsector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -632,6 +636,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"energyFinalByFuelBySectorEJ"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "Final energy by detailed end-use sector and fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -706,6 +711,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"energyFinalSubsecByFuelBuildEJ"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "building final energy by fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -755,6 +761,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"energyFinalSubsecByFuelIndusEJ"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "industry final energy by fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -805,6 +812,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"elecFinalBySecTWh"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "inputs by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -900,6 +908,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"elecFinalByFuelTWh"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "Final energy by detailed end-use sector and fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -958,6 +967,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"energyPrimaryByFuelEJ"
   # primary energy consumption by region (direct equivalent)
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "primary energy consumption by region (direct equivalent)"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -1054,6 +1064,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "elecByTechTWh"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     tbl<-tibble::tibble()
     tblUSA<-tibble::tibble()
     tblUSACogen<-tibble::tibble()
@@ -1211,6 +1222,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"elecCapByFuel"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
   if(!is.null(tblelecByTechTWh)){
     capfactors <- gcamextractor::data_capfactors
     capfactors
@@ -1246,6 +1258,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "watConsumBySec"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # water consumption by sector
     queryx <- "water consumption by state, sector, basin (includes desal)"
     if (queryx %in% queriesx) {
@@ -1306,6 +1319,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx<- "watWithdrawBySec"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # water consumption by sector
     queryx <- "water withdrawals by state, sector, basin (includes desal)"
     if (queryx %in% queriesx) {
@@ -1366,6 +1380,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "watWithdrawByCrop"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # water withdrawals by sector
     queryx <- "water withdrawals by crop"
     if (queryx %in% queriesx) {
@@ -1426,6 +1441,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "watBioPhysCons"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # biophysical water demand by crop type and land region
     queryx <- "biophysical water demand by crop type and land region"
     if (queryx %in% queriesx) {
@@ -1470,6 +1486,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "watIrrWithdrawBasin"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # water withdrawals by water mapping source
     queryx <- "water withdrawals by water mapping source"
     if (queryx %in% queriesx) {
@@ -1518,6 +1535,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "watIrrConsBasin"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # water consumption by water mapping source
     queryx <- "water consumption by water mapping source"
     if (queryx %in% queriesx) {
@@ -1566,6 +1584,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "watSupRunoffBasin"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # water consumption by water mapping source
     queryx <- "Basin level available runoff"
     if (queryx %in% queriesx) {
@@ -1613,6 +1632,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "waterWithdrawROGW"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # water consumption by water mapping source
     queryx <- "Water withdrawals by water source (runoff vs. groundwater)"
     if (queryx %in% queriesx) {
@@ -1663,6 +1683,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "gdpPerCapita"
   if(paramx  %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # GDP MER per Capita MER by region
     queryx <- "GDP per capita MER by region"
     if (queryx %in% queriesx) {
@@ -1707,6 +1728,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "gdp"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # GDP MER by region
     queryx <- "GDP MER by region"
     if (queryx %in% queriesx) {
@@ -1752,6 +1774,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "gdpGrowthRate"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # GDP Growth Rate by region
     queryx <- "GDP Growth Rate (Percent)"
     if ("GDP MER by region" %in% queriesx) {
@@ -1786,6 +1809,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "livestock_MeatDairybyTechMixed"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # Population
     queryx <- "meat and dairy production by tech"
     if (queryx %in% queriesx) {
@@ -1832,6 +1856,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "livestock_MeatDairybySubsector"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # Population
     queryx <- "meat and dairy production by tech"
     if (queryx %in% queriesx) {
@@ -1878,6 +1903,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "livestock_MeatDairybyTechPastoral"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # Population
     queryx <- "meat and dairy production by tech"
     if (queryx %in% queriesx) {
@@ -1923,6 +1949,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "livestock_MeatDairybyTechImports"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # Population
     queryx <- "meat and dairy production by tech"
     if (queryx %in% queriesx) {
@@ -1968,6 +1995,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "pop"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # Population
     queryx <- "Population by region"
     if (queryx %in% queriesx) {
@@ -2012,6 +2040,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "agProdbyIrrRfd"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # Ag production by tech
     queryx <- "ag production by tech"
     if (queryx %in% queriesx) {
@@ -2065,6 +2094,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "agProdBiomass"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # Ag Production by Crop Type Biomass EJ
     queryx <- "ag production by tech"
     if (queryx %in% queriesx) {
@@ -2111,6 +2141,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "agProdForest"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # Ag Production by Crop Type Forest
     queryx <- "ag production by tech"
     if (queryx %in% queriesx) {
@@ -2156,6 +2187,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "agProdByCrop"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # Ag Production by Crop Type
     queryx <- "ag production by tech"
     if (queryx %in% queriesx) {
@@ -2203,6 +2235,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "landIrrRfd"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # land allocation by crop and water source
     queryx <- "land allocation by crop and water source"
     if (queryx %in% queriesx) {
@@ -2248,6 +2281,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "landIrrCrop"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # land allocation by crop and water source
     queryx <- "land allocation by crop and water source"
     if (queryx %in% queriesx) {
@@ -2293,6 +2327,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "landRfdCrop"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # land allocation by crop and water source
     queryx <- "land allocation by crop and water source"
     if (queryx %in% queriesx) {
@@ -2338,6 +2373,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "landAlloc"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # aggregated land allocation
     queryx <- "aggregated land allocation"
     if (queryx %in% queriesx) {
@@ -2393,6 +2429,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "inputs"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "inputs by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -2438,6 +2475,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "outputs"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "outputs by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -2484,6 +2522,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "landAllocDetail"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # aggregated land allocation
     queryx <- "detailed land allocation"
     if (queryx %in% queriesx) {
@@ -2532,6 +2571,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "landAllocByCrop"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # aggregated land allocation
     queryx <- "land allocation by crop"
     if (queryx %in% queriesx) {
@@ -2594,6 +2634,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "emissLUC"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # Land Use Change Emission (future)
     queryx <- "Land Use Change Emission (future)"
     if (queryx %in% queriesx) {
@@ -2644,6 +2685,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "emissCO2BySectorNoBio"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "CO2 emissions by sector (no bio)"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -2702,6 +2744,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "emissNonCO2BySectorGWPAR5"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
 
     # GHG emissions (non CO2) by subsector, using AR5 GWP values
     queryx <- "nonCO2 emissions by sector"
@@ -2868,6 +2911,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "emissNonCO2BySector"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
 
     # GHG emissions (non CO2) by subsector values
     queryx <- "nonCO2 emissions by sector"
@@ -3148,7 +3192,7 @@ readgcam <- function(gcamdatabase = NULL,
 
       rcpranges <- rcpranges %>%
         dplyr::mutate(units = "CO2 (GTC)",
-                      param = "emissCO2CumGlobal2010to2100RCPs",
+                      param = "emissCO2CumGlobal2010to2100RCP",
                       sources = "sources",
                       xLabel = "year",
                       vintage = paste0("vint_",x),
@@ -3179,6 +3223,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "emissMethaneBySourceGWPAR5"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # GHG emissions (non CO2) by subsector, using AR5 GWP values
     queryx <- "nonCO2 emissions by sector"
     if (queryx %in% queriesx) {
@@ -3240,6 +3285,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "emissNonCO2ByResProdGWPAR5"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # GHG emissions by resource production, using AR5 GWP values
     queryx <- "nonCO2 emissions by resource production"
     if (queryx %in% queriesx) {
@@ -3318,6 +3364,7 @@ readgcam <- function(gcamdatabase = NULL,
 
     paramx <- "emissBySectorGWPAR5FFI"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # GHG emissions by resource production, using AR5 GWP values
     totalFFINonCO2 <- datax %>% dplyr::filter(param %in% c("emissNonCO2ByResProdGWPAR5", "emissNonCO2BySectorGWPAR5")) %>%
       dplyr::filter(!class1=='CO2')
@@ -3356,6 +3403,7 @@ readgcam <- function(gcamdatabase = NULL,
   if(any(c("emissNonCO2ByResProdGWPAR5", "emissNonCO2BySectorGWPAR5") %in% unique(datax$param))){
   paramx <- "emissBySectorGWPAR5LUC"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # Same as FFI Emiss by Sec, except we are now adding LUC. So really it is the whole emissions picture (or close to it)
     totalFFINonCO2 <- datax %>% dplyr::filter(param %in% c("emissNonCO2ByResProdGWPAR5", "emissNonCO2BySectorGWPAR5")) %>%
       dplyr::filter(!class1=='CO2')
@@ -3395,6 +3443,7 @@ readgcam <- function(gcamdatabase = NULL,
   if(any(c("emissNonCO2ByResProdGWPAR5", "emissNonCO2BySectorGWPAR5") %in% unique(datax$param))){
     paramx <- "emissByGasGWPAR5FFI"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # GHG emissions by resource production, using AR5 GWP values
     totalFFINonCO2 <- datax %>% dplyr::filter(param %in% c("emissNonCO2ByResProdGWPAR5", "emissNonCO2BySectorGWPAR5")) %>%
       dplyr::filter(!class1=='CO2')
@@ -3431,6 +3480,7 @@ readgcam <- function(gcamdatabase = NULL,
            "emissLUC","emissCO2BySectorNoBio") %in% unique(datax$param))){
     paramx <- "emissByGasGWPAR5LUC"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
 
     totalFFICO2 <- datax %>% dplyr::filter(param %in% c("emissCO2BySectorNoBio")) %>%
       dplyr::mutate(class1=dplyr::if_else(class1=="LUC", "CO2 LUC", "CO2"))
@@ -3474,6 +3524,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "emissNonCO2BySectorGTPAR5"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # GHG emissions by subsector
     queryx <- "nonCO2 emissions by sector"
     if (queryx %in% queriesx) {
@@ -3547,6 +3598,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "emissMethaneBySourceGTPAR5"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # GHG emissions (non CO2) by subsector, using AR5 GTP values
     queryx <- "nonCO2 emissions by sector"
     if (queryx %in% queriesx) {
@@ -3610,6 +3662,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "emissNonCO2ByResProdGTPAR5"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # GHG emissions by resource production, using AR5 GTP values
     queryx <- "nonCO2 emissions by resource production"
     if (queryx %in% queriesx) {
@@ -3689,6 +3742,7 @@ readgcam <- function(gcamdatabase = NULL,
   if(any(c("emissNonCO2ByResProdGTPAR5", "emissNonCO2BySectorGTPAR5") %in% unique(datax$param))){
     paramx <- "emissBySectorGTPAR5FFI"
     if(paramx %in% paramsSelectx){
+      print(paste0("Running param: ", paramx,"..."))
       # GHG emissions by resource production, using AR5 GTP values
       totalFFINonCO2 <- datax %>% dplyr::filter(param %in% c("emissNonCO2ByResProdGTPAR5", "emissNonCO2BySectorGTPAR5")) %>%
         dplyr::filter(!class1=='CO2')
@@ -3727,6 +3781,7 @@ readgcam <- function(gcamdatabase = NULL,
   if(any(c("emissNonCO2ByResProdGTPAR5", "emissNonCO2BySectorGTPAR5") %in% unique(datax$param))){
     paramx <- "emissBySectorGTPAR5LUC"
     if(paramx %in% paramsSelectx){
+      print(paste0("Running param: ", paramx,"..."))
       # Same as FFI Emiss by Sec, except we are now adding LUC. So really it is the whole emissions picture (or close to it)
       totalFFINonCO2 <- datax %>% dplyr::filter(param %in% c("emissNonCO2ByResProdGTPAR5", "emissNonCO2BySectorGTPAR5")) %>%
         dplyr::filter(!class1=='CO2')
@@ -3766,6 +3821,7 @@ readgcam <- function(gcamdatabase = NULL,
   if(any(c("emissNonCO2ByResProdGTPAR5", "emissNonCO2BySectorGTPAR5") %in% unique(datax$param))){
     paramx <- "emissByGasGTPAR5FFI"
     if(paramx %in% paramsSelectx){
+      print(paste0("Running param: ", paramx,"..."))
       # GHG emissions by resource production, using AR5 GTP values
       totalFFINonCO2 <- datax %>% dplyr::filter(param %in% c("emissNonCO2ByResProdGTPAR5", "emissNonCO2BySectorGTPAR5")) %>%
         dplyr::filter(!class1=='CO2')
@@ -3802,6 +3858,7 @@ readgcam <- function(gcamdatabase = NULL,
            "emissLUC","emissCO2BySectorNoBio") %in% unique(datax$param))){
     paramx <- "emissByGasGTPAR5LUC"
     if(paramx %in% paramsSelectx){
+      print(paste0("Running param: ", paramx,"..."))
 
       totalFFICO2 <- datax %>% dplyr::filter(param %in% c("emissCO2BySectorNoBio"))%>%dplyr::mutate(class1="CO2")
       # GHG emissions by resource production, using AR5 GTP values
@@ -3841,6 +3898,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "emissNonCO2BySectorOrigUnits"
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     # GHG emissions by subsector
     queryx <- "nonCO2 emissions by sector"
     if (queryx %in% queriesx) {
@@ -3913,6 +3971,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"transportPassengerVMTByMode"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "transport service output by mode"
     vmt_array <- c("trn_aviation_intl", "trn_pass", "trn_pass_road", "trn_pass_road_LDV",
                    "trn_pass_road_LDV_2W", "trn_pass_road_LDV_4W")
@@ -3971,6 +4030,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"transportFreightVMTByMode"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "transport service output by mode"
     vmt_array <- c("trn_freight", "trn_freight_road")
     if (queryx %in% queriesx) {
@@ -4022,6 +4082,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"energyPrimaryRefLiqProdEJ"
   # Freight VMT (services) by fuel
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "refined liquids production by subsector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -4086,6 +4147,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"transportPassengerVMTByFuel"
   # Passenger VMT (services) by fuel
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "transport service output by tech (new)"
     vmt_array <- c("trn_aviation_intl", "trn_pass", "trn_pass_road", "trn_pass_road_LDV",
                    "trn_pass_road_LDV_2W", "trn_pass_road_LDV_4W")
@@ -4155,6 +4217,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"transportFreightVMTByFuel"
   # Freight VMT (services) by fuel
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "transport service output by tech (new)"
     vmt_array <- c("trn_freight", "trn_freight_road")
     if (queryx %in% queriesx) {
@@ -4220,6 +4283,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"energyFinalSubsecByFuelTranspEJ"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
     queryx <- "transport final energy by fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -4511,7 +4575,7 @@ readgcam <- function(gcamdatabase = NULL,
     print(paste("None of the parameters in paramsSelect: ", paste(paramsSelect,collapse=",")," are available."))}
 
   print("Outputs returned as list containing data, scenarios and queries.")
-  print("For example if df <- readgcam(dataProjFile = gcamextractor::exampleGCAMproj)")
+  print("For example if df <- readgcam(dataProjFile = gcamextractor::example_GCAMv52_2050_proj)")
   print("Then you can view the outputs as df$data, df$dataAggClass1, df$dataAggClass2, df$dataAggParam, df$scenarios, df$queries.")
   print(gsub("//","/",paste("All outputs in : ",dirOutputs, "/", folderName, "/readGCAM/",sep="")))
   print("readgcam run completed.")
