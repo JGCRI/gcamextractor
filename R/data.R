@@ -28,13 +28,46 @@
 "data_capfactors"
 
 
-#' Example GCAM .proj file
+#' Example GCAMv5.2 .proj file
 #'
 #' @source readgcam() run outputs saved
-#' @format R table or .csv
+#' @format proj file
 #' @examples
 #' \dontrun{
 #'  library(gcmaextractor);
-#'  gcmaextractor::exampleGCAMproj
+#'  gcmaextractor::example_GCAMv52_2050_proj
 #' }
-"exampleGCAMproj"
+"example_GCAMv52_2050_proj"
+
+#' Example GCAMv5.3 .proj file
+#'
+#' @source readgcam() run outputs saved
+#' @format proj file
+#' @examples
+#' \dontrun{
+#'  library(gcmaextractor);
+#'  gcmaextractor::example_GCAMv53_2020_proj
+#' }
+"example_GCAMv53_2020_proj"
+
+#' gcamextractor params
+#'
+#' @source from gcamextractor::mappings()$mapParamQuery$param
+#' @format R table
+#' @examples
+#' \dontrun{
+#'  library(gcmaextractor);
+#'  gcmaextractor::data_params
+#' }
+"data_params"
+
+#' gcamextractor queries
+#'
+#' @source from gcamextractor::mappings()$mapParamQuery$query
+#' @format R table
+#' @examples
+#' \dontrun{
+#'  library(gcmaextractor);
+#'  gcmaextractor::data_queries
+#' }
+"data_queries"

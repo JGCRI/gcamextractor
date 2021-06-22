@@ -61,7 +61,7 @@ dfClass2 <- dataGCAM$dataAggClass1; dfClass2
 ```{r, eval=F}
 library(gcamextractor)
 
-dataGCAM <- gcamextractor::readgcam(gcamdatabase = gcamextractor::exampleGCAMproj)
+dataGCAM <- gcamextractor::readgcam(gcamdatabase = gcamextractor::example_GCAMv52_2050_proj)
 
 ``` 
 
@@ -126,7 +126,7 @@ where `convEJ2TWh` is the conversion constant from EJ to TWh, 1 EJ = 277.7778 TW
 ```{r eval=F}
 library(gcamextractor)
 
-dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::exampleGCAMproj,
+dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv52_2050_proj,
                                     paramsSelect = 'elecByTechTWh',
                                     regionsSelect = 'USA')
 ```
@@ -175,7 +175,7 @@ Exceptions in calculating `gcamCapacityFactor` include:
 ```{r eval=F}
 library(gcamextractor)
 
-dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::exampleGCAMproj,
+dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv52_2050_proj,
                                     paramsSelect = 'elecCapByFuel',
                                     regionsSelect = 'USA')
 ```

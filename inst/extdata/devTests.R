@@ -1,15 +1,23 @@
 library(gcamextractor)
 
 
-dataGCAM <- readgcam(#reReadData = T,
-                     #dirOutputs = dirOutputs_i,
-                     #gcamdatabase = "C:/Z/models/GCAMVersions/gcam-core_v5.3_IM3_usa-dispatch-merge/output/database_NonCO2",
-                     #scenOrigNames = scenOrigNames_i[[db_i]],
-                     #scenNewNames = scenNewNames_i[[db_i]],
-                     dataProjFile = "C:/Z/models/gcamextractor/outputs/dataProj.proj",
-                     regionsSelect = "Colombia",
-                     paramsSelect= c("emissCO2BySector","emissNonCO2BySector")
-                     )
+# List of params in gcamextractor
+params <- gcamextractor::mappings()
+params <- unique(params$mapParamQuery$param); params
+
+gcamdatabase_i = "C:/Z/models/GCAMVersions/gcam-core_stash/output/database_5p3_2020"
+param_i = "energyFinalConsumBySecEJ"
 
 
+dataGCAM <- readgcam(reReadData = T,
+                     gcamdatabase = gcamdatabase_i,
+                     dataProjFile = "C:/Z/models/gcamextractor/outputs/readGCAM/dataProj.proj",
+                     regionsSelect = "USA",
+                     paramsSelect= "all")
+
+reReadData = F
+#gcamdatabase = gcamdatabase_i,
+dataProjFile = "C:/Z/models/gcamextractor/outputs/readGCAM/dataProj.proj"
+regionsSelect = "Colombia"
+paramsSelect= param_i
 
