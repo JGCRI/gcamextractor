@@ -194,13 +194,7 @@
 <h2 class="hasAnchor">
 <a href="#socioeconomics" class="anchor"></a>Socioeconomics</h2>
 <!-------------------------->
-<!-------------------------->
-</div>
-<div id="electricity" class="section level2">
-<h2 class="hasAnchor">
-<a href="#electricity" class="anchor"></a>Electricity</h2>
-<!-------------------------->
-<p><a name="table2"></a> <strong>Table 2:</strong> Summary of electricity parameters.</p>
+<p><a name="table1"></a> <strong>Table 1:</strong> Summary of parameters for socioeconomics.</p>
 <table class="table">
 <colgroup>
 <col width="25%">
@@ -211,6 +205,535 @@
 <thead><tr class="header">
 <th>Parameter</th>
 <th>Description and Unit</th>
+<th>Original GCAM Unit</th>
+<th>Source Queries</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><a href="#gdppercapita">gdpPerCapita</a></td>
+<td>GDP per Capita (Thousand 1990 USD per Person)</td>
+<td>Thousand 1990 USD per Person</td>
+<td>GDP per capita MER by region</td>
+</tr>
+<tr class="even">
+<td><a href="#gdp">gdp</a></td>
+<td>GDP (Billion 1990 USD)</td>
+<td>Million 1990 USD</td>
+<td>GDP MER by region</td>
+</tr>
+<tr class="odd">
+<td><a href="#gdpgrowthrate">gdpGrowthRate</a></td>
+<td>GDP Growth Rate (Percent)</td>
+<td>Million 1990 USD</td>
+<td>GDP MER by region</td>
+</tr>
+<tr class="even">
+<td><a href="#pop">pop</a></td>
+<td>Population (Millions)</td>
+<td>Thousands</td>
+<td>Population by region</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<!-- ### gdpPerCapita -->
+<!-- <br /> -->
+<!-- ### gdp -->
+<!-- <br /> -->
+<!-- ### gdpGrowthRate -->
+<!-- <br /> -->
+<!-- ### pop -->
+<!-- <br /> -->
+<!-------------------------->
+</div>
+<div id="transport" class="section level2">
+<h2 class="hasAnchor">
+<a href="#transport" class="anchor"></a>Transport</h2>
+<!-------------------------->
+<p><a name="table2"></a> <strong>Table 2:</strong> Summary of parameters for transport.</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Parameter</th>
+<th>Description and Unit<sup>*</sup>
+</th>
+<th>Original GCAM Unit</th>
+<th>Source Queries</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><a href="#transportpassengervmtbymode">transportPassengerVMTByMode</a></td>
+<td>Passenger VMT (services) by Mode (million pass-km)</td>
+<td>million pass-km</td>
+<td>transport service output by mode</td>
+</tr>
+<tr class="even">
+<td><a href="#transportfreightvmtbymode">transportFreightVMTByMode</a></td>
+<td>Freight VMT (services) by Mode (million ton-km)</td>
+<td>million ton-km</td>
+<td>transport service output by mode</td>
+</tr>
+<tr class="odd">
+<td><a href="#transportpassengervmtbyfuel">transportPassengerVMTByFuel</a></td>
+<td>Passenger VMT (services) by Fuel (million pass-km)</td>
+<td>million pass-km</td>
+<td>transport service output by tech (new)</td>
+</tr>
+<tr class="even">
+<td><a href="#transportfreightvmtbyfuel">transportFreightVMTByFuel</a></td>
+<td>Freight VMT (services) by Fuel (million ton-km)</td>
+<td>million ton-km</td>
+<td>transport service output by tech (new)</td>
+</tr>
+</tbody>
+</table>
+<p><sub>*Passenger VMT modes: 2W and 3W, bus, car, large car and truck, LDV, plane, and rail.</sub><br><sub>*Freight VMT modes: heavy truck, light truck, medium truck, rail, and ship.</sub><br><sub>*Passenger VMT fuel: biofuel, electricity, fossil fuel, gas, hydrogen, and LA-electricity.</sub><br><sub>*Freight VMT fuel: biofuel, coal, electricity, fossil fuel, gas.</sub></p>
+<p><br></p>
+<!-- ### transportPassengerVMTByMode -->
+<!-- <br /> -->
+<!-- ### transportFreightVMTByMode -->
+<!-- <br /> -->
+<!-- ### transportPassengerVMTByFuel -->
+<!-- <br /> -->
+<!-- ### transportFreightVMTByFuel -->
+<!-- <br /> -->
+<!-------------------------->
+</div>
+<div id="water" class="section level2">
+<h2 class="hasAnchor">
+<a href="#water" class="anchor"></a>Water</h2>
+<!-------------------------->
+<p><a name="table3"></a> <strong>Table 3:</strong> Summary of parameters for water.</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Parameter</th>
+<th>Description and Unit<sup>*</sup>
+</th>
+<th>Original GCAM Unit</th>
+<th>Source Queries</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><a href="#watconsumbysec">watConsumBySec</a></td>
+<td>Water Consumption by Sector (km3)</td>
+<td>km3</td>
+<td>water consumption by state, sector, basin (includes desal)</td>
+</tr>
+<tr class="even">
+<td><a href="#watwithdrawbysec">watWithdrawBySec</a></td>
+<td>Water Withdrawal by Sector (km3)</td>
+<td>km3</td>
+<td>water withdrawals by state, sector, basin (includes desal)</td>
+</tr>
+<tr class="odd">
+<td><a href="#watwithdrawbycrop">watWithdrawByCrop</a></td>
+<td>Water Withdrawals by Crop (km3)</td>
+<td>km3</td>
+<td>water withdrawals by crop</td>
+</tr>
+<tr class="even">
+<td><a href="#watbiophyscons">watBioPhysCons</a></td>
+<td>Biophysical Water Consumption (km3)</td>
+<td>km3</td>
+<td>biophysical water demand by crop type and land region</td>
+</tr>
+<tr class="odd">
+<td><a href="#watirrwithdrawvasin">watIrrWithdrawBasin</a></td>
+<td>Irrigation Water Withdrawal (km3)</td>
+<td>km3</td>
+<td>water withdrawals by water mapping source</td>
+</tr>
+<tr class="even">
+<td><a href="#watirrconsbasin">watIrrConsBasin</a></td>
+<td>Irrigation Water Consumption (km3)</td>
+<td>km3</td>
+<td>water consumption by water mapping source</td>
+</tr>
+<tr class="odd">
+<td><a href="#watsuprunoffbasin">watSupRunoffBasin</a></td>
+<td>Runoff (km3)</td>
+<td>km3</td>
+<td>Basin level available runoff</td>
+</tr>
+<tr class="even">
+<td><a href="#waterwithdrawrogw">waterWithdrawROGW</a></td>
+<td>Runoff vs Groundwater (km3)</td>
+<td>km3</td>
+<td>Water withdrawals by water source (runoff vs. groundwater)</td>
+</tr>
+</tbody>
+</table>
+<p><sub>*Water consumption sectors: animal, domestic, electric, industry, irrigation, and primary.</sub><br><sub>*Water withdrawal sectors: agriculture, electricity, industry, livestock, mining, municipal, and desalination.</sub><br><sub>*Crop: biomass, corn, fibercrop, fodderherb, miscellaneous crop, oil crop, other grain, palm fruit, rice, root tuber, sugar crop, wheat, and fodder grass.</sub></p>
+<p><br></p>
+<!-- ### watConsumBySec -->
+<!-- <br /> -->
+<!-- ### watWithdrawBySec -->
+<!-- <br /> -->
+<!-- ### watWithdrawByCrop -->
+<!-- <br /> -->
+<!-- ### watBioPhysCons -->
+<!-- <br /> -->
+<!-- ### watIrrWithdrawBasin -->
+<!-- <br /> -->
+<!-- ### watIrrConsBasin -->
+<!-- <br /> -->
+<!-- ### watSupRunoffBasin -->
+<!-- <br /> -->
+<!-- ### waterWithdrawROGW -->
+<!-- <br /> -->
+<!-------------------------->
+</div>
+<div id="agriculture" class="section level2">
+<h2 class="hasAnchor">
+<a href="#agriculture" class="anchor"></a>Agriculture</h2>
+<!-------------------------->
+<p><a name="table4"></a> <strong>Table 4:</strong> Summary of parameters for agriculture.</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Parameter</th>
+<th>Description and Unit</th>
+<th>Original GCAM Unit</th>
+<th>Source Queries</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><a href="#agprodbyirrrfd">agProdbyIrrRfd</a></td>
+<td>Agricultural Production (Mt)</td>
+<td>Mt</td>
+<td>ag production by tech</td>
+</tr>
+<tr class="even">
+<td><a href="#agprodbiomass">agProdBiomass</a></td>
+<td>Biomass Production (EJ)</td>
+<td>EJ</td>
+<td>ag production by tech</td>
+</tr>
+<tr class="odd">
+<td><a href="#agprodforest">agProdForest</a></td>
+<td>Forest Production (billion m3)</td>
+<td>billion m3</td>
+<td>ag production by tech</td>
+</tr>
+<tr class="even">
+<td><a href="#agprodbycrop">agProdByCrop</a></td>
+<td>Crop Production (Mt)</td>
+<td>Mt</td>
+<td>ag production by tech</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<!-- ### agProdbyIrrRfd -->
+<!-- <br /> -->
+<!-- ### agProdBiomass -->
+<!-- <br /> -->
+<!-- ### agProdForest -->
+<!-- <br /> -->
+<!-- ### agProdByCrop -->
+<!-- <br /> -->
+<!-------------------------->
+</div>
+<div id="livestock" class="section level2">
+<h2 class="hasAnchor">
+<a href="#livestock" class="anchor"></a>Livestock</h2>
+<!-------------------------->
+<p><a name="table5"></a> <strong>Table 5:</strong> Summary of parameters for livestock.</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Parameter</th>
+<th>Description and Unit</th>
+<th>Original GCAM Unit</th>
+<th>Source Queries</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><a href="#livestock_meatdairybytechmixed">livestock_MeatDairybyTechMixed</a></td>
+<td>Livestock Production Mixed Feed (Mt)</td>
+<td>Mt</td>
+<td>meat and dairy production by tech</td>
+</tr>
+<tr class="even">
+<td><a href="#livestock_meatdairybytechpastoral">livestock_MeatDairybyTechPastoral</a></td>
+<td>Livestock Production Pastoral (Mt)</td>
+<td>Mt</td>
+<td>meat and dairy production by tech</td>
+</tr>
+<tr class="odd">
+<td><a href="#livestock_meatdairybytechimports">livestock_MeatDairybyTechImports</a></td>
+<td>Livestock Production Imported Feed (Mt)</td>
+<td>Mt</td>
+<td>meat and dairy production by tech</td>
+</tr>
+<tr class="even">
+<td><a href="#livestock_meatdairybysubsector">livestock_MeatDairybySubsector</a></td>
+<td>Livestock Production (Mt)</td>
+<td>Mt</td>
+<td>meat and dairy production by tech</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<!-- ### livestock_MeatDairybyTechMixed -->
+<!-- <br /> -->
+<!-- ### livestock_MeatDairybyTechPastoral -->
+<!-- <br /> -->
+<!-- ### livestock_MeatDairybyTechImports -->
+<!-- <br /> -->
+<!-- ### livestock_MeatDairybySubsector -->
+<!-- <br /> -->
+<!-------------------------->
+</div>
+<div id="land-use" class="section level2">
+<h2 class="hasAnchor">
+<a href="#land-use" class="anchor"></a>Land Use</h2>
+<!-------------------------->
+<p><a name="table6"></a> <strong>Table 6:</strong> Summary of parameters for land use.</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Parameter</th>
+<th>Description and Unit<sup>*</sup>
+</th>
+<th>Original GCAM Unit</th>
+<th>Source Queries</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><a href="#landirrrfd">landIrrRfd</a></td>
+<td>Irrigated vs Rainfed Land (1000 km2)</td>
+<td>1000 km2</td>
+<td>land allocation by crop and water source</td>
+</tr>
+<tr class="even">
+<td><a href="#landirrcrop">landIrrCrop</a></td>
+<td>Irrigated Crop Land (1000 km2)</td>
+<td>1000 km2</td>
+<td>land allocation by crop and water source</td>
+</tr>
+<tr class="odd">
+<td><a href="#landrfdcrop">landRfdCrop</a></td>
+<td>Rainfed Crop Land (1000 km2)</td>
+<td>1000 km2</td>
+<td>land allocation by crop and water source</td>
+</tr>
+<tr class="even">
+<td><a href="#landalloc">landAlloc</a></td>
+<td>Land Allocation by Aggregated Land Type (1000 km2)</td>
+<td>1000 km2</td>
+<td>aggregated land allocation</td>
+</tr>
+<tr class="odd">
+<td><a href="#landallocbycrop">landAllocByCrop</a></td>
+<td>Cropland Allocation (1000 km2)</td>
+<td>1000 km2</td>
+<td>land allocation by crop</td>
+</tr>
+<tr class="even">
+<td><a href="#landallocdetail">landAllocDetail</a></td>
+<td>Land Allocation by Detailed Land Type (1000 km2)</td>
+<td>1000 km2</td>
+<td>detailed land allocation</td>
+</tr>
+</tbody>
+</table>
+<p><sub>*Aggregated land type: crops, forest, natural other, natural other grass, natural other tree, pasture, and crop</sub><br><sub>*Detailed land type: biomassGrass, biomassTree, Corn, FiberCrop, Forest, Grassland, MiscCrop, OilCrop, OtherArableLand, OtherGrain, PalmFruit, Pasture, ProtectedGrassland, ProtectedShrubland, ProtectedUnmanagedForest, ProtectedUnmanagedPasture, Rice, RootTuber, Shrubland, SugarCrop, UnmanagedForest, UnmanagedPasture, UrbanLand, Wheat, FodderGrass, FodderHerb, RockIceDesert, and Tundra</sub></p>
+<p><br></p>
+<!-- ### landIrrRfd -->
+<!-- <br /> -->
+<!-- ### landIrrCrop -->
+<!-- <br /> -->
+<!-- ### landRfdCrop -->
+<!-- <br /> -->
+<!-- ### landAlloc -->
+<!-- <br /> -->
+<!-- ### landAllocByCrop -->
+<!-- <br /> -->
+<!-- ### landAllocDetail -->
+<!-- <br /> -->
+<!-------------------------->
+</div>
+<div id="emissions" class="section level2">
+<h2 class="hasAnchor">
+<a href="#emissions" class="anchor"></a>Emissions</h2>
+<!-------------------------->
+<p><a name="table7"></a> <strong>Table 7:</strong> Summary of parameters for emissions.</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Parameter</th>
+<th>Description and Unit</th>
+<th>Original GCAM Unit</th>
+<th>Source Queries</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><a href="#emissnonco2bysector">emissNonCO2BySector</a></td>
+<td>GHG Emissions (non CO2) by Gas Type (Gg/Tg/MTC)</td>
+<td>Gg/Tg/MTC</td>
+<td>nonCO2 emissions by sector; <br> nonCO2 emissions by sector USA; <br> nonCO2 emissions by sector USA nonUS</td>
+</tr>
+<tr class="even">
+<td><a href="#emissnonco2bysectorgwpar5">emissNonCO2BySectorGWPAR5</a></td>
+<td>GHG Emissions GWP AR5 (MTCO2eq)</td>
+<td>Gg/Tg/MTC</td>
+<td>nonCO2 emissions by sector; <br> nonCO2 emissions by sector USA</td>
+</tr>
+<tr class="odd">
+<td><a href="#emissnonco2bysectorgtpar5">emissNonCO2BySectorGTPAR5</a></td>
+<td>GHG Emissions GTP AR5 (MTCO2eq)</td>
+<td>Gg/Tg/MTC</td>
+<td>nonCO2 emissions by sector; <br> nonCO2 emissions by sector USA</td>
+</tr>
+<tr class="even">
+<td><a href="#emissnonco2bysectororigunits">emissNonCO2BySectorOrigUnits</a></td>
+<td>GHG Emissions by Gas Type (Gg/Tg/MTC)</td>
+<td>Gg/Tg/MTC</td>
+<td>nonCO2 emissions by sector</td>
+</tr>
+<tr class="odd">
+<td><a href="#emissnonco2byresprodgwpar5">emissNonCO2ByResProdGWPAR5</a></td>
+<td>Non-CO2 Emissions by Resource Production GWP AR5 (MTCO2eq)</td>
+<td>Tg</td>
+<td>nonCO2 emissions by resource production</td>
+</tr>
+<tr class="even">
+<td><a href="#emissnonco2byresprodgtpar5">emissNonCO2ByResProdGTPAR5</a></td>
+<td>Non-CO2 Emissions by Resource Production GTP AR5 (MTCO2eq)</td>
+<td>Tg</td>
+<td>nonCO2 emissions by resource production</td>
+</tr>
+<tr class="odd">
+<td><a href="#emissco2bysector">emissCO2BySector</a></td>
+<td>CO2 Emission (MTC)</td>
+<td>MTC</td>
+<td>CO2 emissions by sector</td>
+</tr>
+<tr class="even">
+<td><a href="#emissco2bysectornobio">emissCO2BySectorNoBio</a></td>
+<td>CO2 Emission without Bio (MTCO2eq)</td>
+<td>MTC</td>
+<td>CO2 emissions by sector (no bio)</td>
+</tr>
+<tr class="odd">
+<td><a href="#emissluc">emissLUC</a></td>
+<td>LUC CO2 Emissions (MTCO2eq)</td>
+<td>MTC</td>
+<td>Land Use Change Emission (future)</td>
+</tr>
+<tr class="even">
+<td><a href="#emissbysectorgtpar5ffi">emissBySectorGTPAR5FFI</a></td>
+<td>Emissions from Fossil FUels and Industry (FFI) but LUC GTP AR5 (MTCO2eq)</td>
+<td>MTC</td>
+<td>nonCO2 emissions by resource production; <br> nonCO2 emissions by sector</td>
+</tr>
+<tr class="odd">
+<td><a href="#emissbysectorgtpar5luc">emissBySectorGTPAR5LUC</a></td>
+<td>Emissions from Landuse Change (LUC) GTP AR5 (MTCO2eq)</td>
+<td>MTC</td>
+<td>nonCO2 emissions by resource production; <br> nonCO2 emissions by sector</td>
+</tr>
+<tr class="even">
+<td><a href="#emissbygasgtpar5ffi">emissByGasGTPAR5FFI</a></td>
+<td>Total Emissions without LUC GTP AR5 Summarized (MTCO2eq)</td>
+<td>MTC</td>
+<td>nonCO2 emissions by resource production; <br> nonCO2 emissions by sector</td>
+</tr>
+<tr class="odd">
+<td><a href="#emissbygasgtpar5luc">emissByGasGTPAR5LUC</a></td>
+<td>Total Emissions with LUC GTP AR5 Summarized (MTCO2eq)</td>
+<td>MTC</td>
+<td>nonCO2 emissions by resource production; <br> nonCO2 emissions by sector</td>
+</tr>
+<tr class="even">
+<td><a href="#emissmethanebysourcegwpar5">emissMethaneBySourceGWPAR5</a></td>
+<td>Methane Emissions GWP AR5 (MTCO2eq)</td>
+<td>Tg</td>
+<td>nonCO2 emissions by sector</td>
+</tr>
+<tr class="odd">
+<td><a href="#emissmethanebysourcegtpar5">emissMethaneBySourceGTPAR5</a></td>
+<td>Methane Emissions GTP AR5 (MTCO2eq)</td>
+<td>Tg</td>
+<td>nonCO2 emissions by sector</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<!-- ### emissNonCO2BySector -->
+<!-- <br /> -->
+<!-- ### emissNonCO2BySectorGWPAR5 -->
+<!-- <br /> -->
+<!-- ### emissNonCO2BySectorGTPAR5 -->
+<!-- <br /> -->
+<!-- ### emissNonCO2BySectorOrigUnits -->
+<!-- <br /> -->
+<!-- ### emissNonCO2ByResProdGWPAR5 -->
+<!-- <br /> -->
+<!-- ### emissNonCO2ByResProdGTPAR5 -->
+<!-- <br /> -->
+<!-- ### emissCO2BySector -->
+<!-- <br /> -->
+<!-- ### emissCO2BySectorNoBio -->
+<!-- <br /> -->
+<!-- ### emissBySectorGTPAR5FFI -->
+<!-- <br /> -->
+<!-- ### emissBySectorGTPAR5LUC -->
+<!-- <br /> -->
+<!-- ### emissMethaneBySourceGWPAR5 -->
+<!-- <br /> -->
+<!-- ### emissMethaneBySourceGTPAR5 -->
+<!-- <br /> -->
+<!-------------------------->
+</div>
+<div id="electricity" class="section level2">
+<h2 class="hasAnchor">
+<a href="#electricity" class="anchor"></a>Electricity</h2>
+<!-------------------------->
+<p><a name="table8"></a> <strong>Table 8:</strong> Summary of parameters for electricity.</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Parameter</th>
+<th>Description and Unit<sup>*</sup>
+</th>
 <th>Original GCAM Unit</th>
 <th>Source Queries</th>
 </tr></thead>
@@ -235,14 +758,14 @@
 </tr>
 <tr class="even">
 <td><a href="#elecfinalbyfueltwh">elecFinalByFuelTWh</a></td>
-<td>Final Electricity by Fuel (TWh)</td>
+<td>Final Electricity (TWh)</td>
 <td>EJ</td>
 <td>Final energy by detailed end-use sector and fuel</td>
 </tr>
 </tbody>
 </table>
+<p><sub>*Fuel: biomass, coal, gas, geothermal, hydro, nuclear, refined liquids, solar, and wind.</sub><br><sub>*Final electricity sectors: building, industry, and transport.</sub></p>
 <p><br></p>
-<!-- <a name="elecByTechTWh"></a> -->
 <div id="elecbytechtwh" class="section level3">
 <h3 class="hasAnchor">
 <a href="#elecbytechtwh" class="anchor"></a>elecByTechTWh</h3>
@@ -255,7 +778,6 @@
                                     paramsSelect <span class="op">=</span> <span class="st">'elecByTechTWh'</span>,
                                     regionsSelect <span class="op">=</span> <span class="st">'USA'</span><span class="op">)</span></code></pre></div>
 <p><br></p>
-<!-- <a name="elecCapByFuel"></a> -->
 </div>
 <div id="eleccapbyfuel" class="section level3">
 <h3 class="hasAnchor">
@@ -340,55 +862,111 @@
                                     paramsSelect <span class="op">=</span> <span class="st">'elecCapByFuel'</span>,
                                     regionsSelect <span class="op">=</span> <span class="st">'USA'</span><span class="op">)</span></code></pre></div>
 <p><br></p>
-<!-- <a name="elecFinalBySecTWh"></a> -->
+<!-- ### elecFinalBySecTWh -->
+<!-- <br /> -->
+<!-- ### elecFinalByFuelTWh -->
+<!-- <br /> -->
+<!-------------------------->
 </div>
-<div id="elecfinalbysectwh" class="section level3">
-<h3 class="hasAnchor">
-<a href="#elecfinalbysectwh" class="anchor"></a>elecFinalBySecTWh</h3>
+</div>
+<div id="energy" class="section level2">
+<h2 class="hasAnchor">
+<a href="#energy" class="anchor"></a>Energy</h2>
+<!-------------------------->
+<p><a name="table9"></a> <strong>Table 9:</strong> Summary of parameters for energy.</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Parameter</th>
+<th>Description and Unit<sup>*</sup>
+</th>
+<th>Original GCAM Unit</th>
+<th>Source Queries</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><a href="#energyprimarybyfuelej">energyPrimaryByFuelEJ</a></td>
+<td>Primary Energy Consumption by Fuel (EJ)</td>
+<td>EJ</td>
+<td>primary energy consumption by region (direct equivalent)</td>
+</tr>
+<tr class="even">
+<td><a href="#energyprimaryrefliqprodej">energyPrimaryRefLiqProdEJ</a></td>
+<td>Refined Liquids Production (EJ)</td>
+<td>EJ</td>
+<td>refined liquids production by subsector</td>
+</tr>
+<tr class="odd">
+<td><a href="#energyfinalconsumbysecej">energyFinalConsumBySecEJ</a></td>
+<td>Final Energy by Sector (EJ)</td>
+<td>EJ</td>
+<td>total final energy by aggregate sector</td>
+</tr>
+<tr class="even">
+<td><a href="#energyfinalbyfuelbysectorej">energyFinalByFuelBySectorEJ</a></td>
+<td>Final Energy by Fuel (EJ)</td>
+<td>EJ</td>
+<td>Final energy by detailed end-use sector and fuel</td>
+</tr>
+<tr class="odd">
+<td><a href="#energyfinalsubsecbyfueltranspej">energyFinalSubsecByFuelTranspEJ</a></td>
+<td>Transport Final Energy by Fuel (EJ)</td>
+<td>EJ</td>
+<td>transport final energy by fuel</td>
+</tr>
+<tr class="even">
+<td><a href="#energyfinalsubsecbyfuelbuildej">energyFinalSubsecByFuelBuildEJ</a></td>
+<td>Building Final Energy by Fuel (EJ)</td>
+<td>EJ</td>
+<td>building final energy by fuel</td>
+</tr>
+<tr class="odd">
+<td><a href="#energyfinalsubsecbyfuelindusej">energyFinalSubsecByFuelIndusEJ</a></td>
+<td>Industry Final Energy by Fuel (EJ)</td>
+<td>EJ</td>
+<td>industry final energy by fuel</td>
+</tr>
+<tr class="even">
+<td><a href="#energyfinalsubsecbysectorbuildej">energyFinalSubsecBySectorBuildEJ</a></td>
+<td>Building Final Energy By Subsector (EJ)</td>
+<td>EJ</td>
+<td>building final energy by subsector</td>
+</tr>
+<tr class="odd">
+<td><a href="#energyfinalconsumbyintlshpavej">energyFinalConsumByIntlShpAvEJ</a></td>
+<td>Final Energy International Aviation and Ship (EJ)</td>
+<td>EJ</td>
+<td>transport final energy by mode and fuel</td>
+</tr>
+</tbody>
+</table>
+<p><sub>*Final energy sectors: building, industry, transport, transport international aviation, and transport international ship.</sub><br><sub>*Building final energy subsectors: commercial cooling and heating, commercial others, residential cooling and heating, and residential others.</sub><br><sub>*Final energy fuel: biomass, coal, electricity, gas, hydrogen, liquids, liquids av, liquids shp, and other.</sub></p>
 <p><br></p>
-<!-- <a name="elecFinalByFuelTWh"></a> -->
-</div>
-<div id="elecfinalbyfueltwh" class="section level3">
-<h3 class="hasAnchor">
-<a href="#elecfinalbyfueltwh" class="anchor"></a>elecFinalByFuelTWh</h3>
-<p><br></p>
-<!-------------------------->
-</div>
-</div>
-<div id="transport" class="section level2">
-<h2 class="hasAnchor">
-<a href="#transport" class="anchor"></a>Transport</h2>
-<!-------------------------->
-<!-------------------------->
-</div>
-<div id="agriculture" class="section level2">
-<h2 class="hasAnchor">
-<a href="#agriculture" class="anchor"></a>Agriculture</h2>
-<!-------------------------->
-<!-------------------------->
-</div>
-<div id="livestock" class="section level2">
-<h2 class="hasAnchor">
-<a href="#livestock" class="anchor"></a>Livestock</h2>
-<!-------------------------->
-<!-------------------------->
-</div>
-<div id="land" class="section level2">
-<h2 class="hasAnchor">
-<a href="#land" class="anchor"></a>Land</h2>
-<!-------------------------->
-<!-------------------------->
-</div>
-<div id="emission" class="section level2">
-<h2 class="hasAnchor">
-<a href="#emission" class="anchor"></a>Emission</h2>
-<!-------------------------->
-<!-------------------------->
-</div>
-<div id="water" class="section level2">
-<h2 class="hasAnchor">
-<a href="#water" class="anchor"></a>Water</h2>
-<!-------------------------->
+<!-- ### energyPrimaryByFuelEJ -->
+<!-- <br /> -->
+<!-- ### energyPrimaryRefLiqProdEJ -->
+<!-- <br /> -->
+<!-- ### energyFinalConsumBySecEJ -->
+<!-- <br /> -->
+<!-- ### energyFinalByFuelBySectorEJ -->
+<!-- <br /> -->
+<!-- ### energyFinalSubsecByFuelTranspEJ -->
+<!-- <br /> -->
+<!-- ### energyFinalSubsecByFuelBuildEJ -->
+<!-- <br /> -->
+<!-- ### energyFinalSubsecByFuelBuildEJ -->
+<!-- <br /> -->
+<!-- ### energyFinalSubsecByFuelIndusEJ -->
+<!-- <br /> -->
+<!-- ### energyFinalSubsecBySectorBuildEJ -->
+<!-- <br /> -->
+<!-- ### energyFinalConsumByIntlShpAvEJ -->
+<!-- <br /> -->
 </div>
 </div>
   </div>
