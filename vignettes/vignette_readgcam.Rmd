@@ -1,8 +1,8 @@
 ---
-title: "readgcam"
+title: "User Guide"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{readgcam}
+  %\VignetteIndexEntry{User Guide}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 resource_files:

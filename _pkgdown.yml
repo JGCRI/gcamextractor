@@ -6,7 +6,7 @@ navbar:
     - icon: fa-home
       href: index.html
     - icon: fas fa-book
-      text: "How-to"
+      text: "User Guide"
       href: articles/vignette_readgcam.html
     - icon: fa-file-code-o
       text: "Reference"
