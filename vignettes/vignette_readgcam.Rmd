@@ -1,10 +1,12 @@
 ---
-title: "readgcam"
+title: "User Guide"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{readgcam}
+  %\VignetteIndexEntry{User Guide}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+resource_files:
+  - vignetteFigs
 ---
 
 
@@ -28,15 +30,15 @@ vignette: >
 
 `gcamextractor::readgcam` will return a list containing: 
 
-- data: a dataframe with the original data
-- dataAggParam: a dataframe with the data aggregated to the parameter
-- dataAggClass1: a dataframe with the data aggregated to class 1
-- dataAggclass2: a dataframe with the data aggregated to class 2
-- scenarios: A list of the scenarios
-- queries: A list of the queries used to extract the data
-
+* data: a dataframe with the original data
+* dataAggParam: a dataframe with the data aggregated to the parameter
+* dataAggClass1: a dataframe with the data aggregated to class 1
+* dataAggclass2: a dataframe with the data aggregated to class 2
+* scenarios: A list of the scenarios
+* queries: A list of the queries used to extract the data
 
 ```{r, eval=F}
+
 library(gcamextractor)
 
 Path_to_GCAMdatabase <- "E:/gcam-core-gcam-v5.3" # Change the path based on your GCAM database location
@@ -46,7 +48,8 @@ df <- dataGCAM$data; df
 dfParam <- dataGCAM$dataAggParam; dfParam
 dfClass1 <- dataGCAM$dataAggClass1; dfClass1
 dfClass2 <- dataGCAM$dataAggClass1; dfClass2
-```  
+
+``` 
 
 
 <!-------------------------->
@@ -63,7 +66,7 @@ library(gcamextractor)
 
 dataGCAM <- gcamextractor::readgcam(gcamdatabase = gcamextractor::example_GCAMv52_2050_proj)
 
-``` 
+```
 
 User can provide path to .Proj file to read GCAM data.
 
@@ -73,7 +76,7 @@ library(gcamextractor)
 Path_to_GCAMProj <- "E:/dataProj_example.proj" # Change the path to your .proj file
 dataGCAM <- gcamextractor::readgcam(gcamdatabase = Path_to_GCAMProj)
 
-```  
+```
 
 <!-------------------------->
 <!-------------------------->
@@ -99,22 +102,336 @@ dataGCAM <- gcamextractor::readgcam(gcamdatabase = Path_to_GCAMProj)
 ## Socioeconomics
 <!-------------------------->
 
+<a name="table1"></a>
+**Table 1:** Summary of parameters for socioeconomics.
+
+| Parameter | Description and Unit | Original GCAM Unit | Source Queries |
+|---|---|---|---|
+| [gdpPerCapita](#gdppercapita) | GDP per Capita (Thousand 1990 USD per Person) | Thousand 1990 USD per Person | GDP per capita MER by region |
+| [gdp](#gdp) | GDP (Billion 1990 USD) | Million 1990 USD | GDP MER by region |
+| [gdpGrowthRate](#gdpgrowthrate) | GDP Growth Rate (Percent) | Million 1990 USD | GDP MER by region |
+| [pop](#pop) | Population (Millions) | Thousands | Population by region |
+
+<br />
+
+<!-- ### gdpPerCapita -->
+
+<!-- <br /> -->
+
+<!-- ### gdp -->
+
+<!-- <br /> -->
+
+<!-- ### gdpGrowthRate -->
+
+<!-- <br /> -->
+
+<!-- ### pop -->
+
+<!-- <br /> -->
+
+
+<!-------------------------->
+## Transport
+<!-------------------------->
+<a name="table2"></a>
+**Table 2:** Summary of parameters for transport.
+
+| Parameter | Description and Unit<sup>*</sup> | Original GCAM Unit | Source Queries |
+|---|---|---|---|
+| [transportPassengerVMTByMode](#transportpassengervmtbymode) | Passenger VMT (services) by Mode (million pass-km) | million pass-km | transport service output by mode |
+| [transportFreightVMTByMode](#transportfreightvmtbymode) | Freight VMT (services) by Mode (million ton-km) | million ton-km | transport service output by mode |
+| [transportPassengerVMTByFuel](#transportpassengervmtbyfuel) | Passenger VMT (services) by Fuel (million pass-km) | million pass-km | transport service output by tech (new) |
+| [transportFreightVMTByFuel](#transportfreightvmtbyfuel) | Freight VMT (services) by Fuel (million ton-km) | million ton-km | transport service output by tech (new) |
+
+<sub>\*Passenger VMT modes: 2W and 3W, bus, car, large car and truck, LDV, plane, and rail.</sub> \
+<sub>\*Freight VMT modes: heavy truck, light truck, medium truck, rail, and ship.</sub> \
+<sub>\*Passenger VMT fuel: biofuel, electricity, fossil fuel, gas, hydrogen, and LA-electricity.</sub> \
+<sub>\*Freight VMT fuel: biofuel, coal, electricity, fossil fuel, gas.</sub>
+
+<br />
+
+<!-- ### transportPassengerVMTByMode -->
+
+<!-- <br /> -->
+
+<!-- ### transportFreightVMTByMode -->
+
+<!-- <br /> -->
+
+<!-- ### transportPassengerVMTByFuel -->
+
+<!-- <br /> -->
+
+<!-- ### transportFreightVMTByFuel -->
+
+<!-- <br /> -->
+
+<!-------------------------->
+## Water
+<!-------------------------->
+
+<a name="table3"></a>
+**Table 3:** Summary of parameters for water.
+
+| Parameter | Description and Unit<sup>*</sup> | Original GCAM Unit | Source Queries |
+|---|---|---|---|
+| [watConsumBySec](#watconsumbysec) | Water Consumption by Sector (km3) | km3 | water consumption by state, sector, basin (includes desal) |
+| [watWithdrawBySec](#watwithdrawbysec) | Water Withdrawal by Sector (km3) | km3 | water withdrawals by state, sector, basin (includes desal) |
+| [watWithdrawByCrop](#watwithdrawbycrop) | Water Withdrawals by Crop (km3) | km3 | water withdrawals by crop |
+| [watBioPhysCons](#watbiophyscons) | Biophysical Water Consumption (km3) | km3 | biophysical water demand by crop type and land region |
+| [watIrrWithdrawBasin](#watirrwithdrawvasin) | Irrigation Water Withdrawal (km3) | km3 | water withdrawals by water mapping source |
+| [watIrrConsBasin](#watirrconsbasin) | Irrigation Water Consumption (km3) | km3 | water consumption by water mapping source |
+| [watSupRunoffBasin](#watsuprunoffbasin) | Runoff (km3) | km3 | Basin level available runoff |
+| [waterWithdrawROGW](#waterwithdrawrogw) | Runoff vs Groundwater (km3) | km3 | Water withdrawals by water source (runoff vs. groundwater) |
+
+<sub>\*Water consumption sectors: animal, domestic, electric, industry, irrigation, and primary.</sub> \
+<sub>\*Water withdrawal sectors: agriculture, electricity, industry, livestock, mining, municipal, and desalination.</sub> \
+<sub>\*Crop: biomass, corn, fibercrop, fodderherb, miscellaneous crop, oil crop, other grain, palm fruit, rice, root tuber, sugar crop, wheat, and fodder grass.</sub>
+
+
+<br />
+
+<!-- ### watConsumBySec -->
+
+<!-- <br /> -->
+
+<!-- ### watWithdrawBySec -->
+
+<!-- <br /> -->
+
+<!-- ### watWithdrawByCrop -->
+
+<!-- <br /> -->
+
+
+<!-- ### watBioPhysCons -->
+
+<!-- <br /> -->
+
+<!-- ### watIrrWithdrawBasin -->
+
+<!-- <br /> -->
+
+<!-- ### watIrrConsBasin -->
+
+<!-- <br /> -->
+
+<!-- ### watSupRunoffBasin -->
+
+<!-- <br /> -->
+
+<!-- ### waterWithdrawROGW -->
+
+<!-- <br /> -->
+
+<!-------------------------->
+## Agriculture
+<!-------------------------->
+
+<a name="table4"></a>
+**Table 4:** Summary of parameters for agriculture.
+
+| Parameter | Description and Unit | Original GCAM Unit | Source Queries |
+|---|---|---|---|
+| [agProdbyIrrRfd](#agprodbyirrrfd) | Agricultural Production (Mt) | Mt | ag production by tech |
+| [agProdBiomass](#agprodbiomass) | Biomass Production (EJ) | EJ | ag production by tech |
+| [agProdForest](#agprodforest) | Forest Production (billion m3) | billion m3 | ag production by tech |
+| [agProdByCrop](#agprodbycrop) | Crop Production (Mt) | Mt | ag production by tech |
+
+
+<br />
+
+<!-- ### agProdbyIrrRfd -->
+
+<!-- <br /> -->
+
+<!-- ### agProdBiomass -->
+
+<!-- <br /> -->
+
+<!-- ### agProdForest -->
+
+<!-- <br /> -->
+
+<!-- ### agProdByCrop -->
+
+<!-- <br /> -->
+
+<!-------------------------->
+## Livestock
+<!-------------------------->
+
+<a name="table5"></a>
+**Table 5:** Summary of parameters for livestock.
+
+| Parameter | Description and Unit | Original GCAM Unit | Source Queries |
+|---|---|---|---|
+| [livestock_MeatDairybyTechMixed](#livestock_meatdairybytechmixed) | Livestock Production Mixed Feed (Mt) | Mt | meat and dairy production by tech |
+| [livestock_MeatDairybyTechPastoral](#livestock_meatdairybytechpastoral) | Livestock Production Pastoral (Mt) | Mt | meat and dairy production by tech |
+| [livestock_MeatDairybyTechImports](#livestock_meatdairybytechimports) | Livestock Production Imported Feed (Mt) | Mt | meat and dairy production by tech |
+| [livestock_MeatDairybySubsector](#livestock_meatdairybysubsector) | Livestock Production (Mt) | Mt | meat and dairy production by tech |
+
+<br />
+
+<!-- ### livestock_MeatDairybyTechMixed -->
+
+<!-- <br /> -->
+
+<!-- ### livestock_MeatDairybyTechPastoral -->
+
+<!-- <br /> -->
+
+<!-- ### livestock_MeatDairybyTechImports -->
+
+<!-- <br /> -->
+
+<!-- ### livestock_MeatDairybySubsector -->
+
+<!-- <br /> -->
+
+<!-------------------------->
+## Land Use
+<!-------------------------->
+
+<a name="table6"></a>
+**Table 6:** Summary of  parameters for land use.
+
+| Parameter | Description and Unit<sup>*</sup> | Original GCAM Unit | Source Queries |
+|---|---|---|---|
+| [landIrrRfd](#landirrrfd) | Irrigated vs Rainfed Land (1000 km2) | 1000 km2 | land allocation by crop and water source |
+| [landIrrCrop](#landirrcrop) | Irrigated Crop Land (1000 km2) | 1000 km2 | land allocation by crop and water source |
+| [landRfdCrop](#landrfdcrop) | Rainfed Crop Land (1000 km2) | 1000 km2 | land allocation by crop and water source |
+| [landAlloc](#landalloc) | Land Allocation by Aggregated Land Type (1000 km2) | 1000 km2 | aggregated land allocation |
+| [landAllocByCrop](#landallocbycrop) | Cropland Allocation (1000 km2) | 1000 km2 | land allocation by crop |
+| [landAllocDetail](#landallocdetail) | Land Allocation by Detailed Land Type (1000 km2) | 1000 km2 | detailed land allocation |
+
+<sub>\*Aggregated land type: crops, forest, natural other, natural other grass, natural other tree, pasture, and crop</sub> \
+<sub>\*Detailed land type: biomassGrass, biomassTree, Corn, FiberCrop, Forest, Grassland, MiscCrop, OilCrop, OtherArableLand, OtherGrain, PalmFruit, Pasture, ProtectedGrassland, ProtectedShrubland, ProtectedUnmanagedForest, ProtectedUnmanagedPasture, Rice, RootTuber, Shrubland, SugarCrop, UnmanagedForest, UnmanagedPasture, UrbanLand, Wheat, FodderGrass, FodderHerb, RockIceDesert, and Tundra</sub>
+
+<br />
+
+<!-- ### landIrrRfd -->
+
+<!-- <br /> -->
+
+<!-- ### landIrrCrop -->
+
+<!-- <br /> -->
+
+<!-- ### landRfdCrop -->
+
+<!-- <br /> -->
+
+<!-- ### landAlloc -->
+
+<!-- <br /> -->
+
+<!-- ### landAllocByCrop -->
+
+<!-- <br /> -->
+
+<!-- ### landAllocDetail -->
+
+<!-- <br /> -->
+
+<!-------------------------->
+## Emissions
+<!-------------------------->
+
+<a name="table7"></a>
+**Table 7:** Summary of parameters for emissions.
+
+| Parameter | Description and Unit | Original GCAM Unit | Source Queries |
+|---|---|---|---|
+| [emissNonCO2BySector](#emissnonco2bysector) | GHG Emissions (non CO2) by Gas Type (Gg/Tg/MTC) | Gg/Tg/MTC  | nonCO2 emissions by sector; <br /> nonCO2 emissions by sector USA; <br /> nonCO2 emissions by sector USA nonUS |
+| [emissNonCO2BySectorGWPAR5](#emissnonco2bysectorgwpar5) | GHG Emissions GWP AR5 (MTCO2eq) | Gg/Tg/MTC  | nonCO2 emissions by sector; <br /> nonCO2 emissions by sector USA |
+| [emissNonCO2BySectorGTPAR5](#emissnonco2bysectorgtpar5) | GHG Emissions GTP AR5 (MTCO2eq) | Gg/Tg/MTC  | nonCO2 emissions by sector; <br /> nonCO2 emissions by sector USA |
+| [emissNonCO2BySectorOrigUnits](#emissnonco2bysectororigunits) | GHG Emissions by Gas Type (Gg/Tg/MTC) | Gg/Tg/MTC  | nonCO2 emissions by sector |
+| [emissNonCO2ByResProdGWPAR5](#emissnonco2byresprodgwpar5) | Non-CO2 Emissions by Resource  Production GWP AR5 (MTCO2eq) | Tg  | nonCO2 emissions by resource production |
+| [emissNonCO2ByResProdGTPAR5](#emissnonco2byresprodgtpar5) | Non-CO2 Emissions by Resource Production GTP AR5 (MTCO2eq) | Tg  | nonCO2 emissions by resource production |
+| [emissCO2BySector](#emissco2bysector) | CO2 Emission (MTC) | MTC  | CO2 emissions by sector |
+| [emissCO2BySectorNoBio](#emissco2bysectornobio) | CO2 Emission without Bio (MTCO2eq) | MTC  | CO2 emissions by sector (no bio) |
+| [emissLUC](#emissluc) | LUC CO2 Emissions (MTCO2eq) | MTC  | Land Use Change Emission (future) |
+| [emissBySectorGTPAR5FFI](#emissbysectorgtpar5ffi) | Emissions from Fossil FUels and Industry (FFI) but LUC GTP AR5 (MTCO2eq) | MTC  | nonCO2 emissions by resource production; <br /> nonCO2 emissions by sector |
+| [emissBySectorGTPAR5LUC](#emissbysectorgtpar5luc) | Emissions from Landuse Change (LUC) GTP AR5 (MTCO2eq) | MTC  | nonCO2 emissions by resource production; <br /> nonCO2 emissions by sector |
+| [emissByGasGTPAR5FFI](#emissbygasgtpar5ffi) | Total Emissions without LUC GTP AR5 Summarized (MTCO2eq) | MTC  | nonCO2 emissions by resource production; <br /> nonCO2 emissions by sector |
+| [emissByGasGTPAR5LUC](#emissbygasgtpar5luc) | Total Emissions with LUC GTP AR5 Summarized (MTCO2eq) | MTC  | nonCO2 emissions by resource production; <br /> nonCO2 emissions by sector |
+| [emissMethaneBySourceGWPAR5](#emissmethanebysourcegwpar5) | Methane Emissions GWP AR5 (MTCO2eq) | Tg  | nonCO2 emissions by sector |
+| [emissMethaneBySourceGTPAR5](#emissmethanebysourcegtpar5) | Methane Emissions GTP AR5 (MTCO2eq) | Tg  | nonCO2 emissions by sector |
+
+
+<br />
+
+<!-- ### emissNonCO2BySector -->
+
+<!-- <br /> -->
+
+<!-- ### emissNonCO2BySectorGWPAR5 -->
+
+<!-- <br /> -->
+
+<!-- ### emissNonCO2BySectorGTPAR5 -->
+
+<!-- <br /> -->
+
+<!-- ### emissNonCO2BySectorOrigUnits -->
+
+<!-- <br /> -->
+
+<!-- ### emissNonCO2ByResProdGWPAR5 -->
+
+<!-- <br /> -->
+
+<!-- ### emissNonCO2ByResProdGTPAR5 -->
+
+<!-- <br /> -->
+
+<!-- ### emissCO2BySector -->
+
+<!-- <br /> -->
+
+<!-- ### emissCO2BySectorNoBio -->
+
+<!-- <br /> -->
+
+<!-- ### emissBySectorGTPAR5FFI -->
+
+<!-- <br /> -->
+
+<!-- ### emissBySectorGTPAR5LUC -->
+
+<!-- <br /> -->
+
+<!-- ### emissMethaneBySourceGWPAR5 -->
+
+<!-- <br /> -->
+
+<!-- ### emissMethaneBySourceGTPAR5 -->
+
+<!-- <br /> -->
+
+
+
 <!-------------------------->
 ## Electricity
 <!-------------------------->
-<a name="table2"></a>
-**Table 2:** Summary of electricity parameters.
+<a name="table8"></a>
+**Table 8:** Summary of parameters for electricity.
 
-| Parameter | Description and Unit | Original GCAM Unit | Source Queries |
+| Parameter | Description and Unit<sup>*</sup> | Original GCAM Unit | Source Queries |
 |---|---|---|---|
 | [elecByTechTWh](#elecbytechtwh) | Electricity Generation by Fuel (TWh) | EJ | elec gen by gen tech USA; <br /> elec gen by gen tech and cooling tech |
 | [elecCapByFuel](#eleccapbyfuel) | Electricity Capacity by Fuel (GW) | EJ | elec gen by gen tech USA; <br /> elec gen by gen tech and cooling tech |
 | [elecFinalBySecTWh](#elecfinalbysectwh) | Final Electricity by Sector (TWh) | EJ | inputs by tech |
-| [elecFinalByFuelTWh](#elecfinalbyfueltwh) | Final Electricity by Fuel (TWh) | EJ | Final energy by detailed end-use sector and fuel |
+| [elecFinalByFuelTWh](#elecfinalbyfueltwh) | Final Electricity (TWh) | EJ | Final energy by detailed end-use sector and fuel |
+
+<sub>\*Fuel: biomass, coal, gas, geothermal, hydro, nuclear, refined liquids, solar, and wind.</sub> \
+<sub>\*Final electricity sectors: building, industry, and transport.</sub>
 
 <br />
 
-<!-- <a name="elecByTechTWh"></a> -->
+
 ### elecByTechTWh
 
 `elecByTechTWh` uses "elec gen by gen tech and cooling tech" query and converts electricity generation of GCAM raw output from EJ to TWh:
@@ -134,7 +451,7 @@ dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv5
 
 <br />
 
-<!-- <a name="elecCapByFuel"></a> -->
+
 ### elecCapByFuel
 
 `elecCapByFuel` calculates electricity capacity (GW) based on the output from `elecByTechTWh`:
@@ -182,37 +499,77 @@ dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv5
 
 <br />
 
-<!-- <a name="elecFinalBySecTWh"></a> -->
-### elecFinalBySecTWh
 
+<!-- ### elecFinalBySecTWh -->
+
+<!-- <br /> -->
+
+<!-- ### elecFinalByFuelTWh -->
+
+<!-- <br /> -->
+
+
+<!-------------------------->
+## Energy
+<!-------------------------->
+
+<a name="table9"></a>
+**Table 9:** Summary of parameters for energy.
+
+| Parameter | Description and Unit<sup>*</sup> | Original GCAM Unit | Source Queries |
+|---|---|---|---|
+| [energyPrimaryByFuelEJ](#energyprimarybyfuelej) | Primary Energy Consumption by Fuel (EJ) | EJ | primary energy consumption by region (direct equivalent) |
+| [energyPrimaryRefLiqProdEJ](#energyprimaryrefliqprodej) | Refined Liquids Production (EJ) | EJ | refined liquids production by subsector |
+| [energyFinalConsumBySecEJ](#energyfinalconsumbysecej) | Final Energy by Sector (EJ) | EJ | total final energy by aggregate sector |
+| [energyFinalByFuelBySectorEJ](#energyfinalbyfuelbysectorej) | Final Energy by Fuel (EJ) | EJ | Final energy by detailed end-use sector and fuel |
+| [energyFinalSubsecByFuelTranspEJ](#energyfinalsubsecbyfueltranspej) | Transport Final Energy by Fuel (EJ) | EJ | transport final energy by fuel |
+| [energyFinalSubsecByFuelBuildEJ](#energyfinalsubsecbyfuelbuildej) | Building Final Energy by Fuel (EJ) | EJ | building final energy by fuel |
+| [energyFinalSubsecByFuelIndusEJ](#energyfinalsubsecbyfuelindusej) | Industry Final Energy by Fuel (EJ) | EJ | industry final energy by fuel |
+| [energyFinalSubsecBySectorBuildEJ](#energyfinalsubsecbysectorbuildej) | Building Final Energy By Subsector (EJ) | EJ | building final energy by subsector |
+| [energyFinalConsumByIntlShpAvEJ](#energyfinalconsumbyintlshpavej) | Final Energy International Aviation and Ship (EJ) | EJ | transport final energy by mode and fuel |
+
+<sub>\*Final energy sectors: building, industry, transport, transport international aviation, and transport international ship.</sub> \
+<sub>\*Building final energy subsectors: commercial cooling and heating, commercial others, residential cooling and heating, and residential others.</sub> \
+<sub>\*Final energy fuel: biomass, coal, electricity, gas, hydrogen, liquids, liquids av, liquids shp, and other.</sub>
 
 <br />
 
-<!-- <a name="elecFinalByFuelTWh"></a> -->
-### elecFinalByFuelTWh
+<!-- ### energyPrimaryByFuelEJ -->
 
-<br />
+<!-- <br /> -->
 
-<!-------------------------->
-## Transport
-<!-------------------------->
+<!-- ### energyPrimaryRefLiqProdEJ -->
 
-<!-------------------------->
-## Agriculture
-<!-------------------------->
+<!-- <br /> -->
 
-<!-------------------------->
-## Livestock
-<!-------------------------->
+<!-- ### energyFinalConsumBySecEJ -->
 
-<!-------------------------->
-## Land
-<!-------------------------->
+<!-- <br /> -->
 
-<!-------------------------->
-## Emission
-<!-------------------------->
+<!-- ### energyFinalByFuelBySectorEJ -->
 
-<!-------------------------->
-## Water
-<!-------------------------->
+<!-- <br /> -->
+
+<!-- ### energyFinalSubsecByFuelTranspEJ -->
+
+<!-- <br /> -->
+
+<!-- ### energyFinalSubsecByFuelBuildEJ -->
+
+<!-- <br /> -->
+
+<!-- ### energyFinalSubsecByFuelBuildEJ -->
+
+<!-- <br /> -->
+
+<!-- ### energyFinalSubsecByFuelIndusEJ -->
+
+<!-- <br /> -->
+
+<!-- ### energyFinalSubsecBySectorBuildEJ -->
+
+<!-- <br /> -->
+
+<!-- ### energyFinalConsumByIntlShpAvEJ -->
+
+<!-- <br /> -->
