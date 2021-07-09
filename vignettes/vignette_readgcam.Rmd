@@ -9,18 +9,6 @@ resource_files:
   - vignetteFigs
 ---
 
-
-<!-------------------------->
-<!-------------------------->
-# Key Links
-<!-------------------------->
-<!-------------------------->
-<p align="center"> <img src="vignetteFigs/divider.png" width="1400"></p>
-
-- Github: https://github.com/JGCRI/gcamextractor
-- Webpage: https://jgcri.github.io/gcamextractor/
-- Cheatsheet: https://jgcri.github.io/gcamextractor/gcamextractorCheatsheet.pdf
-
 <!-------------------------->
 <!-------------------------->
 # Read GCAM database
