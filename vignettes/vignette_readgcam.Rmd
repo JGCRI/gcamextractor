@@ -37,6 +37,12 @@ dfParam <- dataGCAM$dataAggParam; dfParam
 dfClass1 <- dataGCAM$dataAggClass1; dfClass1
 dfClass2 <- dataGCAM$dataAggClass1; dfClass2
 
+# dataGCAM <- gcamextractor::readgcam(gcamdatabase = Path_to_GCAMdatabase,
+                                      # scenOrigNames = "All",
+                                      # scenNewNames = NULL,
+                                      # regionsSelect = NULL,
+                                      # paramsSelect = "All")
+
 ``` 
 
 
@@ -52,7 +58,14 @@ dfClass2 <- dataGCAM$dataAggClass1; dfClass2
 ```{r, eval=F}
 library(gcamextractor)
 
-dataGCAM <- gcamextractor::readgcam(gcamdatabase = gcamextractor::example_GCAMv52_2050_proj)
+dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv52_2050_proj)
+
+# dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv52_2050_proj)
+                                      # scenOrigNames = "All",
+                                      # scenNewNames = NULL,
+                                      # regionsSelect = NULL,
+                                      # paramsSelect = "All")
+
 
 ```
 
