@@ -30,7 +30,10 @@ resource_files:
 library(gcamextractor)
 
 Path_to_GCAMdatabase <- "E:/gcam-core-gcam-v5.3" # Change the path based on your GCAM database location
-dataGCAM <- gcamextractor::readgcam(gcamdatabase = Path_to_GCAMdatabase)
+gcamextractor::data_params # view available parameters
+dataGCAM <- gcamextractor::readgcam(gcamdatabase = Path_to_GCAMdatabase,
+                                    regionsSelect = c("Colombia"),
+                                    paramsSelect = "pop")
 
 df <- dataGCAM$data; df
 dfParam <- dataGCAM$dataAggParam; dfParam
