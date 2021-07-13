@@ -125,7 +125,13 @@
 <span class="va">df</span> <span class="op">&lt;-</span> <span class="va">dataGCAM</span><span class="op">$</span><span class="va">data</span>; <span class="va">df</span>
 <span class="va">dfParam</span> <span class="op">&lt;-</span> <span class="va">dataGCAM</span><span class="op">$</span><span class="va">dataAggParam</span>; <span class="va">dfParam</span>
 <span class="va">dfClass1</span> <span class="op">&lt;-</span> <span class="va">dataGCAM</span><span class="op">$</span><span class="va">dataAggClass1</span>; <span class="va">dfClass1</span>
-<span class="va">dfClass2</span> <span class="op">&lt;-</span> <span class="va">dataGCAM</span><span class="op">$</span><span class="va">dataAggClass1</span>; <span class="va">dfClass2</span></code></pre></div>
+<span class="va">dfClass2</span> <span class="op">&lt;-</span> <span class="va">dataGCAM</span><span class="op">$</span><span class="va">dataAggClass1</span>; <span class="va">dfClass2</span>
+
+<span class="co"># dataGCAM &lt;- gcamextractor::readgcam(gcamdatabase = Path_to_GCAMdatabase,</span>
+                                      <span class="co"># scenOrigNames = "All",</span>
+                                      <span class="co"># scenNewNames = NULL,</span>
+                                      <span class="co"># regionsSelect = NULL,</span>
+                                      <span class="co"># paramsSelect = "All")</span></code></pre></div>
 <!-------------------------->
 <!-------------------------->
 </div>
@@ -140,7 +146,13 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JGCRI/gcamextractor">gcamextractor</a></span><span class="op">)</span>
 
-<span class="va">dataGCAM</span> <span class="op">&lt;-</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="fu"><a href="../reference/readgcam.html">readgcam</a></span><span class="op">(</span>gcamdatabase <span class="op">=</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="va"><a href="../reference/example_GCAMv52_2050_proj.html">example_GCAMv52_2050_proj</a></span><span class="op">)</span></code></pre></div>
+<span class="va">dataGCAM</span> <span class="op">&lt;-</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="fu"><a href="../reference/readgcam.html">readgcam</a></span><span class="op">(</span>dataProjFile <span class="op">=</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="va"><a href="../reference/example_GCAMv52_2050_proj.html">example_GCAMv52_2050_proj</a></span><span class="op">)</span>
+
+<span class="co"># dataGCAM &lt;- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv52_2050_proj)</span>
+                                      <span class="co"># scenOrigNames = "All",</span>
+                                      <span class="co"># scenNewNames = NULL,</span>
+                                      <span class="co"># regionsSelect = NULL,</span>
+                                      <span class="co"># paramsSelect = "All")</span></code></pre></div>
 <p>User can provide path to .Proj file to read GCAM data.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JGCRI/gcamextractor">gcamextractor</a></span><span class="op">)</span>
