@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>data_capfactors — data_capfactors • gcamextractor</title>
+<title>conv_GgTg_to_MTC — conv_GgTg_to_MTC • gcamextractor</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,12 @@
 
 
 
-<meta property="og:title" content="data_capfactors — data_capfactors" />
-<meta property="og:description" content="data_capfactors" />
+<meta property="og:title" content="conv_GgTg_to_MTC — conv_GgTg_to_MTC" />
+<meta property="og:description" content="https://nepis.epa.gov/Exe/ZyNET.exe/P1001YTS.txt?ZyActionD=ZyDocument&amp;amp;Client=EPA&amp;amp;Index=2000
+https://www.firescience.gov/projects/09-2-01-9/supdocs/09-2-01-9_Appendix_C_-_Unit_Conversion_and_Other_Tables.pdf
+MTC is megatonnes (10^6 tonnes) of Carbon.
+Tg one terragram = 1 Megatonne = 10^6 tonnes
+Convert to Mega tonnes of Carbon" />
 
 
 
@@ -129,29 +133,33 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>data_capfactors</h1>
+    <h1>conv_GgTg_to_MTC</h1>
     <small class="dont-index">Source: <a href='https://github.com/JGCRI/gcamextractor/blob/master/R/data.R'><code>R/data.R</code></a></small>
-    <div class="hidden name"><code>data_capfactors.Rd</code></div>
+    <div class="hidden name"><code>conv_GgTg_to_MTC.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>data_capfactors</p>
+    <p>https://nepis.epa.gov/Exe/ZyNET.exe/P1001YTS.txt?ZyActionD=ZyDocument&amp;Client=EPA&amp;Index=2000<!-- %20Thru%202005&amp;Docs=&amp;Query=&amp;Time=&amp;EndTime=&amp;SearchMethod=1&amp;TocRestrict=n&amp;Toc=&amp;TocEntry=&amp;QField=&amp;QFieldYear=&amp;QFieldMonth=&amp;QFieldDay=&amp;UseQField=&amp;IntQFieldOp=0&amp;ExtQFieldOp=0&amp;XmlQuery=&amp;File=D%3A%5CZYFILES%5CINDEX%20DATA%5C00THRU05%5CTXT%5C00000017%5CP1001YTS.txt&amp;User=ANONYMOUS&amp;Password=anonymous&amp;SortMethod=h%7C-&amp;MaximumDocuments=1&amp;FuzzyDegree=0&amp;ImageQuality=r75g8/r75g8/x150y150g16/i425&amp;Display=hpfr&amp;DefSeekPage=x&amp;SearchBack=ZyActionL&amp;Back=ZyActionS&amp;BackDesc=Results%20page&amp;MaximumPages=1&amp;ZyEntry=3 -->
+https://www.firescience.gov/projects/09-2-01-9/supdocs/09-2-01-9_Appendix_C_-_Unit_Conversion_and_Other_Tables.pdf
+MTC is megatonnes (10^6 tonnes) of Carbon.
+Tg one terragram = 1 Megatonne = 10^6 tonnes
+Convert to Mega tonnes of Carbon</p>
     </div>
 
-    <pre class="usage"><span class='va'>data_capfactors</span></pre>
+    <pre class="usage"><span class='va'>conv_GgTg_to_MTC</span></pre>
 
 
     <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>.csv</p>
+    <p>tibble</p>
     <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
 
-    <p>paste(getwd(),"/dataFiles/gcam/capacity_factor_by_elec_gen_subsector.csv",sep="")</p>
+    <p>gcamextractor</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
  <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/JGCRI/gcamextractor'>gcamextractor</a></span><span class='op'>)</span>;
- <span class='fu'>gcamextractor</span><span class='fu'>::</span><span class='va'>data_capfactors</span>
+ <span class='fu'>gcamextractor</span><span class='fu'>::</span><span class='va'>conv_GgTg_to_MTC</span>
 <span class='op'>}</span>
 </div></pre>
   </div>
