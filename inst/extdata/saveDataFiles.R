@@ -1,40 +1,748 @@
 #-----------------
 # Load Libraries
 #-----------------
-library(tibble);library(dplyr);library(devtools); library(rgcam); library(usethis)
+library(tibble);library(dplyr);library(devtools); library(rgcam); library(usethis);
+library(dplyr); library(assertthat)
 
 #-------------------
 # Data Files
 #-------------------
 
+# Example proj file for Colombia, Argentina
+# gcamdatabase_i = "C:/Z/models/GCAMVersions/exampleDatabases/example_gcamv54_argentina_colombia_2025"
+# dataGCAM <- readgcam(reReadData = T,
+#                      gcamdatabase = gcamdatabase_i,
+#                      dataProjFile = "C:/Z/models/gcamextractor/outputs/readGCAM/dataProj.proj",
+#                      regionsSelect = c("Argentina","Colombia"),
+#                      paramsSelect= "all")
 # Example .proj file
 #projFile <-"C:/Z/projects/metisGCAMUSA/metisOutputs/readGCAM/exampleGCAMproj.proj"
-projFile <-paste0(getwd(),"/inst/extdata/example_GCAMv52_2050_proj.proj")
-example_GCAMv52_2050_proj <- rgcam::loadProject(projFile)
-use_data(example_GCAMv52_2050_proj, overwrite=T)
+#projFile <-paste0("C:/Z/models/gcamextractor/outputs/readGCAM/dataProj.proj")
+#example_gcamv54_argentina_colombia_2025_proj <- rgcam::loadProject(projFile)
+#use_data(example_gcamv54_argentina_colombia_2025_proj, version=3, overwrite=T)
 
-#projFile <-"C:/Z/projects/metisGCAMUSA/metisOutputs/readGCAM/exampleGCAMproj.proj"
-projFile <-paste0(getwd(),"/inst/extdata/example_GCAMv53_2020_proj.proj")
-example_GCAMv53_2020_proj <- rgcam::loadProject(projFile)
-use_data(example_GCAMv53_2020_proj, overwrite=T)
-
-# Metis XMl Query Files
+# XMl Query Files
 xmlFilePath = paste0(getwd(),"/inst/extdata/queries.xml")
 xmlfile <- XML::xmlTreeParse(xmlFilePath)
 xmltop <- XML::xmlRoot(xmlfile)
 top <- XML::xmlNode(XML::xmlName(xmltop))
 for(i in 1:length(xmltop)){
-      top <- XML::addChildren(top, xmltop[[i]])
+  top <- XML::addChildren(top, xmltop[[i]])
 }
 queries <- top
-use_data(queries, overwrite=T)
+use_data(queries, version=3, overwrite=T)
 
-# Capacity factors
+#-------------------
+# Data Files
+#-------------------
+
 data_capfactors <- data.table::fread(file=paste0(getwd(),"/inst/extdata/capacity_factor_by_elec_gen_subsector.csv"),skip=5,encoding="Latin-1")
-use_data(data_capfactors, overwrite=T)
+data_params <- unique(gcamextractor::map_param_query$param); data_params
+data_queries <- unlist(unique(gcamextractor::map_param_query$query)); data_queries
+use_data(data_capfactors, version=3, overwrite=T)
+use_data(data_params, version=3, overwrite=T)
+use_data(data_queries, version=3, overwrite=T)
+
+#-------------------
+# gcamextractor mapping between params and quereies
+#-------------------
+
+map_param_query <- tibble::tribble(
+  ~group, ~param, ~query,~mapPalette,
+  # "cerf","gcam_to_cerf_tech_name_map", # class1 gcam class2 gcam value = CERF technology
+  # "cerf","lifetime_yr",
+  # "cerf","capacity_factor",
+  # "cerf","variable_cost_esc_rate_fraction",
+  # "cerf","fuel_esc_rate_fraction",
+  # #unit_size,
+  # "cerf","variable_om_USDperMWh",
+  # "cerf","heat_rate_BTUperkWh",
+  # "cerf","fuel_price_USDperGJ",
+  # "cerf","carbon_capture_rate_fraction",
+  # "cerf","fuel_co2_content_tonsperMWh",
+  # #discount_rate,
+  # "cerf","carbon_esc_rate_fraction",
+  # "cerf","carbon_tax_USDperTon",
+  # "cerf","New capacity by vintage",
+  # "cerf","Retired capacity by vintage",
+  # Energy
+  "energy","energyPrimaryByFuelEJ","primary energy consumption by region (direct equivalent)","pal_hot",
+  "energy","energyPrimaryRefLiqProdEJ", "refined liquids production by subsector","pal_hot",
+  "energy","energyFinalConsumBySecEJ", "total final energy by aggregate sector","pal_hot",
+  "energy","energyFinalByFuelBySectorEJ", "Final energy by detailed end-use sector and fuel","pal_hot",
+  "energy","energyFinalSubsecByFuelTranspEJ", "transport final energy by fuel","pal_hot",
+  "energy","energyFinalSubsecByFuelBuildEJ", "building final energy by fuel","pal_hot",
+  "energy","energyFinalSubsecByFuelIndusEJ", "industry final energy by fuel","pal_hot",
+  "energy","energyFinalSubsecBySectorBuildEJ", "building final energy by subsector","pal_hot",
+  "energy","energyFinalConsumByIntlShpAvEJ", "transport final energy by mode and fuel","pal_hot",
+  "energy","energyPrimaryByFuelMTOE", "primary energy consumption by region (direct equivalent)","pal_hot",
+  "energy","energyPrimaryRefLiqProdMTOE", "refined liquids production by subsector","pal_hot",
+  "energy","energyFinalConsumBySecMTOE", "total final energy by aggregate sector","pal_hot",
+  "energy","energyFinalByFuelBySectorMTOE", "Final energy by detailed end-use sector and fuel","pal_hot",
+  "energy","energyFinalByFuelBySectorTWh", "Final energy by detailed end-use sector and fuel","pal_hot",
+  "energy","energyFinalbyFuelMTOE", "Final energy by detailed end-use sector and fuel","pal_hot",
+  "energy","energyFinalSubsecByFuelTranspMTOE", "transport final energy by fuel","pal_hot",
+  "energy","energyFinalSubsecByFuelBuildMTOE", "building final energy by fuel","pal_hot",
+  "energy","energyFinalSubsecByFuelIndusMTOE", "industry final energy by fuel","pal_hot",
+  "energy","energyFinalSubsecBySectorBuildMTOE", "building final energy by subsector","pal_hot",
+  "energy","energyFinalConsumByIntlShpAvMTOE", "transport final energy by mode and fuel","pal_hot",
+  "energy","energyPrimaryByFuelTWh", "primary energy consumption by region (direct equivalent)","pal_hot",
+  "energy","energyPrimaryRefLiqProdTWh", "refined liquids production by subsector","pal_hot",
+  "energy","energyFinalConsumBySecTWh", "total final energy by aggregate sector","pal_hot",
+  "energy","energyFinalbyFuelTWh", "Final energy by detailed end-use sector and fuel","pal_hot",
+  "energy","energyFinalSubsecByFuelTranspTWh", "transport final energy by fuel","pal_hot",
+  "energy","energyFinalSubsecByFuelBuildTWh", "building final energy by fuel","pal_hot",
+  "energy","energyFinalSubsecByFuelIndusTWh", "industry final energy by fuel","pal_hot",
+  "energy","energyFinalSubsecBySectorBuildTWh", "building final energy by subsector","pal_hot",
+  "energy","energyFinalConsumByIntlShpAvTWh", "transport final energy by mode and fuel","pal_hot",
+  # Electricity
+  "electricity","elecByTechTWh", c("elec gen by gen tech cogen USA","elec gen by gen tech USA","elec gen by gen tech and cooling tech"),"pal_hot",
+  "electricity","elecCapByFuel", c("elec gen by gen tech cogen USA","elec gen by gen tech USA","elec gen by gen tech and cooling tech"),"pal_hot",
+  "electricity","elecFinalBySecTWh",  "inputs by tech","pal_hot",
+  "electricity","elecFinalByFuelTWh", "Final energy by detailed end-use sector and fuel","pal_hot",
+  # Transport
+  "transport","transportPassengerVMTByMode", "transport service output by mode","pal_hot",
+  "transport","transportFreightVMTByMode", "transport service output by mode","pal_hot",
+  "transport","transportPassengerVMTByFuelNew","transport service output by tech (new)","pal_hot",
+  "transport","transportFreightVMTByFuelNew", "transport service output by tech (new)","pal_hot",
+  "transport","transportPassengerVMTByFuel","transport service output by tech","pal_hot",
+  "transport","transportFreightVMTByFuel", "transport service output by tech","pal_hot",
+  # Water
+  "water","watConsumBySec", "water consumption by state, sector, basin (includes desal)","pal_wet",
+  "water","watWithdrawBySec", "water withdrawals by state, sector, basin (includes desal)","pal_wet",
+  "water","watWithdrawByCrop", "water withdrawals by crop","pal_wet",
+  "water","watBioPhysCons", "biophysical water demand by crop type and land region","pal_wet",
+  "water","watIrrWithdrawBasin", "water withdrawals by water mapping source","pal_wet",
+  "water","watIrrConsBasin", "water consumption by water mapping source","pal_wet",
+  "water","watSupRunoffBasin", "Basin level available runoff","pal_wet",
+  "water","waterWithdrawROGW", "Water withdrawals by water source (runoff vs. groundwater)","pal_wet",
+  # Socio-economics
+  "socioecon","gdpPerCapita", "GDP per capita MER by region","pal_hot",
+  "socioecon","gdp", "GDP MER by region","pal_hot",
+  "socioecon","gdpGrowthRate", "GDP Growth Rate (Percent)","pal_hot",
+  "socioecon","pop", "Population by region","pal_hot",
+  # Agriculture
+  "ag","agProdbyIrrRfd", "ag production by tech","pal_green",
+  "ag","agProdBiomass", "ag production by tech","pal_green",
+  "ag","agProdForest", "ag production by tech","pal_green",
+  "ag","agProdByCrop", "ag production by tech","pal_green",
+  #Livestock
+  "livestock","livestock_MeatDairybyTechMixed", "meat and dairy production by tech","pal_green",
+  "livestock","livestock_MeatDairybyTechPastoral", "meat and dairy production by tech","pal_green",
+  "livestock","livestock_MeatDairybyTechImports", "meat and dairy production by tech","pal_green",
+  "livestock","livestock_MeatDairybySubsector", "meat and dairy production by tech","pal_green",
+  # Land use
+  "land","landIrrRfd", "land allocation by crop and water source","pal_green",
+  "land","landIrrCrop", "land allocation by crop and water source","pal_green",
+  "land","landRfdCrop", "land allocation by crop and water source","pal_green",
+  "land","landAlloc", "aggregated land allocation","pal_green",
+  "land","landAllocByCrop", "land allocation by crop","pal_green",
+  "land","landAllocDetail","detailed land allocation","pal_green",
+  # General
+  "general","inputs", "inputs by tech","pal_hot",
+  "general","outputs", "outputs by tech","pal_hot",
+  # Emissions
+  "emissions","emissNonCO2BySectorGWPAR5", "nonCO2 emissions by sector","pal_hot",
+  "emissions","emissNonCO2BySectorGTPAR5", "nonCO2 emissions by sector","pal_hot",
+  "emissions","emissNonCO2BySectorGWPAR5", "nonCO2 emissions by sector USA","pal_hot",
+  "emissions","emissNonCO2BySectorGTPAR5", "nonCO2 emissions by sector USA","pal_hot",
+  "emissions","emissNonCO2BySectorOrigUnits", "nonCO2 emissions by sector","pal_hot",
+  "emissions","emissLUC", "Land Use Change Emission (future)","pal_hot",
+  "emissions","emissCO2BySector", "CO2 emissions by sector","pal_hot",
+  "emissions","emissCO2CumGlobal2010to2100", "CO2 emissions by sector","pal_hot",
+  "emissions","emissCO2CumGlobal2010to2100RCP", "CO2 emissions by sector","pal_hot",
+  "emissions","emissNonCO2BySector", "nonCO2 emissions by sector USA","pal_hot",
+  "emissions","emissNonCO2BySector", "nonCO2 emissions by sector USA nonUS","pal_hot",
+  "emissions","emissNonCO2BySector", "nonCO2 emissions by sector","pal_hot",
+  "emissions","emissCO2BySectorNoBio", "CO2 emissions by sector (no bio)","pal_hot",
+  "emissions","emissNonCO2ByResProdGWPAR5", "nonCO2 emissions by resource production","pal_hot",
+  "emissions","emissMethaneBySourceGWPAR5", "nonCO2 emissions by sector","pal_hot",
+  "emissions","emissByGasGWPAR5FFI", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot",
+  "emissions","emissByGasGWPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot",
+  "emissions","emissBySectorGWPAR5FFI", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot",
+  "emissions","emissBySectorGWPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot",
+  "emissions","emissNonCO2ByResProdGTPAR5", "nonCO2 emissions by resource production","pal_hot",
+  "emissions","emissMethaneBySourceGTPAR5", "nonCO2 emissions by sector","pal_hot",
+  "emissions","emissByGasGTPAR5FFI", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot",
+  "emissions","emissByGasGTPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot",
+  "emissions","emissBySectorGTPAR5FFI",  c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot",
+  "emissions","emissBySectorGTPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot",
+); map_param_query
+
+use_data(map_param_query, version=3, overwrite=T)
+
+#-------------------
+# Regional Mapping
+#-------------------
+
+map_country_to_gcam_region <- tibble::tribble(
+  ~gcam_region_code	,	~country_code	,	~gcam_region	,	~country	,
+  29	,	238	, "Southeast Asia", "Fiji",
+  23	,	103	, "Russia", "Russia",
+  13	,	17	, "EU-15", "Wallis & Futuna",
+  6	,	223	, "Australia_NZ", "New Zealand",
+  1	,	150	, "USA", "United States",
+  29	,	40	, "Southeast Asia", "Midway Is.",
+  29	,	16	, "Southeast Asia", "Tonga",
+  29	,	38	, "Southeast Asia", "Kiribati",
+  29	,	14	, "Southeast Asia", "Samoa",
+  29	,	15	, "Southeast Asia", "Tokelau",
+  29	,	9	, "Southeast Asia", "American Samoa",
+  29	,	13	, "Southeast Asia", "Niue",
+  29	,	37	, "Southeast Asia", "Johnston Atoll",
+  29	,	10	, "Southeast Asia", "Cook Is.",
+  29	,	11	, "Southeast Asia", "French Polynesia",
+  8	,	34	, "Canada", "Canada",
+  29	,	3	, "Southeast Asia", "Pitcairn Is.",
+  20	,	39	, "Mexico", "Mexico",
+  26	,	21	, "South America_Southern", "Chile",
+  9	,	35	, "Central America and Caribbean", "Guatemala",
+  26	,	22	, "South America_Southern", "Ecuador",
+  9	,	62	, "Central America and Caribbean", "El Salvador",
+  9	,	63	, "Central America and Caribbean", "Honduras",
+  9	,	57	, "Central America and Caribbean", "Belize",
+  9	,	64	, "Central America and Caribbean", "Nicaragua",
+  9	,	60	, "Central America and Caribbean", "Costa Rica",
+  9	,	61	, "Central America and Caribbean", "Cuba",
+  9	,	65	, "Central America and Caribbean", "Panama",
+  32	,	59	, "Colombia", "Colombia",
+  26	,	24	, "South America_Southern", "Peru",
+  9	,	58	, "Central America and Caribbean", "Cayman Is.",
+  9	,	55	, "Central America and Caribbean", "The Bahamas",
+  9	,	53	, "Central America and Caribbean", "Jamaica",
+  9	,	52	, "Central America and Caribbean", "Haiti",
+  7	,	20	, "Brazil", "Brazil",
+  31	,	18	, "Argentina", "Argentina",
+  25	,	8	, "South America_Northern", "Venezuela",
+  13	,	67	, "EU-15", "Greenland",
+  13	,	56	, "EU-15", "Turks & Caicos Is.",
+  9	,	51	, "Central America and Caribbean", "Dominican Republic",
+  26	,	19	, "South America_Southern", "Bolivia",
+  9	,	54	, "Central America and Caribbean", "Netherlands Antilles",
+  1	,	30	, "USA", "Puerto Rico",
+  1	,	32	, "USA", "Virgin Is.",
+  9	,	50	, "Central America and Caribbean", "Bermuda",
+  9	,	26	, "Central America and Caribbean", "Anguilla",
+  9	,	31	, "Central America and Caribbean", "St. Kitts & Nevis",
+  26	,	23	, "South America_Southern", "Paraguay",
+  9	,	29	, "Central America and Caribbean", "Montserrat",
+  9	,	7	, "Central America and Caribbean", "Trinidad & Tobago",
+  9	,	43	, "Central America and Caribbean", "Grenada",
+  9	,	44	, "Central America and Caribbean", "Guadeloupe",
+  9	,	27	, "Central America and Caribbean", "Antigua & Barbuda",
+  9	,	48	, "Central America and Caribbean", "St. Vincent & the Grenadines",
+  9	,	45	, "Central America and Caribbean", "Martinique",
+  9	,	42	, "Central America and Caribbean", "Dominica",
+  13	,	0	, "EU-15", "Falkland Is.",
+  25	,	2	, "South America_Northern", "Guyana",
+  9	,	41	, "Central America and Caribbean", "Barbados",
+  26	,	25	, "South America_Southern", "Uruguay",
+  25	,	6	, "South America_Northern", "Suriname",
+  13	,	47	, "EU-15", "St. Pierre & Miquelon",
+  25	,	1	, "South America_Northern", "French Guiana",
+  26	,	4	, "South America_Southern", "South Georgia & the South Sandwich Is.",
+  13	,	81	, "EU-15", "Portugal",
+  5	,	75	, "Africa_Western", "Cape Verde",
+  16	,	69	, "European Free Trade Association", "Iceland",
+  13	,	82	, "EU-15", "Spain",
+  5	,	89	, "Africa_Western", "Senegal",
+  5	,	88	, "Africa_Western", "Mauritania",
+  3	,	83	, "Africa_Northern", "Western Sahara",
+  5	,	91	, "Africa_Western", "The Gambia",
+  5	,	86	, "Africa_Western", "Guinea-Bissau",
+  5	,	85	, "Africa_Western", "Guinea",
+  13	,	5	, "EU-15", "St. Helena",
+  5	,	90	, "Africa_Western", "Sierra Leone",
+  3	,	80	, "Africa_Northern", "Morocco",
+  5	,	87	, "Africa_Western", "Mali",
+  5	,	79	, "Africa_Western", "Liberia",
+  13	,	70	, "EU-15", "Ireland",
+  16	,	72	, "European Free Trade Association", "Jan Mayen",
+  5	,	76	, "Africa_Western", "Cote d'Ivoire",
+  3	,	106	, "Africa_Northern", "Algeria",
+  13	,	74	, "EU-15", "United Kingdom",
+  13	,	66	, "EU-15", "Faroe Is.",
+  5	,	84	, "Africa_Western", "Burkina Faso",
+  13	,	145	, "EU-15", "France",
+  13	,	71	, "EU-15", "Isle of Man",
+  5	,	77	, "Africa_Western", "Ghana",
+  13	,	68	, "EU-15", "Guernsey",
+  13	,	73	, "EU-15", "Jersey",
+  5	,	119	, "Africa_Western", "Togo",
+  5	,	116	, "Africa_Western", "Niger",
+  5	,	111	, "Africa_Western", "Benin",
+  5	,	117	, "Africa_Western", "Nigeria",
+  13	,	144	, "EU-15", "Belgium",
+  13	,	248	, "EU-15", "Netherlands",
+  16	,	102	, "European Free Trade Association", "Norway",
+  5	,	118	, "Africa_Western", "Sao Tome & Principe",
+  13	,	148	, "EU-15", "Luxembourg",
+  13	,	146	, "EU-15", "Germany",
+  16	,	149	, "European Free Trade Association", "Switzerland",
+  13	,	123	, "EU-15", "Italy",
+  3	,	110	, "Africa_Northern", "Tunisia",
+  5	,	115	, "Africa_Western", "Equatorial Guinea",
+  13	,	138	, "EU-15", "Denmark",
+  5	,	220	, "Africa_Western", "Gabon",
+  5	,	112	, "Africa_Western", "Cameroon",
+  3	,	108	, "Africa_Northern", "Libya",
+  13	,	136	, "EU-15", "Austria",
+  13	,	104	, "EU-15", "Sweden",
+  16	,	143	, "European Free Trade Association", "Svalbard",
+  5	,	218	, "Africa_Western", "Congo Rep.",
+  4	,	222	, "Africa_Southern", "Namibia",
+  4	,	217	, "Africa_Southern", "Angola",
+  5	,	219	, "Africa_Western", "Congo DRC",
+  12	,	137	, "EU-12", "Czech Republic",
+  5	,	114	, "Africa_Western", "Chad",
+  15	,	122	, "Europe_Non_EU", "Croatia",
+  12	,	142	, "EU-12", "Slovenia",
+  12	,	125	, "EU-12", "Malta",
+  5	,	113	, "Africa_Western", "Central African Republic",
+  12	,	140	, "EU-12", "Poland",
+  15	,	121	, "Europe_Non_EU", "Bosnia & Herzegovina",
+  24	,	224	, "South Africa", "South Africa",
+  12	,	139	, "EU-12", "Hungary",
+  12	,	141	, "EU-12", "Slovakia",
+  15	,	247	, "Europe_Non_EU", "Montenegro",
+  15	,	120	, "Europe_Non_EU", "Albania",
+  15	,	246	, "Europe_Non_EU", "Serbia",
+  13	,	132	, "EU-15", "Greece",
+  13	,	153	, "EU-15", "Finland",
+  4	,	202	, "Africa_Southern", "Botswana",
+  15	,	124	, "Europe_Non_EU", "Macedonia",
+  12	,	157	, "EU-12", "Romania",
+  12	,	155	, "EU-12", "Lithuania",
+  12	,	154	, "EU-12", "Latvia",
+  12	,	152	, "EU-12", "Estonia",
+  4	,	207	, "Africa_Southern", "Zambia",
+  2	,	95	, "Africa_Eastern", "Sudan",
+  12	,	128	, "EU-12", "Bulgaria",
+  14	,	158	, "Europe_Eastern", "Ukraine",
+  14	,	151	, "Europe_Eastern", "Belarus",
+  3	,	130	, "Africa_Northern", "Egypt",
+  4	,	208	, "Africa_Southern", "Zimbabwe",
+  15	,	135	, "Europe_Non_EU", "Turkey",
+  4	,	221	, "Africa_Southern", "Lesotho",
+  14	,	156	, "Europe_Eastern", "Moldova",
+  2	,	203	, "Africa_Eastern", "Burundi",
+  2	,	205	, "Africa_Eastern", "Rwanda",
+  4	,	206	, "Africa_Southern", "Tanzania",
+  2	,	96	, "Africa_Eastern", "Uganda",
+  4	,	216	, "Africa_Southern", "Mozambique",
+  4	,	225	, "Africa_Southern", "Swaziland",
+  12	,	129	, "EU-12", "Cyprus",
+  4	,	215	, "Africa_Southern", "Malawi",
+  2	,	94	, "Africa_Eastern", "Ethiopia",
+  2	,	204	, "Africa_Eastern", "Kenya",
+  21	,	97	, "Middle East", "Gaza Strip",
+  21	,	99	, "Middle East", "Israel",
+  21	,	173	, "Middle East", "Saudi Arabia",
+  21	,	100	, "Middle East", "Jordan",
+  21	,	105	, "Middle East", "West Bank",
+  21	,	133	, "Middle East", "Lebanon",
+  21	,	134	, "Middle East", "Syria",
+  2	,	93	, "Africa_Eastern", "Eritrea",
+  21	,	98	, "Middle East", "Iraq",
+  2	,	212	, "Africa_Eastern", "French Southern & Antarctic Lands",
+  10	,	131	, "Central Asia", "Georgia",
+  2	,	162	, "Africa_Eastern", "Somalia",
+  2	,	92	, "Africa_Eastern", "Djibouti",
+  21	,	166	, "Middle East", "Yemen",
+  2	,	214	, "Africa_Eastern", "Juan De Nova I.",
+  2	,	228	, "Africa_Eastern", "Madagascar",
+  2	,	211	, "Africa_Eastern", "Comoros",
+  10	,	167	, "Central Asia", "Armenia",
+  21	,	170	, "Middle East", "Iran",
+  29	,	230	, "Southeast Asia", "Mayotte",
+  10	,	168	, "Central Asia", "Azerbaijan",
+  29	,	232	, "Southeast Asia", "Seychelles",
+  21	,	171	, "Middle East", "Kuwait",
+  2	,	227	, "Africa_Eastern", "Glorioso Is.",
+  10	,	101	, "Central Asia", "Kazakhstan",
+  21	,	172	, "Middle East", "Qatar",
+  21	,	169	, "Middle East", "Bahrain",
+  21	,	174	, "Middle East", "United Arab Emirates",
+  21	,	161	, "Middle East", "Oman",
+  10	,	164	, "Central Asia", "Turkmenistan",
+  2	,	231	, "Africa_Eastern", "Reunion",
+  10	,	165	, "Central Asia", "Uzbekistan",
+  2	,	229	, "Africa_Eastern", "Mauritius",
+  27	,	175	, "South Asia", "Afghanistan",
+  22	,	178	, "Pakistan", "Pakistan",
+  10	,	179	, "Central Asia", "Tajikistan",
+  17	,	159	, "India", "India",
+  10	,	176	, "Central Asia", "Kyrgyzstan",
+  27	,	226	, "South Asia", "British Indian Ocean Territory",
+  6	,	213	, "Australia_NZ", "Heard I. & McDonald Is.",
+  27	,	160	, "South Asia", "Maldives",
+  11	,	183	, "China", "China",
+  27	,	163	, "South Asia", "Sri Lanka",
+  27	,	177	, "South Asia", "Nepal",
+  27	,	180	, "South Asia", "Bangladesh",
+  10	,	184	, "Central Asia", "Mongolia",
+  27	,	181	, "South Asia", "Bhutan",
+  29	,	190	, "Southeast Asia", "Myanmar",
+  18	,	236	, "Indonesia", "Indonesia",
+  29	,	235	, "Southeast Asia", "Cocos Is.",
+  29	,	194	, "Southeast Asia", "Thailand",
+  29	,	189	, "Southeast Asia", "Malaysia",
+  29	,	188	, "Southeast Asia", "Laos",
+  29	,	187	, "Southeast Asia", "Cambodia",
+  29	,	195	, "Southeast Asia", "Vietnam",
+  29	,	192	, "Southeast Asia", "Singapore",
+  29	,	234	, "Southeast Asia", "Christmas I.",
+  6	,	233	, "Australia_NZ", "Australia",
+  29	,	182	, "Southeast Asia", "Brunei",
+  29	,	186	, "Southeast Asia", "Philippines",
+  30	,	183	, "Taiwan", "China",
+  19	,	197	, "Japan", "Japan",
+  29	,	237	, "Southeast Asia", "Timor-Leste",
+  29	,	191	, "Southeast Asia", "North Korea",
+  28	,	193	, "South Korea", "South Korea",
+  29	,	185	, "Southeast Asia", "Palau",
+  29	,	199	, "Southeast Asia", "Micronesia",
+  29	,	242	, "Southeast Asia", "Papua New Guinea",
+  29	,	196	, "Southeast Asia", "Guam",
+  29	,	200	, "Southeast Asia", "Northern Mariana Is.",
+  29	,	243	, "Southeast Asia", "Solomon Is.",
+  29	,	198	, "Southeast Asia", "Marshall Is.",
+  29	,	240	, "Southeast Asia", "New Caledonia",
+  29	,	245	, "Southeast Asia", "Vanuatu",
+  29	,	239	, "Southeast Asia", "Nauru",
+  29	,	201	, "Southeast Asia", "Wake I.",
+  29	,	241	, "Southeast Asia", "Norfolk I.",
+  29	,	244	, "Southeast Asia", "Tuvalu",
+  33	,	248	, "Uruguay", "Uruguay",
+  33	,	150	, "AK", "United States",
+  34	,	150	, "AL", "United States",
+  35	,	150	, "AR", "United States",
+  36	,	150	, "AZ", "United States",
+  37	,	150	, "CA", "United States",
+  38	,	150	, "CO", "United States",
+  39	,	150	, "CT", "United States",
+  40	,	150	, "DC", "United States",
+  41	,	150	, "DE", "United States",
+  42	,	150	, "FL", "United States",
+  43	,	150	, "GA", "United States",
+  44	,	150	, "HI", "United States",
+  45	,	150	, "IA", "United States",
+  46	,	150	, "ID", "United States",
+  47	,	150	, "IL", "United States",
+  48	,	150	, "IN", "United States",
+  49	,	150	, "KS", "United States",
+  50	,	150	, "KY", "United States",
+  51	,	150	, "LA", "United States",
+  52	,	150	, "MA", "United States",
+  53	,	150	, "MD", "United States",
+  54	,	150	, "ME", "United States",
+  55	,	150	, "MI", "United States",
+  56	,	150	, "MN", "United States",
+  57	,	150	, "MO", "United States",
+  58	,	150	, "MS", "United States",
+  59	,	150	, "MT", "United States",
+  60	,	150	, "NC", "United States",
+  61	,	150	, "ND", "United States",
+  62	,	150	, "NE", "United States",
+  63	,	150	, "NH", "United States",
+  64	,	150	, "NJ", "United States",
+  65	,	150	, "NM", "United States",
+  66	,	150	, "NV", "United States",
+  67	,	150	, "NY", "United States",
+  68	,	150	, "OH", "United States",
+  69	,	150	, "OK", "United States",
+  70	,	150	, "OR", "United States",
+  71	,	150	, "PA", "United States",
+  72	,	150	, "RI", "United States",
+  73	,	150	, "SC", "United States",
+  74	,	150	, "SD", "United States",
+  75	,	150	, "TN", "United States",
+  76	,	150	, "TX", "United States",
+  77	,	150	, "UT", "United States",
+  78	,	150	, "VA", "United States",
+  79	,	150	, "VT", "United States",
+  80	,	150	, "WA", "United States",
+  81	,	150	, "WI", "United States",
+  82	,	150	, "WV", "United States",
+  83	,	150	, "WY", "United States"
+); map_country_to_gcam_region
+
+use_data(map_country_to_gcam_region, version=3, overwrite=T)
+
+#-------------------
+# Conversions
+#-------------------
+
+# GDP deflator from GCAM
+
+#' Calculate a gross domestic product (GDP) implicit price deflator between two years.
+#'
+#' The GDP deflator is a measure of price inflation with respect to a
+#' specific base year; it allows us to back out the effects of inflation when we
+#' compare prices over time.  This function calculates a deflator given a base
+#' year (the year to convert from) and a conversion year (the year to convert
+#' to).  To use the deflator, multiply prices in base-year dollars by the deflator; the
+#' result will be prices in the converted dollar year.
+#'
+#' @param year Year to convert TO.
+#' @param base_year Year to convert FROM.
+#' @return GDP Deflator.  Multiply to convert FROM \code{base_year} dollars TO
+#' \code{year} dollars.
+#' @source U.S. Bureau of Economic Analysis, Gross domestic product (implicit
+#' price deflator) [A191RD3A086NBEA], retrieved from FRED, Federal Reserve Bank
+#' of St. Louis; https://fred.stlouisfed.org/series/A191RD3A086NBEA, April 12,
+#' 2017
+#' @author BBL
+#' @export
+#' @examples
+#' gdp_bil_1990USD <- c(4770, 4779, 4937)
+#' gdp_bil_2010USD <- gdp_bil_1990USD * gdp_deflator(2010, base_year = 1990)
+gdp_deflator <- function(year, base_year) {
+  # This time series is the BEA "A191RD3A086NBEA" product
+  # Downloaded April 13, 2017 from https://fred.stlouisfed.org/series/A191RD3A086NBEA
+  gdp_years <- 1929:2019
+  gdp <- c(9.896, 9.535, 8.555, 7.553, 7.345, 7.749, 7.908, 8.001, 8.347,
+           8.109, 8.033, 8.131, 8.68, 9.369, 9.795, 10.027, 10.288, 11.618,
+           12.887, 13.605, 13.581, 13.745, 14.716, 14.972, 15.157, 15.298,
+           15.559, 16.091, 16.625, 17.001, 17.237, 17.476, 17.669, 17.886,
+           18.088, 18.366, 18.702, 19.227, 19.786, 20.627, 21.642, 22.784,
+           23.941, 24.978, 26.337, 28.703, 31.361, 33.083, 35.135, 37.602,
+           40.706, 44.377, 48.52, 51.53, 53.565, 55.466, 57.24, 58.395,
+           59.885, 61.982, 64.392, 66.773, 68.996, 70.569, 72.248, 73.785,
+           75.324, 76.699, 78.012, 78.859, 80.065, 81.887, 83.754, 85.039,
+           86.735, 89.12, 91.988, 94.814, 97.337, 99.246, 100, 101.221,
+           103.311, 105.214, 106.913, 108.828, 109.998, 111.445, 113.545,
+           116.311, 118.339)
+  names(gdp) <- gdp_years
+
+  assert_that(all(year %in% gdp_years))
+  assert_that(all(base_year %in% gdp_years))
+
+  as.vector(unlist(gdp[as.character(year)] / gdp[as.character(base_year)]))
+}
+
+convert <- list(
+  conv_EJ_to_MTOE = 23.8845897,  #https://www.iea.org/statistics/resources/unitconverter/
+  conv_EJ_to_TWh = 277.77777777778,
+  conv_EJ_to_GW = 277.77777777778*1000/8760,
+  conv_EJ_to_GWh = 277777.778,
+  conv_GW_to_kW = 1e6,
+  conv_1975USDperGJ_to_2017USDperMWh =  gdp_deflator(year=2017,base_year=1975)/0.2777778,
+  conv_1975USDperGJ_to_2017USDperMBTU =  gdp_deflator(year=2017,base_year=1975)/0.947,
+  conv_USD_1975_2010	= gdp_deflator(year=2010,base_year=1975),
+  conv_USD_1975_2015	= gdp_deflator(year=2015,base_year=1975),
+  conv_C_CO2 = 44/12,
+  conv_MT_GT = 1e-3); convert
+
+use_data(convert, version=3, overwrite=T)
+
+#-------------------
+# Global Warming Potentials
+# Emissions Conversion to CO2eq
+# GWP conversions - uses 100-yr GWPs from IPPC AR4 and AR5
+# https://www.ghgprotocol.org/sites/default/files/ghgp/Global-Warming-Potential-Values%20%28Feb%2016%202016%29_1.pdf
+# Does not include all covnersions. Add them if they are tracked in GCAM
+# Mean HFC numbers GWP %>% dplyr::filter(grepl("HFC",ghg)) %>% summarize_at(vars(names(GWP)[!grepl("ghg",names(GWP))]),funs(mean))
+# GTP AR5 Box 3.2 Table 1 https://www.ipcc.ch/site/assets/uploads/2018/02/SYR_AR5_FINAL_full.pdf
+#-------------------
+
+data_GWP<- tibble::tribble(
+  ~ghg, ~GWPSAR, ~GWPAR4,~GWPAR5,~GTPAR5,
+  "CO2",44/12,44/12,44/12,44/12,
+  "CH4",21,25,28,4,
+  "CH4_AGR", 21,	25, 28, 28,
+  "CH4_AWB", 21,	25, 28, 28,
+  "N2O",310,298,265,234,
+  "N2O_AGR",310,298,265,234,
+  "N2O_AWB",310,298,265,234,
+  "C2F6",9200,12200,11100,NA,
+  "CF4",6500,7390,6630,8040,
+  "HFC125",2800,3500,3170,NA,
+  "HFC134a",1300,1430,1300,NA,
+  "HFC245fa",1030,1030,858,NA,
+  "HFC143a",3800,4470,4800,NA,
+  "HFC152a",140,124,138,19,
+  "HFC227ea",2900,3220,3350,NA,
+  "HFC23",11700,14800,12400,NA,
+  "HFC236fa",6300,9810,8060,NA,
+  "HFC32",650,675,677,NA,
+  "HFC365mfc",794,794,804,NA,
+  "HFCs", 3141, 3985, 3555,NA,
+  "SF6",23900,22800,23500,NA)
+
+use_data(data_GWP, version=3, overwrite=T)
+
+# https://nepis.epa.gov/Exe/ZyNET.exe/P1001YTS.txt?ZyActionD=ZyDocument&Client=EPA&Index=2000%20Thru%202005&Docs=&Query=&Time=&EndTime=&SearchMethod=1&TocRestrict=n&Toc=&TocEntry=&QField=&QFieldYear=&QFieldMonth=&QFieldDay=&UseQField=&IntQFieldOp=0&ExtQFieldOp=0&XmlQuery=&File=D%3A%5CZYFILES%5CINDEX%20DATA%5C00THRU05%5CTXT%5C00000017%5CP1001YTS.txt&User=ANONYMOUS&Password=anonymous&SortMethod=h%7C-&MaximumDocuments=1&FuzzyDegree=0&ImageQuality=r75g8/r75g8/x150y150g16/i425&Display=hpfr&DefSeekPage=x&SearchBack=ZyActionL&Back=ZyActionS&BackDesc=Results%20page&MaximumPages=1&ZyEntry=3
+# https://www.firescience.gov/projects/09-2-01-9/supdocs/09-2-01-9_Appendix_C_-_Unit_Conversion_and_Other_Tables.pdf
+# MTC is megatonnes (10^6 tonnes) of Carbon.
+# Tg one terragram = 1 Megatonne = 10^6 tonnes
+# Convert to Mega tonnes of Carbon
+
+conv_GgTg_to_MTC<- tibble::tribble(
+  ~Units,~Convert,
+  "Gg",0.001,
+  "Tg",1,
+  "MTC",1,
+  "MtC/yr",1)
+
+use_data(conv_GgTg_to_MTC, version=3, overwrite=T)
 
 
-data_params <- unique(gcamextractor::mappings()$mapParamQuery$param); data_params
-data_queries <- unlist(unique(gcamextractor::mappings()$mapParamQuery$query)); data_queries
-use_data(data_params, overwrite=T)
-use_data(data_queries, overwrite=T)
+#--------------------------------------------------------------------------------------------------
+# GCAM USA Regions
+#--------------------------------------------------------------------------------------------------
+regions_US52 <- c("AK","AL","AR","AZ","CA","CO","CT","DC","DE","FL","GA",
+          "HI","IA","ID","IL","IN","KS","KY","LA","MA","MD","ME",
+          "MI","MN","MO","MS","MT","NC","ND","NE","NH","NJ","NM",
+          "NV","NY","OH","OK","OR","PA","PR","RI","SC","SD","TN",
+          "TX","UT","VA","VT","WA","WI","WV","WY")
+
+use_data(regions_US52, version=3, overwrite=T)
+
+# GCAM USA 49. Excludes Alaska, Hawaii and Puerto Rico. Includes DC.
+regions_US49 <- c("AL","AR","AZ","CA","CO","CT","DC","DE","FL","GA",
+          "IA","ID","IL","IN","KS","KY","LA","MA","MD","ME",
+          "MI","MN","MO","MS","MT","NC","ND","NE","NH","NJ","NM",
+          "NV","NY","OH","OK","OR","PA","RI","SC","SD","TN",
+          "TX","UT","VA","VT","WA","WI","WV","WY")
+
+use_data(regions_US49, version=3, overwrite=T)
+
+
+regions_gcam32 <- c( "Africa_Eastern","Africa_Northern","Africa_Southern",
+             "Africa_Western","Argentina","Australia_NZ",
+             "Brazil","Canada","Central America and Caribbean",
+             "Central Asia",  "China", "Colombia",
+             "EU_12", "EU_15", "Europe_Eastern",
+             "Europe_Non_EU", "European Free Trade Association","India",
+             "Indonesia","Japan", "Mexico",
+             "Middle East","Pakistan", "Russia",
+             "South Africa",  "South America_Northern",  "South America_Southern",
+             "South Asia", "South Korea","Southeast Asia",
+             "USA")
+
+use_data(regions_gcam32, version=3, overwrite=T)
+
+regions_gcam_basins <- c( "Adriatic_Sea_Greece_Black_Sea_Coast","Africa_East_Central_Coast",
+                  "Africa_Indian_Ocean_Coast", "Africa_North_Interior",
+                  "Africa_North_West_Coast", "Africa_Red_Sea_Gulf_of_Aden_Coast",
+                  "Africa_South_Interior", "Africa_West_Coast",
+                  "Amazon", "Amu_Darya",
+                  "Amur", "Andaman_Nicobar_Islands",
+                  "Angola_Coast", "Antarctica",
+                  "Arabian_Peninsula", "Arabian_Sea_Coast",
+                  "Arctic_Ocean_Islands", "Arkansas_White_Red",
+                  "Atlantic_Ocean_Seaboard", "Australia_East_Coast",
+                  "Australia_Interior", "Australia_North_Coast",
+                  "Australia_South_Coast", "Australia_West_Coast",
+                  "Baja_California", "Baltic_Sea_Coast",
+                  "Bay_of_Bengal_North_East_Coast", "Black_Sea_North_Coast",
+                  "Black_Sea_South_Coast", "Bo_Hai_Korean_Bay_North_Coast",
+                  "Brahamani", "California_River",
+                  "Caribbean", "Caribbean_Coast",
+                  "Caspian_Sea_Coast", "Caspian_Sea_East_Coast",
+                  "Caspian_Sea_South_West_Coast", "Cauvery",
+                  "Central_Iran", "Central_Patagonia_Highlands",
+                  "Chao_Phraya", "China_Coast",
+                  "Churchill", "Colombia_Ecuador_Pacific_Coast",
+                  "Congo", "Danube",
+                  "Daugava", "Dead_Sea",
+                  "Denmark_Germany_Coast", "Dnieper",
+                  "Dniester", "Don",
+                  "Douro", "East_Brazil_South_Atlantic_Coast",
+                  "Eastern_Jordan_Syria", "Ebro",
+                  "Elbe", "Ems_Weser",
+                  "England_and_Wales", "Farahrud",
+                  "Finland", "Fly",
+                  "France_South_Coast", "France_West_Coast",
+                  "Fraser", "Ganges_Bramaputra",
+                  "Gironde", "Gobi_Interior",
+                  "Godavari", "Great",
+                  "Great_Lakes", "Grijalva_Usumacinta",
+                  "Guadalquivir", "Guadiana",
+                  "Gulf_of_Guinea", "Gulf_of_Thailand_Coast",
+                  "Hainan", "Hamun_i_Mashkel",
+                  "Hawaii", "Helmand",
+                  "Hong_Red_River", "Huang_He",
+                  "Hudson_Bay_Coast", "Iceland",
+                  "India_East_Coast", "India_North_East_Coast",
+                  "India_South_Coast", "India_West_Coast",
+                  "Indus", "Ireland",
+                  "Irian_Jaya_Coast", "Irrawaddy",
+                  "Isthmus_of_Tehuantepec", "Italy_East_Coast",
+                  "Italy_West_Coast", "Japan",
+                  "Java_Timor", "Kalimantan",
+                  "Kara_Sea_Coast", "Krishna",
+                  "La_Plata", "La_Puna_Region",
+                  "Lake_Balkash", "Lake_Chad",
+                  "Lena", "Limpopo",
+                  "Loire", "Lower_Colorado_River",
+                  "Lower_Mississippi_River", "Mackenzie",
+                  "Madasgacar", "Magdalena",
+                  "Mahandi", "Mahi",
+                  "Mar_Chiquita", "Mediterranean_Sea_East_Coast",
+                  "Mediterranean_Sea_Islands", "Mediterranean_South_Coast",
+                  "Mekong", "Mexico_Interior",
+                  "Mexico_Northwest_Coast", "Micronesia",
+                  "Mid_Atlantic", "Missouri_River",
+                  "Murray_Darling", "Namibia_Coast",
+                  "Narmada", "Narva",
+                  "Negro", "Neman",
+                  "Neva", "New_England",
+                  "New_Zealand", "Niger",
+                  "Nile", "North_and_South_Korea",
+                  "North_Argentina_South_Atlantic_Coast", "North_Borneo_Coast",
+                  "North_Brazil_South_Atlantic_Coast", "North_Chile_Pacific_Coast",
+                  "North_Gulf", "North_Marina_Islands_and_Guam",
+                  "Northeast_South_America_South_Atlantic_Coast","Northern_Dvina",
+                  "Northwest_Territories", "Ob",
+                  "Oder", "Ohio_River",
+                  "Orange", "Orinoco",
+                  "Pacific_and_Arctic_Coast", "Pacific_Central_Coast",
+                  "Pacific_Northwest", "Palau_and_East_Indonesia",
+                  "Pampas_Region", "Papaloapan",
+                  "Papua_New_Guinea_Coast", "Parnaiba",
+                  "Peninsula_Malaysia", "Pennar",
+                  "Persian_Gulf_Coast", "Peru_Pacific_Coast",
+                  "Philippines", "Plateau_of_Tibet_Interior",
+                  "Po", "Poland_Coast",
+                  "Red_Sea_East_Coast", "Rhine",
+                  "Rhone", "Rift_Valley",
+                  "Rio_Balsas", "Rio_Grande_River",
+                  "Rio_Lerma", "Rio_Verde",
+                  "Russia_Barents_Sea_Coast", "Russia_South_East_Coast",
+                  "Sabarmati", "Salinas_Grandes",
+                  "Salween", "Sao_Francisco",
+                  "Saskatchewan_Nelson", "Scandinavia_North_Coast",
+                  "Scheldt", "Scotland",
+                  "Seine", "Senegal",
+                  "Sepik", "Shebelli_Juba",
+                  "Siberia_North_Coast", "Siberia_West_Coast",
+                  "Sinai_Peninsula", "Sittang",
+                  "Solomon_Islands", "South_Africa_South_Coast",
+                  "South_Africa_West_Coast", "South_America_Colorado",
+                  "South_Argentina_South_Atlantic_Coast", "South_Atlantic_Gulf",
+                  "South_Chile_Pacific_Coast", "South_China_Sea_Coast",
+                  "South_Pacific_Islands", "Southern_Central_America",
+                  "Spain_Portugal_Atlantic_Coast", "Spain_South_and_East_Coast",
+                  "Sri_Lanka", "St_Lawrence",
+                  "Sulawesi", "Sumatra",
+                  "Sweden", "Syr_Darya",
+                  "Tagus", "Taiwan",
+                  "Tapti", "Tarim_Interior",
+                  "Tasmania", "Tennessee_River",
+                  "Texas_Gulf_Coast", "Tiber",
+                  "Tigris_Euphrates", "Tocantins",
+                  "Upper_Colorado_River", "Upper_Mississippi",
+                  "Ural", "Uruguay_Brazil_South_Atlantic_Coast",
+                  "Viet_Nam_Coast", "Volga",
+                  "Volta", "Wisla",
+                  "Xun_Jiang", "Yangtze",
+                  "Yasai", "Yenisey",
+                  "Yucatan_Peninsula", "Zambezi",
+                  "Ziya_He_Interior")
+
+use_data(regions_gcam_basins, version=3, overwrite=T)
+
+
+

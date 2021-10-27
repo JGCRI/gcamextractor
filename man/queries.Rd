@@ -8,7 +8,7 @@
 .xml
 }
 \source{
-gcmaextractor
+gcamextractor
 }
 \usage{
 queries
@@ -18,10 +18,10 @@ queries xml file
 }
 \examples{
 \dontrun{
- library(gcmaextractor); library(XML)
- gcmaextractor::queries
+ library(gcamextractor); library(XML)
+ gcamextractor::queries
  # Can save xml
- XML::saveXML(gcmaextractor::queries, file=paste(getwd(), "/queries.xml", sep = ""))
+ XML::saveXML(gcamextractor::queries, file=paste(getwd(), "/queries.xml", sep = ""))
 }
 }
 \keyword{datasets}

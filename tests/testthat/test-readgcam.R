@@ -5,8 +5,8 @@ library(rprojroot)
 library(rgcam)
 library(dplyr)
 
-testthat::skip_on_cran()
-testthat::skip_on_travis()
+# testthat::skip_on_cran()
+# testthat::skip_on_travis()
 
 # Default arguments
 # gcamdatabase = NULL
@@ -26,11 +26,11 @@ testthat::skip_on_travis()
 # Tests using .proj file =======================================================
 # Test arguments
 gcamData <- gcamextractor::readgcam(queryFile = NULL,
-                                    dataProjFile = gcamextractor::example_GCAMv53_2020_proj,
+                                    dataProjFile = gcamextractor::example_gcamv54_argentina_colombia_2025_proj,
                                     scenOrigNames = 'Reference',
                                     scenNewNames = 'Ref',
                                     paramsSelect = 'All',
-                                    regionsSelect = 'USA')
+                                    regionsSelect = 'Colombia')
 
 
 test_that("data exists", {
@@ -46,7 +46,7 @@ test_that("scenario is selected and new name is applied", {
 
 test_that("region is selected", {
   test <- unique((gcamData$data%>%dplyr::filter(param=="pop"))$region)
-  testthat::expect_equal(test, 'USA')
+  testthat::expect_equal(test, 'Colombia')
 })
 
 

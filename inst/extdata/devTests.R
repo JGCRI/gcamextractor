@@ -1,19 +1,23 @@
-library(gcamextractor)
+library(gcamextractor); library(dplyr)
 
 
 # List of params in gcamextractor
-params <- gcamextractor::mappings()
-params <- unique(params$mapParamQuery$param); params
+params <- gcamextractor::data_params; params
 
-gcamdatabase_i = "C:/Z/models/GCAMVersions/gcam-core_stash/output/database_5p3_2020"
-param_i = "energyFinalConsumBySecEJ"
+gcamdatabase_i = "C:/Z/models/GCAMVersions/gcam-usa-im3/output/database_SSP5"
+param_i = "pop"
 
 
 dataGCAM <- readgcam(reReadData = T,
                      gcamdatabase = gcamdatabase_i,
                      dataProjFile = "C:/Z/models/gcamextractor/outputs/readGCAM/dataProj.proj",
-                     regionsSelect = "USA",
+                     regionsSelect = NULL,
                      paramsSelect= "all")
+
+dataGCAM$data
+dataGCAM$dataAggClass1
+(dataGCAM$dataAggClass1)$subRegion%>%unique()
+
 
 reReadData = F
 #gcamdatabase = gcamdatabase_i,
