@@ -16,8 +16,7 @@
 #' in the same folder as the GCAM database. If FALSE will load a '.proj' file if a file
 #' with full path is provided otherwise it will search for a dataProj.proj file in the existing
 #' folder which may have been created from an old run.
-#' @param regionsSelect The regions to analyze in a vector. Example c('Colombia','Argentina'). Full list:
-#'
+#' @param regionsSelect Default = NULL. The regions to analyze in a vector. Example c('Colombia','Argentina'). Full list:
 #' USA, Africa_Eastern, Africa_Northern, Africa_Southern, Africa_Western, Australia_NZ, Brazil, Canada
 #' Central America and Caribbean, Central Asia, China, EU-12, EU-15, Europe_Eastern, Europe_Non_EU,
 #' European Free Trade Association, India, Indonesia, Japan, Mexico, Middle East, Pakistan, Russia,
@@ -75,6 +74,7 @@
 #' tibble with gcam data formatted for gcamextractor charts aggregated to different categories.
 #' These include data, dataAggParam, dataAggClass1, dataAggClass2.
 #' @keywords gcam, gcam database, query
+#' @importFrom magrittr %>%
 #' @export
 
 
@@ -120,12 +120,17 @@ readgcam <- function(gcamdatabase = NULL,
     'International Ship oil' -> 'International Aviation liquids' -> liquids -> 'International Ship liquids'->crop->
     paramsSelectAll -> tblFinalNrgIntlAvShip->datax->group->basin->subRegion->query->subresource-> transport
 
+  if(!is.null(regionsSelect)){
+    if(grepl("$all^", regionsSelect, ignore.case = T)){
+      regionsSelect <- NULL
+    }
+    }
 
 #---------------------
 # Params and Queries
 #---------------------
 
-  paramQueryMap <- (gcamextractor::mappings()$mapParamQuery)%>%dplyr::select(group,param,query)
+  paramQueryMap <- (gcamextractor::map_param_query)%>%dplyr::select(group,param,query)
 
   # Check if queriesSelect is a querySet or one of the queries
   if(!any(c("all","All","ALL") %in% paramsSelect)){
@@ -823,7 +828,7 @@ readgcam <- function(gcamdatabase = NULL,
       # USA
       tblUSA <- tbl %>%
         dplyr::filter(grepl("domestic supply",input),
-                      region %in% assumptions("US52"),
+                      region %in% gcamextractor::regions_US52,
                       scenario %in% scenOrigNames)%>%
         dplyr::mutate(
           class2=sector,
@@ -841,7 +846,7 @@ readgcam <- function(gcamdatabase = NULL,
                       origUnits = Units,
                       origX = year, subRegion=region,
                       scenario = scenNewNames,
-                      value = value * assumptions("convEJ2TWh"),
+                      value = value * gcamextractor::convert$conv_EJ_to_TWh,
                       units = "Final Electricity by Sector (TWh)",
                       vintage = paste("Vint_", year, sep = ""),
                       x = year,
@@ -862,7 +867,7 @@ readgcam <- function(gcamdatabase = NULL,
 
       # CORE
       tblCORE <- tbl %>%
-        dplyr::filter(!region %in% c(assumptions("US52")),
+        dplyr::filter(!region %in% c(gcamextractor::regions_US52),
                       scenario %in% scenOrigNames,
                       sector %in% c("elect_td_bld","elect_td_trn","elect_td_ind"))%>%
         dplyr::mutate(
@@ -880,7 +885,7 @@ readgcam <- function(gcamdatabase = NULL,
                       origUnits = Units,
                       origX = year, subRegion=region,
                       scenario = scenNewNames,
-                      value = value * assumptions("convEJ2TWh"),
+                      value = value * gcamextractor::convert$conv_EJ_to_TWh,
                       units = "Final Electricity by Sector (TWh)",
                       vintage = paste("Vint_", year, sep = ""),
                       x = year,
@@ -940,7 +945,7 @@ readgcam <- function(gcamdatabase = NULL,
                       origUnits = Units,
                       origX = year, subRegion=region,
                       scenario = scenNewNames,
-                      value = value * assumptions("convEJ2TWh"),
+                      value = value * gcamextractor::convert$conv_EJ_to_TWh,
                       units = "Final Electricity by Fuel (TWh)",
                       vintage = paste("Vint_", year, sep = ""),
                       x = year,
@@ -1082,7 +1087,7 @@ readgcam <- function(gcamdatabase = NULL,
       }
       if (nrow(tbl)>0) {
       tbl <- tbl %>%
-        dplyr::filter(region %in% assumptions("US52"))%>%
+        dplyr::filter(region %in% gcamextractor::regions_US52)%>%
         dplyr::filter(!sector %in% "industrial energy use")
       }
       tblUSA <- tbl %>%
@@ -1096,7 +1101,7 @@ readgcam <- function(gcamdatabase = NULL,
                       origUnits = Units,
                       origX = year, subRegion=region,
                       scenario = scenNewNames,
-                      value = value * assumptions("convEJ2TWh"),
+                      value = value * gcamextractor::convert$conv_EJ_to_TWh,
                       units = "Electricity Generation by Fuel (TWh)",
                       vintage = paste("Vint_", year, sep = ""),
                       x = year,
@@ -1121,7 +1126,7 @@ readgcam <- function(gcamdatabase = NULL,
     #   }
     #   if (nrow(tbl)>0) {
     #     tbl <- tbl %>%
-    #       dplyr::filter(region %in% assumptions("US52"))
+    #       dplyr::filter(region %in% gcamextractor::regions_US52)
     #   }
     #   tblUSACogen <- tbl %>%
     #     dplyr::filter(scenario %in% scenOrigNames)%>%
@@ -1134,7 +1139,7 @@ readgcam <- function(gcamdatabase = NULL,
     #                   origUnits = Units,
     #                   origX = year, subRegion=region,
     #                   scenario = scenNewNames,
-    #                   value = value * assumptions("convEJ2TWh"),
+    #                   value = value * gcamextractor::convert$conv_EJ_to_TWh,
     #                   units = "Electricity Generation by Fuel (TWh)",
     #                   vintage = paste("Vint_", year, sep = ""),
     #                   x = year,
@@ -1157,7 +1162,7 @@ readgcam <- function(gcamdatabase = NULL,
         if (!is.null(regionsSelect)) {
           tbl <- tbl %>%
             dplyr::filter(region %in% regionsSelect) %>%
-            dplyr::filter(!region %in% assumptions("US52"))
+            dplyr::filter(!region %in% gcamextractor::regions_US52)
         }
         tblGCAMReg <- tbl %>%
           dplyr::filter(scenario %in% scenOrigNames)%>%
@@ -1170,7 +1175,7 @@ readgcam <- function(gcamdatabase = NULL,
                         origUnits = Units,
                         origX = year, subRegion=region,
                         scenario = scenNewNames,
-                        value = value * assumptions("convEJ2TWh"),
+                        value = value * gcamextractor::convert$conv_EJ_to_TWh,
                         units = "Electricity Generation by Fuel (TWh)",
                         vintage = paste("Vint_", year, sep = ""),
                         x = year,
@@ -1265,7 +1270,7 @@ readgcam <- function(gcamdatabase = NULL,
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if(nrow(tbl)>0){
         # If GCAM USA then remove "USA" region and use states
-        # if(any(assumptions("US52") %in% unique(tbl$region))){
+        # if(any(gcamextractor::regions_US52 %in% unique(tbl$region))){
         #   tbl <- tbl %>% dplyr::filter(region!="USA") # Remove region USA and use states instead
         # }
       }
@@ -1326,7 +1331,7 @@ readgcam <- function(gcamdatabase = NULL,
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       # if(nrow(tbl)>0){
       #   # If GCAM USA then remove "USA" region and use states
-      #   if(any(assumptions("US52") %in% unique(tbl$region))){
+      #   if(any(gcamextractor::regions_US52 %in% unique(tbl$region))){
       #     tbl <- tbl %>% dplyr::filter(region!="USA") # Remove region USA and use states instead
       #   }
       # }
@@ -1388,15 +1393,15 @@ readgcam <- function(gcamdatabase = NULL,
       # Need to add in conveyance losses for USA when running GCAM USA
       # gcamusa.CONVEYANCE_LOSSES <- 0.829937455747218 from constants.R
       if(nrow(tbl)>0){
-        if(any(unique(tbl$region) %in% assumptions("US52"))){
+        if(any(unique(tbl$region) %in% gcamextractor::regions_US52)){
           tbl <- tbl %>%
             dplyr::mutate(value = dplyr::case_when(region=="USA"~value/0.829937455747218,
                                             TRUE~value)) %>%
-            dplyr::filter(!region %in% assumptions("US52"))
+            dplyr::filter(!region %in% gcamextractor::regions_US52)
         }
       }
       if (!is.null(regionsSelect)) {
-        if(any(regionsSelect %in% assumptions("US52"))){
+        if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
         } else {
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
@@ -1638,7 +1643,7 @@ readgcam <- function(gcamdatabase = NULL,
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
-        if(any(regionsSelect %in% assumptions("US52"))){
+        if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
         } else {
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
@@ -2046,7 +2051,7 @@ readgcam <- function(gcamdatabase = NULL,
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
-        if(any(regionsSelect %in% assumptions("US52"))){
+        if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
         } else {
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
@@ -2100,7 +2105,7 @@ readgcam <- function(gcamdatabase = NULL,
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
-        if(any(regionsSelect %in% assumptions("US52"))){
+        if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
         } else {
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
@@ -2147,7 +2152,7 @@ readgcam <- function(gcamdatabase = NULL,
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
-        if(any(regionsSelect %in% assumptions("US52"))){
+        if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
         } else {
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
@@ -2193,7 +2198,7 @@ readgcam <- function(gcamdatabase = NULL,
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
-        if(any(regionsSelect %in% assumptions("US52"))){
+        if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
         } else {
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
@@ -2643,7 +2648,7 @@ readgcam <- function(gcamdatabase = NULL,
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
-        dplyr::left_join(assumptions("convertGgTgMTC"),by="Units") %>%
+        dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         dplyr::mutate(origValue=value,value=value*Convert*44/12,
                       origUnits=Units,units="Emissions LUC - (MTCO2eq)")%>%
         dplyr::filter(scenario %in% scenOrigNames)%>%
@@ -2694,7 +2699,7 @@ readgcam <- function(gcamdatabase = NULL,
       }
     #emiss_sector_mapping <- read.csv(CO2mappingFile, skip=1)
     tbl <- tbl %>%
-      dplyr::left_join(assumptions("convertGgTgMTC"),by="Units") %>%
+      dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
       dplyr::mutate(origValue=value,value=value*Convert*44/12,
                     origUnits=Units,units="CO2 Emissions by Sector (MTCO2eq)")%>%
       dplyr::mutate(
@@ -2786,8 +2791,8 @@ readgcam <- function(gcamdatabase = NULL,
             grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
             grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
             TRUE~class2))%>%
-        dplyr::left_join(assumptions("GWP")%>%dplyr::rename(class1=ghg),by="class1")%>%
-        dplyr::left_join(assumptions("convertGgTgMTC"),by="Units") %>%
+        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
+        dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         #dplyr::filter(!class1=='CO2') %>%
         dplyr::mutate(origValue=value,
                       value=value*GWPAR5*Convert,
@@ -2862,8 +2867,8 @@ readgcam <- function(gcamdatabase = NULL,
             grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
             grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
             TRUE~class2))%>%
-        dplyr::left_join(assumptions("GWP")%>%dplyr::rename(class1=ghg),by="class1")%>%
-        dplyr::left_join(assumptions("convertGgTgMTC"),by="Units") %>%
+        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
+        dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         #dplyr::filter(!class1=='CO2') %>%
         dplyr::mutate(origValue=value,
                       value=value*GWPAR5*Convert,
@@ -3250,8 +3255,8 @@ readgcam <- function(gcamdatabase = NULL,
             grepl("Beef|Dairy|Pork|Poultry",class1,ignore.case=T)~"livestock",
             grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class1,ignore.case=T)~"crops",
             TRUE~class1))%>%
-        dplyr::left_join(assumptions("GWP")%>%dplyr::rename(class2=ghg),by="class2")%>%
-        dplyr::left_join(assumptions("convertGgTgMTC"),by="Units") %>%
+        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class2=ghg),by="class2")%>%
+        dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         dplyr::mutate(origValue=value,
                       value=value*GWPAR5*Convert,
                       origUnits=Units,
@@ -3325,8 +3330,8 @@ readgcam <- function(gcamdatabase = NULL,
           grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
           grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
           TRUE~class2))%>%
-        dplyr::left_join(assumptions("GWP")%>%dplyr::rename(class1=ghg),by="class1")%>%
-        dplyr::left_join(assumptions("convertGgTgMTC"),by="Units") %>%
+        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
+        dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         dplyr::filter(!class1=='CO2') %>%
         dplyr::mutate(origValue=value,
                       value=value*GWPAR5*Convert,
@@ -3562,8 +3567,8 @@ readgcam <- function(gcamdatabase = NULL,
           grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
           grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
           TRUE~class2))%>%
-        dplyr::left_join(assumptions("GWP")%>%dplyr::rename(class1=ghg),by="class1")%>%
-        dplyr::left_join(assumptions("convertGgTgMTC"),by="Units") %>%
+        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
+        dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         dplyr::mutate(origValue=value,
                       value=dplyr::case_when(!is.na(GTPAR5) ~ value*GTPAR5*Convert,
                                              TRUE ~  value*GWPAR5*Convert),
@@ -3626,8 +3631,8 @@ readgcam <- function(gcamdatabase = NULL,
             grepl("Beef|Dairy|Pork|Poultry",class1,ignore.case=T)~"livestock",
             grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class1,ignore.case=T)~"crops",
             TRUE~class1))%>%
-        dplyr::left_join(assumptions("GWP")%>%dplyr::rename(class2=ghg),by="class2")%>%
-        dplyr::left_join(assumptions("convertGgTgMTC"),by="Units") %>%
+        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class2=ghg),by="class2")%>%
+        dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         dplyr::mutate(origValue=value,
                       value=dplyr::case_when(!is.na(GTPAR5) ~ value*GTPAR5*Convert,
                                              TRUE ~  value*GWPAR5*Convert),
@@ -3703,8 +3708,8 @@ readgcam <- function(gcamdatabase = NULL,
           grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
           grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
           TRUE~class2))%>%
-        dplyr::left_join(assumptions("GWP")%>%dplyr::rename(class1=ghg),by="class1")%>%
-        dplyr::left_join(assumptions("convertGgTgMTC"),by="Units") %>%
+        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
+        dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         dplyr::filter(!class1=='CO2') %>%
         dplyr::mutate(origValue=value,
                       value=dplyr::case_when(!is.na(GTPAR5) ~ value*GTPAR5*Convert,
@@ -4409,12 +4414,12 @@ readgcam <- function(gcamdatabase = NULL,
   # unit Conversions
   # -----------
   dataxEJtoMTOE <- datax %>% dplyr::filter(grepl("\\(EJ\\)",units)) %>%
-    dplyr::mutate(value=value*assumptions("convEJ2MTOE"),
+    dplyr::mutate(value=value*gcamextractor::convert$conv_EJ_to_MTOE,
                   units = gsub("\\(EJ\\)","(Mtoe)",units),
                   param = gsub("EJ","MTOE",param)); dataxEJtoMTOE
 
   dataxEJtoTWh <- datax %>% dplyr::filter(grepl("\\(EJ\\)",units)) %>%
-    dplyr::mutate(value=value*assumptions("convEJ2TWh"),
+    dplyr::mutate(value=value*gcamextractor::convert$conv_EJ_to_TWh,
                   units = gsub("\\(EJ\\)","(TWh)",units),
                   param = gsub("EJ","TWh",param))
 
@@ -4427,7 +4432,7 @@ readgcam <- function(gcamdatabase = NULL,
 
     regions_i <-(datax %>% dplyr::filter(param==param_i,scenario==scenario_i))$region%>%unique(); regions_i
 
-    if(any(grepl("USA",regions_i)) & length(regions_i[regions_i %in% assumptions("US52")])>1){
+    if(any(grepl("USA",regions_i)) & length(regions_i[regions_i %in% gcamextractor::regions_US52])>1){
       datax <- datax %>%
         dplyr::mutate(region = dplyr::case_when(param==param_i &
                                            scenario==scenario_i &
@@ -4442,7 +4447,7 @@ readgcam <- function(gcamdatabase = NULL,
 
     subRegions_i <-(datax %>% dplyr::filter(param==param_i,scenario==scenario_i))$subRegion%>%unique(); subRegions_i
 
-    if(any(grepl("USA",subRegions_i)) & length(subRegions_i[subRegions_i %in% assumptions("US52")])>1){
+    if(any(grepl("USA",subRegions_i)) & length(subRegions_i[subRegions_i %in% gcamextractor::regions_US52])>1){
       datax <- datax %>%
         dplyr::mutate(subRegion = dplyr::case_when(param==param_i &
                                            scenario==scenario_i &
@@ -4580,10 +4585,14 @@ readgcam <- function(gcamdatabase = NULL,
   print(gsub("//","/",paste("All outputs in : ",dirOutputs, "/", folderName, "/readGCAM/",sep="")))
   print("readgcam run completed.")
 
-  return(list(data = datax,
-              dataAggClass1 = dataAggClass1,
-              dataAggClass2 = dataAggClass2,
-              dataAggParam = dataAggParam,
+  return(list(dataAll = datax,
+              data = datax %>% dplyr::select("scenario","region","subRegion","param","classLabel1","class1","classLabel2","class2",
+                                             "xLabel","x","vintage","units","value"),
+              dataAggClass1 = dataAggClass1 %>% dplyr::select("scenario","region","subRegion","param","classLabel","class","classLabel",
+                                                              "xLabel","x","vintage","units","value"),
+              dataAggClass2 = dataAggClass2  %>% dplyr::select("scenario","region","subRegion","param","classLabel","class","classLabel",
+                                                               "xLabel","x","vintage","units","value"),
+              dataAggParam = dataAggParam %>% dplyr::select("scenario","region","subRegion","param","xLabel","x","vintage","units","value"),
               scenarios = scenarios,
               queries = queries))
 

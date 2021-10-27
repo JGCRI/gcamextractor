@@ -22,6 +22,7 @@ resource_files:
 * dataAggParam: a dataframe with the data aggregated to the parameter
 * dataAggClass1: a dataframe with the data aggregated to class 1
 * dataAggclass2: a dataframe with the data aggregated to class 2
+* dataAll: a dataframe with the original data as well as original queries and values before any conversions
 * scenarios: A list of the scenarios
 * queries: A list of the queries used to extract the data
 
@@ -32,19 +33,14 @@ library(gcamextractor)
 Path_to_GCAMdatabase <- "E:/gcam-core-gcam-v5.3" # Change the path based on your GCAM database location
 gcamextractor::data_params # view available parameters
 dataGCAM <- gcamextractor::readgcam(gcamdatabase = Path_to_GCAMdatabase,
-                                    regionsSelect = c("Colombia"),
-                                    paramsSelect = "pop")
+                                    regionsSelect = c("Colombia"), # Set to "All" to read in all available regions
+                                    paramsSelect = "pop")  # Set to "All" to read in all available params
 
 df <- dataGCAM$data; df
 dfParam <- dataGCAM$dataAggParam; dfParam
 dfClass1 <- dataGCAM$dataAggClass1; dfClass1
 dfClass2 <- dataGCAM$dataAggClass1; dfClass2
 
-# dataGCAM <- gcamextractor::readgcam(gcamdatabase = Path_to_GCAMdatabase,
-                                      # scenOrigNames = "All",
-                                      # scenNewNames = NULL,
-                                      # regionsSelect = NULL,
-                                      # paramsSelect = "All")
 
 ``` 
 
@@ -61,18 +57,11 @@ dfClass2 <- dataGCAM$dataAggClass1; dfClass2
 ```{r, eval=F}
 library(gcamextractor)
 
-dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv52_2050_proj)
-
-# dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv52_2050_proj)
-                                      # scenOrigNames = "All",
-                                      # scenNewNames = NULL,
-                                      # regionsSelect = NULL,
-                                      # paramsSelect = "All")
-
+dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_gcamv54_argentina_colombia_2025_proj)
 
 ```
 
-User can provide path to .Proj file to read GCAM data.
+Users can provide path to .Proj file to read GCAM data.
 
 ```{r, eval=F}
 library(gcamextractor)
@@ -99,7 +88,19 @@ dataGCAM <- gcamextractor::readgcam(gcamdatabase = Path_to_GCAMProj)
 <!-------------------------->
 <p align="center"> <img src="vignetteFigs/divider.png" width="1400"></p>
 
-<!-- Add metis.param list figure -->
+Users can get a list of all available params and queries as follows. 
+Key words can be used to get params grouped by selected sectors.
+
+```{r, eval=F}
+library(gcamextractor)
+
+gcamextractor::data_params # Get all params
+gcamextractor::data_queries # Get all queries used
+gcamextractor::map_param_query # Get a table of params and the relevants queries used to extract and calculate them.
+
+```
+
+<!-- Add params list figure -->
 <p align="center"> <img src="vignetteFigs/ParamList.png" width="1200"></p>
 
 <!-------------------------->
@@ -577,3 +578,43 @@ dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv5
 <!-- ### energyFinalConsumByIntlShpAvEJ -->
 
 <!-- <br /> -->
+
+
+<!-------------------------->
+<!-------------------------->
+# Data for Specific Models
+<!-------------------------->
+<!-------------------------->
+<p align="center"> <img src="vignetteFigs/divider.png" width="1400"></p>
+
+<!-------------------------->
+## CERF
+<!-------------------------->
+
+Use the `cerf` for the parameter argument in `gcamextractor` to extract the relevant variables needed for the `CERF` model (https://github.com/IMMM-SFA/cerf).
+
+```{r eval=F}
+library(gcamextractor)
+
+dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv52_2050_proj,
+                                    paramsSelect = 'cerf')
+```
+
+The parameters extracted for CERF are as follows with links to the relevant parameters explanation:
+
+* gcam_to_cerf_tech_name_map
+* lifetime_yr
+* capacity_factor
+* variable_cost_esc_rate_fraction
+* fuel_esc_rate_fraction
+* variable_om_USDperMWh
+* heat_rate_BTUperkWh
+* fuel_price_USDperGJ
+* carbon_capture_rate_fraction
+* fuel_co2_content_tonsperMWh
+* carbon_esc_rate_fraction
+* carbon_tax_USDperTon
+* New capacity by vintage
+* Retired capacity by vintage
+
+

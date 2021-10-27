@@ -18,8 +18,8 @@ data_capfactors
 }
 \examples{
 \dontrun{
- library(gcmaextractor);
- gcmaextractor::data_capfactors
+ library(gcamextractor);
+ gcamextractor::data_capfactors
 }
 }
 \keyword{datasets}

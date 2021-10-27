@@ -39,8 +39,7 @@ folder which may have been created from an old run.}
 
 \item{dirOutputs}{Full path to directory for outputs}
 
-\item{regionsSelect}{The regions to analyze in a vector. Example c('Colombia','Argentina'). Full list:
-
+\item{regionsSelect}{Default = NULL. The regions to analyze in a vector. Example c('Colombia','Argentina'). Full list:
 USA, Africa_Eastern, Africa_Northern, Africa_Southern, Africa_Western, Australia_NZ, Brazil, Canada
 Central America and Caribbean, Central Asia, China, EU-12, EU-15, Europe_Eastern, Europe_Non_EU,
 European Free Trade Association, India, Indonesia, Japan, Mexico, Middle East, Pakistan, Russia,

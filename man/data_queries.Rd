@@ -18,8 +18,8 @@ gcamextractor queries
 }
 \examples{
 \dontrun{
- library(gcmaextractor);
- gcmaextractor::data_queries
+ library(gcamextractor);
+ gcamextractor::data_queries
 }
 }
 \keyword{datasets}
