@@ -6,21 +6,23 @@
 \usage{
 readgcam(
   gcamdatabase = NULL,
+  gcamdata_folder = NULL,
   queryFile = NULL,
-  dataProjFile = paste(getwd(), "/outputs/dataProj.proj", sep = ""),
+  dataProjFile = paste0(getwd(), "/dataProj.proj"),
   scenOrigNames = "All",
   scenNewNames = NULL,
   reReadData = T,
-  dirOutputs = paste(getwd(), "/outputs", sep = ""),
   regionsSelect = NULL,
   paramsSelect = "All",
-  folderName = NULL,
+  folder = getwd(),
   nameAppend = "",
   saveData = T
 )
 }
 \arguments{
 \item{gcamdatabase}{Default = NULL. Full path to GCAM database folder.}
+
+\item{gcamdata_folder}{(OPTIONAL) Default=NULL. Full path to gcamdata folder. Required for some params.}
 
 \item{queryFile}{Defualt = NULL. When NULL gcamextractor loads pre-saved xml file gcamextractor::queries}
 
@@ -36,8 +38,6 @@ Default will use Original Names. For example c('scenario1','scenario2)}
 in the same folder as the GCAM database. If FALSE will load a '.proj' file if a file
 with full path is provided otherwise it will search for a dataProj.proj file in the existing
 folder which may have been created from an old run.}
-
-\item{dirOutputs}{Full path to directory for outputs}
 
 \item{regionsSelect}{Default = NULL. The regions to analyze in a vector. Example c('Colombia','Argentina'). Full list:
 USA, Africa_Eastern, Africa_Northern, Africa_Southern, Africa_Western, Australia_NZ, Brazil, Canada
@@ -93,7 +93,7 @@ Or pick an individual param from the list:
 "emissByGasGTPAR5FFI", "emissByGasGTPAR5LUC","emissBySectorGTPAR5LUC",
 "emissCO2BySectorNoBio"}
 
-\item{folderName}{Default = NULL}
+\item{folder}{Default = getwd(). Path to directory for outputs}
 
 \item{nameAppend}{Default="". Name to append to saved files.}
 

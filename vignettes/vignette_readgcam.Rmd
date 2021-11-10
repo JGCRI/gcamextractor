@@ -30,11 +30,12 @@ resource_files:
 
 library(gcamextractor)
 
-Path_to_GCAMdatabase <- "E:/gcam-core-gcam-v5.3" # Change the path based on your GCAM database location
+path_to_gcam_database <- "E:/gcamfolder/output/database_ref" # Change the path based on your GCAM database location
 gcamextractor::data_params # view available parameters
-dataGCAM <- gcamextractor::readgcam(gcamdatabase = Path_to_GCAMdatabase,
+dataGCAM <- gcamextractor::readgcam(gcamdatabase = path_to_gcam_database,
                                     regionsSelect = c("Colombia"), # Set to "All" to read in all available regions
-                                    paramsSelect = "pop")  # Set to "All" to read in all available params
+                                    paramsSelect = "pop",
+                                    folder = "my_output_folder")  # Set to "All" to read in all available params
 
 df <- dataGCAM$data; df
 dfParam <- dataGCAM$dataAggParam; dfParam
@@ -57,7 +58,8 @@ dfClass2 <- dataGCAM$dataAggClass1; dfClass2
 ```{r, eval=F}
 library(gcamextractor)
 
-dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_gcamv54_argentina_colombia_2025_proj)
+dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_gcamv54_argentina_colombia_2025_proj,
+                                    folder = "my_output_folder")
 
 ```
 
@@ -66,8 +68,9 @@ Users can provide path to .Proj file to read GCAM data.
 ```{r, eval=F}
 library(gcamextractor)
 
-Path_to_GCAMProj <- "E:/dataProj_example.proj" # Change the path to your .proj file
-dataGCAM <- gcamextractor::readgcam(gcamdatabase = Path_to_GCAMProj)
+path_to_gcam_projfile <- "E:/my_proj_file.proj" # Change path to your proj file. This is an output of gcam extractor.
+dataGCAM <- gcamextractor::readgcam(gcamdatabase = path_to_gcam_projfile,
+                                    folder = "my_output_folder")
 
 ```
 
@@ -450,7 +453,8 @@ library(gcamextractor)
 
 dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv52_2050_proj,
                                     paramsSelect = 'elecByTechTWh',
-                                    regionsSelect = 'USA')
+                                    regionsSelect = 'USA',
+                                    folder = "my_output_folder")
 ```
 
 
@@ -463,7 +467,7 @@ dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv5
 
 $$elecCapByFuel = \frac{elecByTechTWh \times 1000}{8760 \times gcamCapacityFactor}$$
 
-`gcamCapacityFactor` is calculated as an average of the capacity factors of the technologies within each subsector (See [Table 3](#table3)) based on the data from:
+`gcamCapacityFactor` is calculated as an average of the capacity factors of the technologies within each subsector (See [Table GCAM Capacity Factors](#table_gcamCapacityFactor)) based on the data from:
 
   - Global technology capacity factor from "GCAM-FOLDER\\input\\gcamdata\\inst\\extdata\\energy\\A23.globaltech_capacity_factor.csv"
   - USA renewable technology capacity factors by States from "GCAM-FOLDER\\input\\gcamdata\\inst\\extdata\\gcam-usa\\NREL_us_re_capacity_factors.csv"
@@ -476,8 +480,8 @@ Exceptions in calculating `gcamCapacityFactor` include:
   - No cogeneration capacity factor "n CHP" was given.
   - rooftop_pv was assumed the same as solar average (5) grid_storage assumed to have a high cap factor equal to that of nuclear
 
-<a name="table3"></a>
-**Table 3:** Averaged capacity factor for electricity generation by generation technology.
+<a name="table_gcamCapacityFactor"></a>
+**Table GCAM Capacity Factors:** Averaged capacity factor for electricity generation by generation technology.
 
 | Subsector (class1) | Average capacity factor from 1971 to 2100 |
 |---|---|
@@ -499,7 +503,8 @@ library(gcamextractor)
 
 dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv52_2050_proj,
                                     paramsSelect = 'elecCapByFuel',
-                                    regionsSelect = 'USA')
+                                    regionsSelect = 'USA',
+                                    folder = "my_output_folder")
 ```
 
 <br />
@@ -591,19 +596,62 @@ dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv5
 ## CERF
 <!-------------------------->
 
-Use the `cerf` for the parameter argument in `gcamextractor` to extract the relevant variables needed for the `CERF` model (https://github.com/IMMM-SFA/cerf).
+Use `cerf` for the `paramSelect` argument in `gcamextractor` to extract the relevant variables needed for the `CERF` model (https://github.com/IMMM-SFA/cerf).
 
 ```{r eval=F}
 library(gcamextractor)
 
-dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv52_2050_proj,
-                                    paramsSelect = 'cerf')
+path_to_gcam_database <- "E:/gcamfolder/output/database_ref" # Change to your path.
+path_to_gcam_projfile <- "E:/my_proj_file.proj" # Change to your .proj file path.
+path_to_gcamdata_folder <- "E:/gcamfolder/input/gcamdata"
+gcamextractor::data_params # view available parameters
+dataGCAM <- gcamextractor::readgcam(gcamdatabase = path_to_gcam_database,
+                                    dataProjFile = path_to_gcam_projfile # Optional. Or cerf_proj_file.proj
+                                    gcamdata_folder = path_to_gcamdata_folder,
+                                    paramsSelect = "cerf",
+                                    folder = "cerf")  # Set to "All" to read in all available params
+
+df <- dataGCAM$data; df
+dfParam <- dataGCAM$dataAggParam; dfParam
+dfClass1 <- dataGCAM$dataAggClass1; dfClass1
+dfClass2 <- dataGCAM$dataAggClass1; dfClass2
+
 ```
 
 The parameters extracted for CERF are as follows with links to the relevant parameters explanation:
 
-* gcam_to_cerf_tech_name_map
-* lifetime_yr
+<a name="table_cerf"></a>
+**Table: CERF**
+
+```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
+library(pander)
+mytable = data.frame(
+    Parameter     = c("lifetime_yr",
+                      "lifetime_scurve_yr"),
+    Description = c("Technology Lifetime (Yr)",
+                    "Base year S-Curve Lifetime, Steepness, half life"),
+    Unit     = c("year",
+                 "* lifetime (yr)\
+                 \n* steepness (no units)\
+                 \n* half life (yr)"),
+    Queries = c("NA",
+                "NA"),
+    `GCAM version tested` = c("v5.3",
+                              "v5.3"),
+    `gcamdata files` = c("* L223.TechLifetime_Dispatch\
+                         \n* L2242.TechLifetime_hydro\
+                         \n* L2233.GlobalTechLifetime_elec_cool\
+                         \n* L2233.GlobalIntTechLifetime_elec_cool",
+                         "* L2244.TechSCurve_nuc_gen2_USA\
+                         \n* L223.TechSCurve_Dispatch\
+                         \n* L2241.TechSCurve_coalret_vintage_dispatch_gcamusa\
+                         \n* L2233.GlobalTechSCurve_elec_cool")
+    )
+
+pander::pander(mytable, keep.line.breaks = TRUE, style = 'grid', justify = 'left', 
+               split.tables=Inf, split.cells=100)
+```
+
 * capacity_factor
 * variable_cost_esc_rate_fraction
 * fuel_esc_rate_fraction
@@ -616,5 +664,6 @@ The parameters extracted for CERF are as follows with links to the relevant para
 * carbon_tax_USDperTon
 * New capacity by vintage
 * Retired capacity by vintage
+
 
 
