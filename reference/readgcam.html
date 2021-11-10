@@ -142,15 +142,15 @@ out results into a table ready for plotting.</p>
 
     <pre class="usage"><span class='fu'>readgcam</span><span class='op'>(</span>
   gcamdatabase <span class='op'>=</span> <span class='cn'>NULL</span>,
+  gcamdata_folder <span class='op'>=</span> <span class='cn'>NULL</span>,
   queryFile <span class='op'>=</span> <span class='cn'>NULL</span>,
-  dataProjFile <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span><span class='op'>(</span><span class='op'>)</span>, <span class='st'>"/outputs/dataProj.proj"</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>,
+  dataProjFile <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span><span class='op'>(</span><span class='op'>)</span>, <span class='st'>"/dataProj.proj"</span><span class='op'>)</span>,
   scenOrigNames <span class='op'>=</span> <span class='st'>"All"</span>,
   scenNewNames <span class='op'>=</span> <span class='cn'>NULL</span>,
   reReadData <span class='op'>=</span> <span class='cn'>T</span>,
-  dirOutputs <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span><span class='op'>(</span><span class='op'>)</span>, <span class='st'>"/outputs"</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>,
   regionsSelect <span class='op'>=</span> <span class='cn'>NULL</span>,
   paramsSelect <span class='op'>=</span> <span class='st'>"All"</span>,
-  folderName <span class='op'>=</span> <span class='cn'>NULL</span>,
+  folder <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span><span class='op'>(</span><span class='op'>)</span>,
   nameAppend <span class='op'>=</span> <span class='st'>""</span>,
   saveData <span class='op'>=</span> <span class='cn'>T</span>
 <span class='op'>)</span></pre>
@@ -161,6 +161,10 @@ out results into a table ready for plotting.</p>
     <tr>
       <th>gcamdatabase</th>
       <td><p>Default = NULL. Full path to GCAM database folder.</p></td>
+    </tr>
+    <tr>
+      <th>gcamdata_folder</th>
+      <td><p>(OPTIONAL) Default=NULL. Full path to gcamdata folder. Required for some params.</p></td>
     </tr>
     <tr>
       <th>queryFile</th>
@@ -186,10 +190,6 @@ Default will use Original Names. For example c('scenario1','scenario2)</p></td>
 in the same folder as the GCAM database. If FALSE will load a '.proj' file if a file
 with full path is provided otherwise it will search for a dataProj.proj file in the existing
 folder which may have been created from an old run.</p></td>
-    </tr>
-    <tr>
-      <th>dirOutputs</th>
-      <td><p>Full path to directory for outputs</p></td>
     </tr>
     <tr>
       <th>regionsSelect</th>
@@ -239,8 +239,8 @@ South Africa, South America_Northern, South America_Southern, South Asia, South 
 "emissCO2BySectorNoBio"</p></td>
     </tr>
     <tr>
-      <th>folderName</th>
-      <td><p>Default = NULL</p></td>
+      <th>folder</th>
+      <td><p>Default = getwd(). Path to directory for outputs</p></td>
     </tr>
     <tr>
       <th>nameAppend</th>

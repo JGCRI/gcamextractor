@@ -120,11 +120,12 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JGCRI/gcamextractor">gcamextractor</a></span><span class="op">)</span>
 
-<span class="va">Path_to_GCAMdatabase</span> <span class="op">&lt;-</span> <span class="st">"E:/gcam-core-gcam-v5.3"</span> <span class="co"># Change the path based on your GCAM database location</span>
+<span class="va">path_to_gcam_database</span> <span class="op">&lt;-</span> <span class="st">"E:/gcamfolder/output/database_ref"</span> <span class="co"># Change the path based on your GCAM database location</span>
 <span class="fu">gcamextractor</span><span class="fu">::</span><span class="va"><a href="../reference/data_params.html">data_params</a></span> <span class="co"># view available parameters</span>
-<span class="va">dataGCAM</span> <span class="op">&lt;-</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="fu"><a href="../reference/readgcam.html">readgcam</a></span><span class="op">(</span>gcamdatabase <span class="op">=</span> <span class="va">Path_to_GCAMdatabase</span>,
+<span class="va">dataGCAM</span> <span class="op">&lt;-</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="fu"><a href="../reference/readgcam.html">readgcam</a></span><span class="op">(</span>gcamdatabase <span class="op">=</span> <span class="va">path_to_gcam_database</span>,
                                     regionsSelect <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Colombia"</span><span class="op">)</span>, <span class="co"># Set to "All" to read in all available regions</span>
-                                    paramsSelect <span class="op">=</span> <span class="st">"pop"</span><span class="op">)</span>  <span class="co"># Set to "All" to read in all available params</span>
+                                    paramsSelect <span class="op">=</span> <span class="st">"pop"</span>,
+                                    folder <span class="op">=</span> <span class="st">"my_output_folder"</span><span class="op">)</span>  <span class="co"># Set to "All" to read in all available params</span>
 
 <span class="va">df</span> <span class="op">&lt;-</span> <span class="va">dataGCAM</span><span class="op">$</span><span class="va">data</span>; <span class="va">df</span>
 <span class="va">dfParam</span> <span class="op">&lt;-</span> <span class="va">dataGCAM</span><span class="op">$</span><span class="va">dataAggParam</span>; <span class="va">dfParam</span>
@@ -144,13 +145,15 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JGCRI/gcamextractor">gcamextractor</a></span><span class="op">)</span>
 
-<span class="va">dataGCAM</span> <span class="op">&lt;-</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="fu"><a href="../reference/readgcam.html">readgcam</a></span><span class="op">(</span>dataProjFile <span class="op">=</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="va"><a href="../reference/example_gcamv54_argentina_colombia_2025_proj.html">example_gcamv54_argentina_colombia_2025_proj</a></span><span class="op">)</span></code></pre></div>
+<span class="va">dataGCAM</span> <span class="op">&lt;-</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="fu"><a href="../reference/readgcam.html">readgcam</a></span><span class="op">(</span>dataProjFile <span class="op">=</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="va"><a href="../reference/example_gcamv54_argentina_colombia_2025_proj.html">example_gcamv54_argentina_colombia_2025_proj</a></span>,
+                                    folder <span class="op">=</span> <span class="st">"my_output_folder"</span><span class="op">)</span></code></pre></div>
 <p>Users can provide path to .Proj file to read GCAM data.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JGCRI/gcamextractor">gcamextractor</a></span><span class="op">)</span>
 
-<span class="va">Path_to_GCAMProj</span> <span class="op">&lt;-</span> <span class="st">"E:/dataProj_example.proj"</span> <span class="co"># Change the path to your .proj file</span>
-<span class="va">dataGCAM</span> <span class="op">&lt;-</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="fu"><a href="../reference/readgcam.html">readgcam</a></span><span class="op">(</span>gcamdatabase <span class="op">=</span> <span class="va">Path_to_GCAMProj</span><span class="op">)</span></code></pre></div>
+<span class="va">path_to_gcam_projfile</span> <span class="op">&lt;-</span> <span class="st">"E:/my_proj_file.proj"</span> <span class="co"># Change path to your proj file. This is an output of gcam extractor.</span>
+<span class="va">dataGCAM</span> <span class="op">&lt;-</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="fu"><a href="../reference/readgcam.html">readgcam</a></span><span class="op">(</span>gcamdatabase <span class="op">=</span> <span class="va">path_to_gcam_projfile</span>,
+                                    folder <span class="op">=</span> <span class="st">"my_output_folder"</span><span class="op">)</span></code></pre></div>
 <!-------------------------->
 <!-------------------------->
 </div>
@@ -770,7 +773,8 @@
 
 <span class="va">dataGCAM</span> <span class="op">&lt;-</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="fu"><a href="../reference/readgcam.html">readgcam</a></span><span class="op">(</span>dataProjFile <span class="op">=</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="va">example_GCAMv52_2050_proj</span>,
                                     paramsSelect <span class="op">=</span> <span class="st">'elecByTechTWh'</span>,
-                                    regionsSelect <span class="op">=</span> <span class="st">'USA'</span><span class="op">)</span></code></pre></div>
+                                    regionsSelect <span class="op">=</span> <span class="st">'USA'</span>,
+                                    folder <span class="op">=</span> <span class="st">"my_output_folder"</span><span class="op">)</span></code></pre></div>
 <p><br></p>
 </div>
 <div id="eleccapbyfuel" class="section level3">
@@ -778,7 +782,7 @@
 <a href="#eleccapbyfuel" class="anchor"></a>elecCapByFuel</h3>
 <p><code>elecCapByFuel</code> calculates electricity capacity (GW) based on the output from <code>elecByTechTWh</code>:</p>
 <p><span class="math display">\[elecCapByFuel = \frac{elecByTechTWh \times 1000}{8760 \times gcamCapacityFactor}\]</span></p>
-<p><code>gcamCapacityFactor</code> is calculated as an average of the capacity factors of the technologies within each subsector (See <a href="#table3">Table 3</a>) based on the data from:</p>
+<p><code>gcamCapacityFactor</code> is calculated as an average of the capacity factors of the technologies within each subsector (See <a href="#table_gcamCapacityFactor">Table GCAM Capacity Factors</a>) based on the data from:</p>
 <ul>
 <li>Global technology capacity factor from “GCAM-FOLDER\input\gcamdata\inst\extdata\energy\A23.globaltech_capacity_factor.csv”</li>
 <li>USA renewable technology capacity factors by States from “GCAM-FOLDER\input\gcamdata\inst\extdata\gcam-usa\NREL_us_re_capacity_factors.csv”</li>
@@ -792,7 +796,7 @@
 <li>No cogeneration capacity factor “n CHP” was given.</li>
 <li>rooftop_pv was assumed the same as solar average (5) grid_storage assumed to have a high cap factor equal to that of nuclear</li>
 </ul>
-<p><a name="table3"></a> <strong>Table 3:</strong> Averaged capacity factor for electricity generation by generation technology.</p>
+<p><a name="table_gcamCapacityFactor"></a> <strong>Table GCAM Capacity Factors:</strong> Averaged capacity factor for electricity generation by generation technology.</p>
 <table class="table">
 <thead><tr class="header">
 <th>Subsector (class1)</th>
@@ -854,7 +858,8 @@
 
 <span class="va">dataGCAM</span> <span class="op">&lt;-</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="fu"><a href="../reference/readgcam.html">readgcam</a></span><span class="op">(</span>dataProjFile <span class="op">=</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="va">example_GCAMv52_2050_proj</span>,
                                     paramsSelect <span class="op">=</span> <span class="st">'elecCapByFuel'</span>,
-                                    regionsSelect <span class="op">=</span> <span class="st">'USA'</span><span class="op">)</span></code></pre></div>
+                                    regionsSelect <span class="op">=</span> <span class="st">'USA'</span>,
+                                    folder <span class="op">=</span> <span class="st">"my_output_folder"</span><span class="op">)</span></code></pre></div>
 <p><br></p>
 <!-- ### elecFinalBySecTWh -->
 <!-- <br /> -->
@@ -977,16 +982,76 @@
 <h2 class="hasAnchor">
 <a href="#cerf" class="anchor"></a>CERF</h2>
 <!-------------------------->
-<p>Use the <code>cerf</code> for the parameter argument in <code>gcamextractor</code> to extract the relevant variables needed for the <code>CERF</code> model (<a href="https://github.com/IMMM-SFA/cerf" class="uri">https://github.com/IMMM-SFA/cerf</a>).</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JGCRI/gcamextractor">gcamextractor</a></span><span class="op">)</span>
-
-<span class="va">dataGCAM</span> <span class="op">&lt;-</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="fu"><a href="../reference/readgcam.html">readgcam</a></span><span class="op">(</span>dataProjFile <span class="op">=</span> <span class="fu">gcamextractor</span><span class="fu">::</span><span class="va">example_GCAMv52_2050_proj</span>,
-                                    paramsSelect <span class="op">=</span> <span class="st">'cerf'</span><span class="op">)</span></code></pre></div>
+<p>Use <code>cerf</code> for the <code>paramSelect</code> argument in <code>gcamextractor</code> to extract the relevant variables needed for the <code>CERF</code> model (<a href="https://github.com/IMMM-SFA/cerf" class="uri">https://github.com/IMMM-SFA/cerf</a>).</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">library</span>(gcamextractor)</span>
+<span id="cb7-2"><a href="#cb7-2"></a></span>
+<span id="cb7-3"><a href="#cb7-3"></a>path_to_gcam_database &lt;-<span class="st"> "E:/gcamfolder/output/database_ref"</span> <span class="co"># Change to your path.</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a>path_to_gcam_projfile &lt;-<span class="st"> "E:/my_proj_file.proj"</span> <span class="co"># Change to your .proj file path.</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a>path_to_gcamdata_folder &lt;-<span class="st"> "E:/gcamfolder/input/gcamdata"</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a>gcamextractor<span class="op">::</span>data_params <span class="co"># view available parameters</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a>dataGCAM &lt;-<span class="st"> </span>gcamextractor<span class="op">::</span><span class="kw">readgcam</span>(<span class="dt">gcamdatabase =</span> path_to_gcam_database,</span>
+<span id="cb7-8"><a href="#cb7-8"></a>                                    <span class="dt">dataProjFile =</span> path_to_gcam_projfile <span class="co"># Optional. Or cerf_proj_file.proj</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a>                                    <span class="dt">gcamdata_folder =</span> path_to_gcamdata_folder,</span>
+<span id="cb7-10"><a href="#cb7-10"></a>                                    <span class="dt">paramsSelect =</span> <span class="st">"cerf"</span>,</span>
+<span id="cb7-11"><a href="#cb7-11"></a>                                    <span class="dt">folder =</span> <span class="st">"cerf"</span>)  <span class="co"># Set to "All" to read in all available params</span></span>
+<span id="cb7-12"><a href="#cb7-12"></a></span>
+<span id="cb7-13"><a href="#cb7-13"></a>df &lt;-<span class="st"> </span>dataGCAM<span class="op">$</span>data; df</span>
+<span id="cb7-14"><a href="#cb7-14"></a>dfParam &lt;-<span class="st"> </span>dataGCAM<span class="op">$</span>dataAggParam; dfParam</span>
+<span id="cb7-15"><a href="#cb7-15"></a>dfClass1 &lt;-<span class="st"> </span>dataGCAM<span class="op">$</span>dataAggClass1; dfClass1</span>
+<span id="cb7-16"><a href="#cb7-16"></a>dfClass2 &lt;-<span class="st"> </span>dataGCAM<span class="op">$</span>dataAggClass1; dfClass2</span></code></pre></div>
 <p>The parameters extracted for CERF are as follows with links to the relevant parameters explanation:</p>
+<p><a name="table_cerf"></a> <strong>Table: CERF</strong></p>
+<table class="table">
+<colgroup>
+<col width="11%">
+<col width="27%">
+<col width="13%">
+<col width="5%">
+<col width="12%">
+<col width="29%">
+</colgroup>
+<thead><tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+<th>Unit</th>
+<th>Queries</th>
+<th>GCAM.version.tested</th>
+<th>gcamdata.files</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>lifetime_yr</td>
+<td>Technology Lifetime (Yr)</td>
+<td>year</td>
+<td>NA</td>
+<td>v5.3</td>
+<td><ul>
+<li>L223.TechLifetime_Dispatch</li>
+<li>L2242.TechLifetime_hydro</li>
+<li>L2233.GlobalTechLifetime_elec_cool</li>
+<li>L2233.GlobalIntTechLifetime_elec_cool</li>
+</ul></td>
+</tr>
+<tr class="even">
+<td>lifetime_scurve_yr</td>
+<td>Base year S-Curve Lifetime, Steepness, half life</td>
+<td><ul>
+<li>lifetime (yr)</li>
+<li>steepness (no units)</li>
+<li>half life (yr)</li>
+</ul></td>
+<td>NA</td>
+<td>v5.3</td>
+<td><ul>
+<li>L2244.TechSCurve_nuc_gen2_USA</li>
+<li>L223.TechSCurve_Dispatch</li>
+<li>L2241.TechSCurve_coalret_vintage_dispatch_gcamusa</li>
+<li>L2233.GlobalTechSCurve_elec_cool</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
 <ul>
-<li>gcam_to_cerf_tech_name_map</li>
-<li>lifetime_yr</li>
 <li>capacity_factor</li>
 <li>variable_cost_esc_rate_fraction</li>
 <li>fuel_esc_rate_fraction</li>
