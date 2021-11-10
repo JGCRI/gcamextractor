@@ -28,10 +28,14 @@ Imports:
 	rgcam,
 	rpackageutils,
 	markdown,
-	rprojroot
+	rprojroot,
+	pander,
+	kableExtra
 Suggests: 
     rmarkdown,
-    testthat
+    testthat,
+    pander,
+    kabelExtra
 Remotes: 
 	github::JGCRI/rgcam,
 	github::JGCRI/rpackageutils	
