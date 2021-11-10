@@ -2,9 +2,9 @@
 #'
 #' This function connects to a gcamdatabase and uses a query file to
 #' out results into a table ready for plotting.
-#' @param dirOutputs Full path to directory for outputs
-#' @param folderName Default = NULL
+#' @param folder Default = getwd(). Path to directory for outputs
 #' @param nameAppend  Default="". Name to append to saved files.
+#' @param gcamdata_folder (OPTIONAL) Default=NULL. Full path to gcamdata folder. Required for some params.
 #' @param gcamdatabase Default = NULL. Full path to GCAM database folder.
 #' @param queryFile Defualt = NULL. When NULL gcamextractor loads pre-saved xml file gcamextractor::queries
 #' @param dataProjFile Default = NULL. Optional. A default 'dataProj.proj' is produced if no .Proj file is specified.
@@ -79,15 +79,15 @@
 
 
 readgcam <- function(gcamdatabase = NULL,
+                     gcamdata_folder = NULL,
                      queryFile = NULL,
-                     dataProjFile = paste(getwd(), "/outputs/dataProj.proj", sep = ""),
+                     dataProjFile = paste0(getwd(),"/dataProj.proj"),
                      scenOrigNames = "All",
                      scenNewNames = NULL,
                      reReadData = T,
-                     dirOutputs = paste(getwd(), "/outputs", sep = ""),
                      regionsSelect = NULL,
                      paramsSelect = "All",
-                     folderName = NULL,
+                     folder = getwd(),
                      nameAppend = "",
                      saveData = T
 ){
@@ -95,14 +95,12 @@ readgcam <- function(gcamdatabase = NULL,
 
   # gcamdatabase = NULL
   # queryFile = NULL
-  # dataProjFile = paste(getwd(), "/outputs/dataProj.proj", sep = "")
   # scenOrigNames = "All"
   # scenNewNames = NULL
   # reReadData = T
-  # dirOutputs = paste(getwd(), "/outputs", sep = "")
   # regionsSelect = NULL
   # paramsSelect="All"
-  # folderName=NULL
+  # folder=paste(getwd(), "/outputs", sep = "")
   # nameAppend=""
   # saveData = T
 
@@ -126,11 +124,18 @@ readgcam <- function(gcamdatabase = NULL,
     }
     }
 
+  if(!is.null(gcamdata_folder)){
+    if(!dir.exists(gcamdata_folder)){
+      print(paste0("gcamdata_folder provided : ", gcamdata_folder, "does not exist."))
+      print(paste0("Will skip parameters that require gcamdata folder."))
+    }
+  }
+
 #---------------------
 # Params and Queries
 #---------------------
 
-  paramQueryMap <- (gcamextractor::map_param_query)%>%dplyr::select(group,param,query)
+  paramQueryMap <- (gcamextractor::map_param_query)%>%dplyr::select(group,param,query,gcamdata)
 
   # Check if queriesSelect is a querySet or one of the queries
   if(!any(c("all","All","ALL") %in% paramsSelect)){
@@ -158,14 +163,8 @@ readgcam <- function(gcamdatabase = NULL,
 #-----------------------------
 # Create necessary directories if they dont exist.
 #----------------------------
-  if (!dir.exists(dirOutputs)){
-    dir.create(dirOutputs)}  # Output Directory
-  if (!dir.exists(paste(dirOutputs, "/", folderName, sep = ""))){
-    dir.create(paste(dirOutputs, "/", folderName, sep = ""))}
-  if (!dir.exists(paste(dirOutputs, "/", folderName,"/readGCAM",sep=""))){
-    dir.create(paste(dirOutputs, "/", folderName,"/readGCAM",sep=""))}  # Output Directory
-  if (!dir.exists(paste(dirOutputs, "/", folderName, "/readGCAM/Tables_gcam", sep = ""))){
-    dir.create(paste(dirOutputs, "/", folderName, "/readGCAM/Tables_gcam", sep = ""))}  # GCAM output directory
+  if (!dir.exists(folder)){
+    dir.create(folder)}  # Output Directory
 
 #----------------
 # Set file paths
@@ -187,8 +186,8 @@ readgcam <- function(gcamdatabase = NULL,
   }
 
   if(is.null(queryFile)){
-    XML::saveXML(gcamextractor::queries, file=paste(dirOutputs, "/", folderName,"/readGCAM/queries.xml", sep = ""))
-    queryFile <- paste(dirOutputs, "/", folderName,"/readGCAM/queries.xml", sep = "")
+    XML::saveXML(gcamextractor::queries, file=paste0(folder,"/queries.xml"))
+    queryFile <- paste0(folder,"/queries.xml")
     xfun::gsub_file(queryFile,"&apos;","'")
     queryPath <- gsub("[^/]+$","",queryFile)
     queryxml <- basename(queryFile)
@@ -207,10 +206,10 @@ readgcam <- function(gcamdatabase = NULL,
 
   if(is.null(dataProjFile)){
     dataProj = "dataProj"
-    dataProjPath = gsub("//","/",paste(dirOutputs, "/", folderName,"/readGCAM/", sep = ""))
+    dataProjPath = gsub("//","/",paste(folder,"/", sep = ""))
   }else{
     if(is.list(dataProjFile)){
-      dataProjPath <- gsub("//","/",paste(dirOutputs, "/", folderName,"/readGCAM/", sep = ""))
+      dataProjPath <- gsub("//","/",paste(folder,"/", sep = ""))
       dataProj <- paste("dataProj", sep = "")
     }else{
     if(is.character(dataProjFile)){
@@ -224,7 +223,7 @@ readgcam <- function(gcamdatabase = NULL,
           print(gsub("//","/",paste("Will save GCAM data to ",dataProjPath,"/",dataProjFile,"...",sep="")))
         }
       }else{
-        dataProjPath <- gsub("//","/",paste(dirOutputs, "/", folderName,"/readGCAM/", sep = ""))
+        dataProjPath <- gsub("//","/",paste(folder,"/", sep = ""))
         dataProj <- dataProjFile
         print(paste("Will save data to: ", dataProjPath,"/",dataProjFile, sep=""))
       }
@@ -252,6 +251,7 @@ readgcam <- function(gcamdatabase = NULL,
 # Read gcam database or existing dataProj.proj
 #--------------------------------------------
 
+
   # In case user sets reReadData=F and provides a .proj file instead of a gcamdatabase
   if((is.null(gcamdatabasePath) | is.null(gcamdatabaseName)) &
      reReadData==T){
@@ -265,6 +265,7 @@ readgcam <- function(gcamdatabase = NULL,
     }
   }
 
+  if(!all(is.na(queriesSelectx))){
   if (!reReadData) {
  # Check for proj file path and folder if incorrect give error
     if(!is.list(dataProjFile)){
@@ -403,6 +404,9 @@ readgcam <- function(gcamdatabase = NULL,
   }
 
   queries <- rgcam::listQueries(dataProjLoaded); queries  # List of Queries in queryxml
+  } else {
+    queries <- NA
+  }
 
   # Set new scenario names if provided
   if (is.null(scenNewNames)) {
@@ -427,6 +431,30 @@ readgcam <- function(gcamdatabase = NULL,
       } else {paramsSelectx=paramsSelect}
     }
 
+  # Read in relevant gcamdatafiles for all params requiring data
+  if(!is.null(gcamdata_folder)){
+    if(dir.exists(gcamdata_folder)){
+
+      # Get list of relevant gcamdata files for selected params
+      (paramQueryMap %>%
+        dplyr::filter(gcamdata != "no",
+                      param %in% paramsSelectx))$gcamdata %>%
+        unlist() %>%
+        unique() ->
+        gcamdata_filenames; gcamdata_filenames
+
+      # Read in each file needed and assign to list and rename the list item
+      gcamdata_files <- list()
+      for(i in 1:length(gcamdata_filenames)){
+        gcamdata_file_i <-  as_tibble(read.csv(paste0(gcamdata_folder, "/outputs/", gcamdata_filenames[[i]], ".csv"), comment.char = "#"))
+        gcamdata_files[[i]] <- gcamdata_file_i
+        names(gcamdata_files)[[i]] <- gcamdata_filenames[[i]]
+      }
+      names(gcamdata_files)
+    }
+  }
+
+
   # Check if any of the selected parameters are available in the GCAM data
   if(any(paramsSelectx %in% paramsSelectAll)){
 
@@ -435,6 +463,209 @@ readgcam <- function(gcamdatabase = NULL,
   if(T){
 
   queriesx <- queriesx[queriesx %in% queries]
+
+  paramx<-"lifetime_scurve_yr"
+  # S Curve Parameters
+  if(paramx %in% paramsSelectx){
+
+    print(paste0("Running param: ", paramx,"..."))
+
+    # Check if all required files are present
+    (paramQueryMap %>%
+        dplyr::filter(param %in% paramx))$gcamdata %>%
+      unlist() %>%
+      unique() -> gcamdata_files_needed
+
+    if(dir.exists(gcamdata_folder)){
+      for(file_i in gcamdata_files_needed){
+        file_ix <- paste0(gcamdata_folder, "/outputs/", file_i, ".csv")
+      if(!file.exists(file_ix)){
+        print(paste0("File needed does not exist: ", file_ix))
+        print("Some results may be missing.")
+       }
+      }
+    }
+
+    # US S-Curve
+    tibble::as_tibble(gcamdata_files[["L2244.TechSCurve_nuc_gen2_USA"]]) %>%
+      dplyr::select(subRegion = "region",
+                    class1 = "subsector",
+                    class2 = "technology",
+                    year,lifetime, steepness, half.life) %>%
+      dplyr::mutate(classLabel1 = "subsector",
+                    classLabel2 = "technology",
+                    param = paramx,
+                    region = "USA") %>%
+      dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["L223.TechSCurve_Dispatch"]]) %>%
+                  dplyr::select(subRegion = "region",
+                                class1 = "subsector",
+                                class2 = "technology",
+                                year,lifetime,steepness, half.life) %>%
+                  dplyr::mutate(classLabel1 = "subsector",
+                                classLabel2 = "technology",
+                                param = paramx,
+                                region = "USA")) %>%
+      dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["L2241.TechSCurve_coalret_vintage_dispatch_gcamusa"]]) %>%
+                  dplyr::select(subRegion = "region",
+                                class1 = "subsector",
+                                class2 = "technology",
+                                year,lifetime,steepness, half.life) %>%
+                  dplyr::mutate(classLabel1 = "subsector",
+                                classLabel2 = "technology",
+                                param = paramx,
+                                region = "USA")) -> lifetime_scurve_us
+
+    # Global S-Curve
+    tibble::as_tibble(gcamdata_files[["L2233.GlobalTechSCurve_elec_cool"]]) %>%
+      dplyr::select(class1 = "subsector.name",
+                    class2 = "technology",
+                    year,lifetime, steepness, half.life) %>%
+      dplyr::mutate(classLabel1 = "subsector",
+                    classLabel2 = "technology",
+                    param = paramx,
+                    region = "Global",
+                    subRegion = "Global") -> lifetime_scurve_global
+
+    # Combined S-Curve
+    lifetime_scurve_comb <- lifetime_scurve_us %>%
+      dplyr::bind_rows(lifetime_scurve_global)
+
+    # Collapse into lifetime_scurve_yr param
+    lifetime_scurve_comb_long <- lifetime_scurve_comb %>%
+      dplyr::mutate(param = paramx,
+                    classLabel1 = "scurve_param") %>%
+      dplyr::select(-class1)%>%
+      tidyr::gather(key="class1",value="value",
+                    -year,-subRegion,-class2,-classLabel1,
+                    -classLabel2,-param,-region);
+    lifetime_scurve_comb_long
+
+    tbl <- lifetime_scurve_comb_long %>%
+      dplyr::mutate(param = paramx,
+                    sources = "Sources",
+                    origScen = "origScen",
+                    origQuery = "origQuery",
+                    origValue = value,
+                    origUnits = "units",
+                    origX = year,
+                    scenario = "scenario",
+                    units = class1,
+                    vintage = paste("Vint_", year, sep = ""),
+                    x = year,
+                    xLabel = "Year",
+                    aggregate = "sum",
+                    classPalette1 = "pal_all",
+                    classPalette2 = "pal_all")%>%
+      dplyr::select(scenario, region, subRegion,param, sources, class1, class2, x, xLabel, vintage, units, value,
+                    aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                    origScen, origQuery, origValue, origUnits, origX)%>%
+      dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+      dplyr::ungroup()%>%
+      dplyr::filter(!is.na(value))
+    datax <- dplyr::bind_rows(datax, tbl)
+  }
+
+  paramx<-"lifetime_yr"
+  # S Curve Parameters
+  if(paramx %in% paramsSelectx){
+
+    print(paste0("Running param: ", paramx,"..."))
+
+    # Check if all required files are present
+    (paramQueryMap %>%
+        dplyr::filter(param %in% paramx))$gcamdata %>%
+      unlist() %>%
+      unique() -> gcamdata_files_needed
+
+    if(dir.exists(gcamdata_folder)){
+      for(file_i in gcamdata_files_needed){
+        file_ix <- paste0(gcamdata_folder, "/outputs/", file_i, ".csv")
+        if(!file.exists(file_ix)){
+          print(paste0("File needed does not exist: ", file_ix))
+          print("Some results may be missing.")
+        }
+      }
+    }
+
+    tibble::as_tibble(gcamdata_files[["L223.TechLifetime_Dispatch"]]);
+    tibble::as_tibble(gcamdata_files[["L2242.TechLifetime_hydro"]]);
+    tibble::as_tibble(gcamdata_files[["L2233.GlobalTechLifetime_elec_cool"]]);
+    tibble::as_tibble(gcamdata_files[["L2233.GlobalIntTechLifetime_elec_cool"]]);
+
+    # US S-Curve
+    tibble::as_tibble(gcamdata_files[["L223.TechLifetime_Dispatch"]]) %>%
+      dplyr::select(subRegion = "region",
+                    class1 = "subsector",
+                    class2 = "technology",
+                    year,lifetime) %>%
+      dplyr::mutate(classLabel1 = "subsector",
+                    classLabel2 = "technology",
+                    param = paramx,
+                    region = "USA") %>%
+      dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["L2242.TechLifetime_hydro"]]) %>%
+                  dplyr::select(subRegion = "region",
+                                class1 = "subsector",
+                                class2 = "technology",
+                                year,lifetime) %>%
+                  dplyr::mutate(classLabel1 = "subsector",
+                                classLabel2 = "technology",
+                                param = paramx,
+                                region = "USA")) -> lifetime_us
+
+    # Global S-Curve
+    tibble::as_tibble(gcamdata_files[["L2233.GlobalTechLifetime_elec_cool"]]) %>%
+      dplyr::select(class1 = "subsector.name",
+                    class2 = "technology",
+                    year,lifetime) %>%
+      dplyr::mutate(classLabel1 = "subsector",
+                    classLabel2 = "technology",
+                    param = paramx,
+                    region = "Global",
+                    subRegion = "Global") %>%
+      dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["L2233.GlobalIntTechLifetime_elec_cool"]]) %>%
+                          dplyr::select(class1 = "subsector.name",
+                                        class2 = "technology",
+                                        year,lifetime) %>%
+                          dplyr::mutate(classLabel1 = "subsector",
+                                        classLabel2 = "technology",
+                                        param = paramx,
+                                        region = "Global",
+                                        subRegion = "Global"))-> lifetime_global
+
+    # Combined S-Curve
+    lifetime_comb <- lifetime_us %>%
+      dplyr::bind_rows(lifetime_global) %>%
+      dplyr::rename(value=lifetime)
+
+    tbl <- lifetime_comb %>%
+      dplyr::mutate(param = paramx,
+                    sources = "Sources",
+                    origScen = "origScen",
+                    origQuery = "origQuery",
+                    origValue = value,
+                    origUnits = "year",
+                    origX = year,
+                    scenario = "scenario",
+                    units = "lifetime (yr)",
+                    vintage = paste("Vint_", year, sep = ""),
+                    x = year,
+                    xLabel = "Year",
+                    aggregate = "sum",
+                    classPalette1 = "pal_all",
+                    classPalette2 = "pal_all")%>%
+      dplyr::select(scenario, region, subRegion,param, sources, class1, class2, x, xLabel, vintage, units, value,
+                    aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                    origScen, origQuery, origValue, origUnits, origX)%>%
+      dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+      dplyr::ungroup()%>%
+      dplyr::filter(!is.na(value))
+    datax <- dplyr::bind_rows(datax, tbl)
+  }
+
 
   paramx<-"energyFinalConsumByIntlShpAvEJ"
   # Total final energy by aggregate end-use sector
@@ -4484,12 +4715,20 @@ readgcam <- function(gcamdatabase = NULL,
     print(paste("Running remaining regions: ",  paste(regionsSelect[(regionsSelect %in% unique(datax$region))],collapse=", "), sep=""))
   }
 
-
   if(saveData){
-     # All Data
-    utils::write.csv(datax, file = paste(dirOutputs, "/", folderName, "/readGCAM/Tables_gcam/gcamDataTable",nameAppend, ".csv", sep = ""), row.names = F)
+
+    # All Data
+    utils::write.csv(datax,
+                     file = paste(folder, "/gcamDataTable_Extended",nameAppend, ".csv", sep = ""), row.names = F)
     print(paste("GCAM data table saved to: ",
-                gsub("//","/",paste(dirOutputs, "/", folderName, "/readGCAM/Tables_gcam/gcamDataTable",nameAppend,".csv", sep = ""))))
+                gsub("//","/",paste(folder, "/gcamDataTable_Extended",nameAppend,".csv", sep = ""))))
+
+     # Data
+    utils::write.csv(datax %>% dplyr::select("scenario","region","subRegion","param","classLabel1","class1","classLabel2","class2",
+                                             "xLabel","x","vintage","units","value"),
+                     file = paste(folder, "/gcamDataTable",nameAppend, ".csv", sep = ""), row.names = F)
+    print(paste("GCAM data table saved to: ",
+                gsub("//","/",paste(folder, "/gcamDataTable",nameAppend,".csv", sep = ""))))
      }
 
     # Aggregate across Class 2
@@ -4507,17 +4746,22 @@ readgcam <- function(gcamdatabase = NULL,
 
     dataAggClass2 = dataxAggClass %>% dplyr::rename(class=class2,classLabel=classLabel2,classPalette=classPalette2) %>% unique()
 
+
+
     if(saveData){
-    utils::write.csv(dataxAggClass %>% dplyr::rename(class=class2,classLabel=classLabel2,classPalette=classPalette2),
-                     file = gsub("//","/",paste(dirOutputs, "/", folderName,
-                                                "/readGCAM/Tables_gcam/gcamDataTable_aggClass2",
-                                                nameAppend,".csv", sep = "")),row.names = F)
+      utils::write.csv(dataxAggClass %>%
+                         dplyr::rename(class=class2,classLabel=classLabel2,classPalette=classPalette2)%>%
+                         dplyr::select("scenario","region","subRegion","param","classLabel","class","classLabel",
+                                       "xLabel","x","vintage","units","value"),
+                       file = gsub("//","/",paste(folder,
+                                                  "/gcamDataTable_aggClass2",
+                                                  nameAppend,".csv", sep = "")),row.names = F)
 
-    print(paste("GCAM data aggregated to class 2 saved to: ",gsub("//","/",paste(dirOutputs, "/", folderName,
-                              "/readGCAM/Tables_gcam/gcamDataTable_aggClass2",
-                              nameAppend,".csv", sep = "")),sep=""))
+      print(paste("GCAM data aggregated to class 2 saved to: ",gsub("//","/",paste(folder,
+                                "/gcamDataTable_aggClass2",
+                                nameAppend,".csv", sep = "")),sep=""))
 
-}
+      }
 
     # Aggregate across Class 1
     dataxAggsums<-datax%>%
@@ -4536,16 +4780,19 @@ readgcam <- function(gcamdatabase = NULL,
 
     if(saveData){
 
-    utils::write.csv(dataxAggClass  %>% dplyr::rename(class=class1,classLabel=classLabel1,classPalette=classPalette1),
-                     file = gsub("//","/",paste(dirOutputs, "/", folderName,
-                                                "/readGCAM/Tables_gcam/gcamDataTable_aggClass1",
+    utils::write.csv(dataxAggClass  %>%
+                       dplyr::rename(class=class1,classLabel=classLabel1,classPalette=classPalette1) %>%
+                       dplyr::select("scenario","region","subRegion","param","classLabel","class","classLabel",
+                                     "xLabel","x","vintage","units","value"),
+                     file = gsub("//","/",paste(folder,
+                                                "/gcamDataTable_aggClass1",
                                                 nameAppend,".csv", sep = "")),row.names = F)
 
-    print(paste("GCAM data aggregated to class 1 saved to: ",gsub("//","/",paste(dirOutputs, "/", folderName,
-                                                                                   "/readGCAM/Tables_gcam/gcamDataTable_aggClass1",
+    print(paste("GCAM data aggregated to class 1 saved to: ",gsub("//","/",paste(folder,
+                                                                                   "/gcamDataTable_aggClass1",
                                                                                    nameAppend,".csv", sep = "")),sep=""))
 
-  }
+    }
 
     # Aggregate across Param
     dataxAggsums<-datax%>%
@@ -4563,14 +4810,16 @@ readgcam <- function(gcamdatabase = NULL,
     dataAggParam = dataxAggClass %>% dplyr::rename(classPalette=classPalette1) %>% unique()
 
     if(saveData){
-    utils::write.csv(dataxAggClass %>% dplyr::rename(classPalette=classPalette1),
-                     file = gsub("//","/",paste(dirOutputs, "/", folderName,
-                                                "/readGCAM/Tables_gcam/gcamDataTable_aggParam",
+    utils::write.csv(dataxAggClass %>%
+                       dplyr::rename(classPalette=classPalette1) %>%
+                       dplyr::select("scenario","region","subRegion","param","xLabel","x","vintage","units","value"),
+                     file = gsub("//","/",paste(folder,
+                                                "/gcamDataTable_aggParam",
                                                 nameAppend,".csv", sep = "")),row.names = F)
 
 
-    print(paste("GCAM data aggregated to param saved to: ",gsub("//","/",paste(dirOutputs, "/", folderName,
-                                                                                   "/readGCAM/Tables_gcam/gcamDataTable_aggParam",
+    print(paste("GCAM data aggregated to param saved to: ",gsub("//","/",paste(folder,
+                                                                                   "/gcamDataTable_aggParam",
                                                                                    nameAppend,".csv", sep = "")),sep=""))
     }
 
@@ -4582,7 +4831,7 @@ readgcam <- function(gcamdatabase = NULL,
   print("Outputs returned as list containing data, scenarios and queries.")
   print("For example if df <- readgcam(dataProjFile = gcamextractor::example_GCAMv52_2050_proj)")
   print("Then you can view the outputs as df$data, df$dataAggClass1, df$dataAggClass2, df$dataAggParam, df$scenarios, df$queries.")
-  print(gsub("//","/",paste("All outputs in : ",dirOutputs, "/", folderName, "/readGCAM/",sep="")))
+  print(gsub("//","/",paste("All outputs in : ",folder, "/readGCAM/",sep="")))
   print("readgcam run completed.")
 
   return(list(dataAll = datax,

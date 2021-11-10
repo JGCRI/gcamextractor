@@ -5,6 +5,146 @@ library(tibble);library(dplyr);library(devtools); library(rgcam); library(usethi
 library(dplyr); library(assertthat)
 
 #-------------------
+# gcamextractor mapping between params and quereies
+#-------------------
+
+map_param_query <- tibble::tribble(
+  ~group, ~param, ~query,~mapPalette,~gcamdata,
+  # "cerf","gcam_to_cerf_tech_name_map",
+  "cerf","lifetime_scurve_yr",NA,"pal_hot",c("L2244.TechSCurve_nuc_gen2_USA",
+                                      "L223.TechSCurve_Dispatch",
+                                      "L2241.TechSCurve_coalret_vintage_dispatch_gcamusa",
+                                      "L2233.GlobalTechSCurve_elec_cool"
+                                      #"L223.GlobalTechSCurve_elec"
+                                      ),
+  "cerf","lifetime_yr",NA,"pal_hot",c("L223.TechLifetime_Dispatch",
+                                      "L2242.TechLifetime_hydro",
+                                      "L2233.GlobalTechLifetime_elec_cool",
+                                      "L2233.GlobalIntTechLifetime_elec_cool"
+                                      #"L223.GlobalTechLifetime_elec",
+                                      #"L223.GlobalIntTechLifetime_elec"
+                                      ),
+  # "cerf","capacity_factor","pal_hot","no",
+  # "cerf","variable_cost_esc_rate_fraction","pal_hot","no",
+  # "cerf","fuel_esc_rate_fraction","pal_hot","no",
+  # #unit_size,"pal_hot","no",
+  # "cerf","variable_om_USDperMWh","pal_hot","no",
+  # "cerf","heat_rate_BTUperkWh","pal_hot","no",
+  # "cerf","fuel_price_USDperGJ","pal_hot","no",
+  # "cerf","carbon_capture_rate_fraction","pal_hot","no",
+  # "cerf","fuel_co2_content_tonsperMWh","pal_hot","no",
+  # #discount_rate,
+  # "cerf","carbon_esc_rate_fraction","pal_hot","no",
+  # "cerf","carbon_tax_USDperTon","pal_hot","no",
+  # "cerf","New capacity by vintage","pal_hot","no",
+  # "cerf","Retired capacity by vintage","pal_hot","no",
+  # Energy
+  "energy","energyPrimaryByFuelEJ","primary energy consumption by region (direct equivalent)","pal_hot","no",
+  "energy","energyPrimaryRefLiqProdEJ", "refined liquids production by subsector","pal_hot","no",
+  "energy","energyFinalConsumBySecEJ", "total final energy by aggregate sector","pal_hot","no",
+  "energy","energyFinalByFuelBySectorEJ", "Final energy by detailed end-use sector and fuel","pal_hot","no",
+  "energy","energyFinalSubsecByFuelTranspEJ", "transport final energy by fuel","pal_hot","no",
+  "energy","energyFinalSubsecByFuelBuildEJ", "building final energy by fuel","pal_hot","no",
+  "energy","energyFinalSubsecByFuelIndusEJ", "industry final energy by fuel","pal_hot","no",
+  "energy","energyFinalSubsecBySectorBuildEJ", "building final energy by subsector","pal_hot","no",
+  "energy","energyFinalConsumByIntlShpAvEJ", "transport final energy by mode and fuel","pal_hot","no",
+  "energy","energyPrimaryByFuelMTOE", "primary energy consumption by region (direct equivalent)","pal_hot","no",
+  "energy","energyPrimaryRefLiqProdMTOE", "refined liquids production by subsector","pal_hot","no",
+  "energy","energyFinalConsumBySecMTOE", "total final energy by aggregate sector","pal_hot","no",
+  "energy","energyFinalByFuelBySectorMTOE", "Final energy by detailed end-use sector and fuel","pal_hot","no",
+  "energy","energyFinalByFuelBySectorTWh", "Final energy by detailed end-use sector and fuel","pal_hot","no",
+  "energy","energyFinalbyFuelMTOE", "Final energy by detailed end-use sector and fuel","pal_hot","no",
+  "energy","energyFinalSubsecByFuelTranspMTOE", "transport final energy by fuel","pal_hot","no",
+  "energy","energyFinalSubsecByFuelBuildMTOE", "building final energy by fuel","pal_hot","no",
+  "energy","energyFinalSubsecByFuelIndusMTOE", "industry final energy by fuel","pal_hot","no",
+  "energy","energyFinalSubsecBySectorBuildMTOE", "building final energy by subsector","pal_hot","no",
+  "energy","energyFinalConsumByIntlShpAvMTOE", "transport final energy by mode and fuel","pal_hot","no",
+  "energy","energyPrimaryByFuelTWh", "primary energy consumption by region (direct equivalent)","pal_hot","no",
+  "energy","energyPrimaryRefLiqProdTWh", "refined liquids production by subsector","pal_hot","no",
+  "energy","energyFinalConsumBySecTWh", "total final energy by aggregate sector","pal_hot","no",
+  "energy","energyFinalbyFuelTWh", "Final energy by detailed end-use sector and fuel","pal_hot","no",
+  "energy","energyFinalSubsecByFuelTranspTWh", "transport final energy by fuel","pal_hot","no",
+  "energy","energyFinalSubsecByFuelBuildTWh", "building final energy by fuel","pal_hot","no",
+  "energy","energyFinalSubsecByFuelIndusTWh", "industry final energy by fuel","pal_hot","no",
+  "energy","energyFinalSubsecBySectorBuildTWh", "building final energy by subsector","pal_hot","no",
+  "energy","energyFinalConsumByIntlShpAvTWh", "transport final energy by mode and fuel","pal_hot","no",
+  # Electricity
+  "electricity","elecByTechTWh", c("elec gen by gen tech cogen USA","elec gen by gen tech USA","elec gen by gen tech and cooling tech"),"pal_hot","no",
+  "electricity","elecCapByFuel", c("elec gen by gen tech cogen USA","elec gen by gen tech USA","elec gen by gen tech and cooling tech"),"pal_hot","no",
+  "electricity","elecFinalBySecTWh",  "inputs by tech","pal_hot","no",
+  "electricity","elecFinalByFuelTWh", "Final energy by detailed end-use sector and fuel","pal_hot","no",
+  # Transport
+  "transport","transportPassengerVMTByMode", "transport service output by mode","pal_hot","no",
+  "transport","transportFreightVMTByMode", "transport service output by mode","pal_hot","no",
+  "transport","transportPassengerVMTByFuelNew","transport service output by tech (new)","pal_hot","no",
+  "transport","transportFreightVMTByFuelNew", "transport service output by tech (new)","pal_hot","no",
+  "transport","transportPassengerVMTByFuel","transport service output by tech","pal_hot","no",
+  "transport","transportFreightVMTByFuel", "transport service output by tech","pal_hot","no",
+  # Water
+  "water","watConsumBySec", "water consumption by state, sector, basin (includes desal)","pal_wet","no",
+  "water","watWithdrawBySec", "water withdrawals by state, sector, basin (includes desal)","pal_wet","no",
+  "water","watWithdrawByCrop", "water withdrawals by crop","pal_wet","no",
+  "water","watBioPhysCons", "biophysical water demand by crop type and land region","pal_wet","no",
+  "water","watIrrWithdrawBasin", "water withdrawals by water mapping source","pal_wet","no",
+  "water","watIrrConsBasin", "water consumption by water mapping source","pal_wet","no",
+  "water","watSupRunoffBasin", "Basin level available runoff","pal_wet","no",
+  "water","waterWithdrawROGW", "Water withdrawals by water source (runoff vs. groundwater)","pal_wet","no",
+  # Socio-economics
+  "socioecon","gdpPerCapita", "GDP per capita MER by region","pal_hot","no",
+  "socioecon","gdp", "GDP MER by region","pal_hot","no",
+  "socioecon","gdpGrowthRate", "GDP Growth Rate (Percent)","pal_hot","no",
+  "socioecon","pop", "Population by region","pal_hot","no",
+  # Agriculture
+  "ag","agProdbyIrrRfd", "ag production by tech","pal_green","no",
+  "ag","agProdBiomass", "ag production by tech","pal_green","no",
+  "ag","agProdForest", "ag production by tech","pal_green","no",
+  "ag","agProdByCrop", "ag production by tech","pal_green","no",
+  #Livestock
+  "livestock","livestock_MeatDairybyTechMixed", "meat and dairy production by tech","pal_green","no",
+  "livestock","livestock_MeatDairybyTechPastoral", "meat and dairy production by tech","pal_green","no",
+  "livestock","livestock_MeatDairybyTechImports", "meat and dairy production by tech","pal_green","no",
+  "livestock","livestock_MeatDairybySubsector", "meat and dairy production by tech","pal_green","no",
+  # Land use
+  "land","landIrrRfd", "land allocation by crop and water source","pal_green","no",
+  "land","landIrrCrop", "land allocation by crop and water source","pal_green","no",
+  "land","landRfdCrop", "land allocation by crop and water source","pal_green","no",
+  "land","landAlloc", "aggregated land allocation","pal_green","no",
+  "land","landAllocByCrop", "land allocation by crop","pal_green","no",
+  "land","landAllocDetail","detailed land allocation","pal_green","no",
+  # General
+  "general","inputs", "inputs by tech","pal_hot","no",
+  "general","outputs", "outputs by tech","pal_hot","no",
+  # Emissions
+  "emissions","emissNonCO2BySectorGWPAR5", "nonCO2 emissions by sector","pal_hot","no",
+  "emissions","emissNonCO2BySectorGTPAR5", "nonCO2 emissions by sector","pal_hot","no",
+  "emissions","emissNonCO2BySectorGWPAR5", "nonCO2 emissions by sector USA","pal_hot","no",
+  "emissions","emissNonCO2BySectorGTPAR5", "nonCO2 emissions by sector USA","pal_hot","no",
+  "emissions","emissNonCO2BySectorOrigUnits", "nonCO2 emissions by sector","pal_hot","no",
+  "emissions","emissLUC", "Land Use Change Emission (future)","pal_hot","no",
+  "emissions","emissCO2BySector", "CO2 emissions by sector","pal_hot","no",
+  "emissions","emissCO2CumGlobal2010to2100", "CO2 emissions by sector","pal_hot","no",
+  "emissions","emissCO2CumGlobal2010to2100RCP", "CO2 emissions by sector","pal_hot","no",
+  "emissions","emissNonCO2BySector", "nonCO2 emissions by sector USA","pal_hot","no",
+  "emissions","emissNonCO2BySector", "nonCO2 emissions by sector USA nonUS","pal_hot","no",
+  "emissions","emissNonCO2BySector", "nonCO2 emissions by sector","pal_hot","no",
+  "emissions","emissCO2BySectorNoBio", "CO2 emissions by sector (no bio)","pal_hot","no",
+  "emissions","emissNonCO2ByResProdGWPAR5", "nonCO2 emissions by resource production","pal_hot","no",
+  "emissions","emissMethaneBySourceGWPAR5", "nonCO2 emissions by sector","pal_hot","no",
+  "emissions","emissByGasGWPAR5FFI", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
+  "emissions","emissByGasGWPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
+  "emissions","emissBySectorGWPAR5FFI", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
+  "emissions","emissBySectorGWPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
+  "emissions","emissNonCO2ByResProdGTPAR5", "nonCO2 emissions by resource production","pal_hot","no",
+  "emissions","emissMethaneBySourceGTPAR5", "nonCO2 emissions by sector","pal_hot","no",
+  "emissions","emissByGasGTPAR5FFI", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
+  "emissions","emissByGasGTPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
+  "emissions","emissBySectorGTPAR5FFI",  c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
+  "emissions","emissBySectorGTPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
+); map_param_query
+
+use_data(map_param_query, version=3, overwrite=T)
+
+#-------------------
 # Data Files
 #-------------------
 
@@ -42,134 +182,6 @@ data_queries <- unlist(unique(gcamextractor::map_param_query$query)); data_queri
 use_data(data_capfactors, version=3, overwrite=T)
 use_data(data_params, version=3, overwrite=T)
 use_data(data_queries, version=3, overwrite=T)
-
-#-------------------
-# gcamextractor mapping between params and quereies
-#-------------------
-
-map_param_query <- tibble::tribble(
-  ~group, ~param, ~query,~mapPalette,
-  # "cerf","gcam_to_cerf_tech_name_map", # class1 gcam class2 gcam value = CERF technology
-  # "cerf","lifetime_yr",
-  # "cerf","capacity_factor",
-  # "cerf","variable_cost_esc_rate_fraction",
-  # "cerf","fuel_esc_rate_fraction",
-  # #unit_size,
-  # "cerf","variable_om_USDperMWh",
-  # "cerf","heat_rate_BTUperkWh",
-  # "cerf","fuel_price_USDperGJ",
-  # "cerf","carbon_capture_rate_fraction",
-  # "cerf","fuel_co2_content_tonsperMWh",
-  # #discount_rate,
-  # "cerf","carbon_esc_rate_fraction",
-  # "cerf","carbon_tax_USDperTon",
-  # "cerf","New capacity by vintage",
-  # "cerf","Retired capacity by vintage",
-  # Energy
-  "energy","energyPrimaryByFuelEJ","primary energy consumption by region (direct equivalent)","pal_hot",
-  "energy","energyPrimaryRefLiqProdEJ", "refined liquids production by subsector","pal_hot",
-  "energy","energyFinalConsumBySecEJ", "total final energy by aggregate sector","pal_hot",
-  "energy","energyFinalByFuelBySectorEJ", "Final energy by detailed end-use sector and fuel","pal_hot",
-  "energy","energyFinalSubsecByFuelTranspEJ", "transport final energy by fuel","pal_hot",
-  "energy","energyFinalSubsecByFuelBuildEJ", "building final energy by fuel","pal_hot",
-  "energy","energyFinalSubsecByFuelIndusEJ", "industry final energy by fuel","pal_hot",
-  "energy","energyFinalSubsecBySectorBuildEJ", "building final energy by subsector","pal_hot",
-  "energy","energyFinalConsumByIntlShpAvEJ", "transport final energy by mode and fuel","pal_hot",
-  "energy","energyPrimaryByFuelMTOE", "primary energy consumption by region (direct equivalent)","pal_hot",
-  "energy","energyPrimaryRefLiqProdMTOE", "refined liquids production by subsector","pal_hot",
-  "energy","energyFinalConsumBySecMTOE", "total final energy by aggregate sector","pal_hot",
-  "energy","energyFinalByFuelBySectorMTOE", "Final energy by detailed end-use sector and fuel","pal_hot",
-  "energy","energyFinalByFuelBySectorTWh", "Final energy by detailed end-use sector and fuel","pal_hot",
-  "energy","energyFinalbyFuelMTOE", "Final energy by detailed end-use sector and fuel","pal_hot",
-  "energy","energyFinalSubsecByFuelTranspMTOE", "transport final energy by fuel","pal_hot",
-  "energy","energyFinalSubsecByFuelBuildMTOE", "building final energy by fuel","pal_hot",
-  "energy","energyFinalSubsecByFuelIndusMTOE", "industry final energy by fuel","pal_hot",
-  "energy","energyFinalSubsecBySectorBuildMTOE", "building final energy by subsector","pal_hot",
-  "energy","energyFinalConsumByIntlShpAvMTOE", "transport final energy by mode and fuel","pal_hot",
-  "energy","energyPrimaryByFuelTWh", "primary energy consumption by region (direct equivalent)","pal_hot",
-  "energy","energyPrimaryRefLiqProdTWh", "refined liquids production by subsector","pal_hot",
-  "energy","energyFinalConsumBySecTWh", "total final energy by aggregate sector","pal_hot",
-  "energy","energyFinalbyFuelTWh", "Final energy by detailed end-use sector and fuel","pal_hot",
-  "energy","energyFinalSubsecByFuelTranspTWh", "transport final energy by fuel","pal_hot",
-  "energy","energyFinalSubsecByFuelBuildTWh", "building final energy by fuel","pal_hot",
-  "energy","energyFinalSubsecByFuelIndusTWh", "industry final energy by fuel","pal_hot",
-  "energy","energyFinalSubsecBySectorBuildTWh", "building final energy by subsector","pal_hot",
-  "energy","energyFinalConsumByIntlShpAvTWh", "transport final energy by mode and fuel","pal_hot",
-  # Electricity
-  "electricity","elecByTechTWh", c("elec gen by gen tech cogen USA","elec gen by gen tech USA","elec gen by gen tech and cooling tech"),"pal_hot",
-  "electricity","elecCapByFuel", c("elec gen by gen tech cogen USA","elec gen by gen tech USA","elec gen by gen tech and cooling tech"),"pal_hot",
-  "electricity","elecFinalBySecTWh",  "inputs by tech","pal_hot",
-  "electricity","elecFinalByFuelTWh", "Final energy by detailed end-use sector and fuel","pal_hot",
-  # Transport
-  "transport","transportPassengerVMTByMode", "transport service output by mode","pal_hot",
-  "transport","transportFreightVMTByMode", "transport service output by mode","pal_hot",
-  "transport","transportPassengerVMTByFuelNew","transport service output by tech (new)","pal_hot",
-  "transport","transportFreightVMTByFuelNew", "transport service output by tech (new)","pal_hot",
-  "transport","transportPassengerVMTByFuel","transport service output by tech","pal_hot",
-  "transport","transportFreightVMTByFuel", "transport service output by tech","pal_hot",
-  # Water
-  "water","watConsumBySec", "water consumption by state, sector, basin (includes desal)","pal_wet",
-  "water","watWithdrawBySec", "water withdrawals by state, sector, basin (includes desal)","pal_wet",
-  "water","watWithdrawByCrop", "water withdrawals by crop","pal_wet",
-  "water","watBioPhysCons", "biophysical water demand by crop type and land region","pal_wet",
-  "water","watIrrWithdrawBasin", "water withdrawals by water mapping source","pal_wet",
-  "water","watIrrConsBasin", "water consumption by water mapping source","pal_wet",
-  "water","watSupRunoffBasin", "Basin level available runoff","pal_wet",
-  "water","waterWithdrawROGW", "Water withdrawals by water source (runoff vs. groundwater)","pal_wet",
-  # Socio-economics
-  "socioecon","gdpPerCapita", "GDP per capita MER by region","pal_hot",
-  "socioecon","gdp", "GDP MER by region","pal_hot",
-  "socioecon","gdpGrowthRate", "GDP Growth Rate (Percent)","pal_hot",
-  "socioecon","pop", "Population by region","pal_hot",
-  # Agriculture
-  "ag","agProdbyIrrRfd", "ag production by tech","pal_green",
-  "ag","agProdBiomass", "ag production by tech","pal_green",
-  "ag","agProdForest", "ag production by tech","pal_green",
-  "ag","agProdByCrop", "ag production by tech","pal_green",
-  #Livestock
-  "livestock","livestock_MeatDairybyTechMixed", "meat and dairy production by tech","pal_green",
-  "livestock","livestock_MeatDairybyTechPastoral", "meat and dairy production by tech","pal_green",
-  "livestock","livestock_MeatDairybyTechImports", "meat and dairy production by tech","pal_green",
-  "livestock","livestock_MeatDairybySubsector", "meat and dairy production by tech","pal_green",
-  # Land use
-  "land","landIrrRfd", "land allocation by crop and water source","pal_green",
-  "land","landIrrCrop", "land allocation by crop and water source","pal_green",
-  "land","landRfdCrop", "land allocation by crop and water source","pal_green",
-  "land","landAlloc", "aggregated land allocation","pal_green",
-  "land","landAllocByCrop", "land allocation by crop","pal_green",
-  "land","landAllocDetail","detailed land allocation","pal_green",
-  # General
-  "general","inputs", "inputs by tech","pal_hot",
-  "general","outputs", "outputs by tech","pal_hot",
-  # Emissions
-  "emissions","emissNonCO2BySectorGWPAR5", "nonCO2 emissions by sector","pal_hot",
-  "emissions","emissNonCO2BySectorGTPAR5", "nonCO2 emissions by sector","pal_hot",
-  "emissions","emissNonCO2BySectorGWPAR5", "nonCO2 emissions by sector USA","pal_hot",
-  "emissions","emissNonCO2BySectorGTPAR5", "nonCO2 emissions by sector USA","pal_hot",
-  "emissions","emissNonCO2BySectorOrigUnits", "nonCO2 emissions by sector","pal_hot",
-  "emissions","emissLUC", "Land Use Change Emission (future)","pal_hot",
-  "emissions","emissCO2BySector", "CO2 emissions by sector","pal_hot",
-  "emissions","emissCO2CumGlobal2010to2100", "CO2 emissions by sector","pal_hot",
-  "emissions","emissCO2CumGlobal2010to2100RCP", "CO2 emissions by sector","pal_hot",
-  "emissions","emissNonCO2BySector", "nonCO2 emissions by sector USA","pal_hot",
-  "emissions","emissNonCO2BySector", "nonCO2 emissions by sector USA nonUS","pal_hot",
-  "emissions","emissNonCO2BySector", "nonCO2 emissions by sector","pal_hot",
-  "emissions","emissCO2BySectorNoBio", "CO2 emissions by sector (no bio)","pal_hot",
-  "emissions","emissNonCO2ByResProdGWPAR5", "nonCO2 emissions by resource production","pal_hot",
-  "emissions","emissMethaneBySourceGWPAR5", "nonCO2 emissions by sector","pal_hot",
-  "emissions","emissByGasGWPAR5FFI", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot",
-  "emissions","emissByGasGWPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot",
-  "emissions","emissBySectorGWPAR5FFI", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot",
-  "emissions","emissBySectorGWPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot",
-  "emissions","emissNonCO2ByResProdGTPAR5", "nonCO2 emissions by resource production","pal_hot",
-  "emissions","emissMethaneBySourceGTPAR5", "nonCO2 emissions by sector","pal_hot",
-  "emissions","emissByGasGTPAR5FFI", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot",
-  "emissions","emissByGasGTPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot",
-  "emissions","emissBySectorGTPAR5FFI",  c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot",
-  "emissions","emissBySectorGTPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot",
-); map_param_query
-
-use_data(map_param_query, version=3, overwrite=T)
 
 #-------------------
 # Regional Mapping
