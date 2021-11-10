@@ -119,7 +119,7 @@ readgcam <- function(gcamdatabase = NULL,
     paramsSelectAll -> tblFinalNrgIntlAvShip->datax->group->basin->subRegion->query->subresource-> transport
 
   if(!is.null(regionsSelect)){
-    if(grepl("$all^", regionsSelect, ignore.case = T)){
+    if(any(grepl("$all^", regionsSelect, ignore.case = T))){
       regionsSelect <- NULL
     }
     }
@@ -446,7 +446,7 @@ readgcam <- function(gcamdatabase = NULL,
       # Read in each file needed and assign to list and rename the list item
       gcamdata_files <- list()
       for(i in 1:length(gcamdata_filenames)){
-        gcamdata_file_i <-  as_tibble(read.csv(paste0(gcamdata_folder, "/outputs/", gcamdata_filenames[[i]], ".csv"), comment.char = "#"))
+        gcamdata_file_i <-  tibble::as_tibble(read.csv(paste0(gcamdata_folder, "/outputs/", gcamdata_filenames[[i]], ".csv"), comment.char = "#"))
         gcamdata_files[[i]] <- gcamdata_file_i
         names(gcamdata_files)[[i]] <- gcamdata_filenames[[i]]
       }
