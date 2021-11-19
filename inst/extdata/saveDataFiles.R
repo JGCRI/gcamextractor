@@ -24,6 +24,7 @@ map_param_query <- tibble::tribble(
                                       #"L223.GlobalTechLifetime_elec",
                                       #"L223.GlobalIntTechLifetime_elec"
                                       ),
+  "cerf","capacity_factor_usa_in",'elec investment capacity factor',"pal_hot","no",
   # "cerf","capacity_factor","pal_hot","no",
   # "cerf","variable_cost_esc_rate_fraction","pal_hot","no",
   # "cerf","fuel_esc_rate_fraction","pal_hot","no",
