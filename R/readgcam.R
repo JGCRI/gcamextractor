@@ -523,7 +523,7 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
-
+  if(!is.null(gcamdata_folder)){
   # S Curve Parameters
   paramx<-"lifetime_scurve_yr"
   if(paramx %in% paramsSelectx){
@@ -536,6 +536,7 @@ readgcam <- function(gcamdatabase = NULL,
       unlist() %>%
       unique() -> gcamdata_files_needed
 
+    if(!is.null(gcamdata_folder)){
     if(dir.exists(gcamdata_folder)){
       for(file_i in gcamdata_files_needed){
         file_ix <- paste0(gcamdata_folder, "/outputs/", file_i, ".csv")
@@ -545,6 +546,7 @@ readgcam <- function(gcamdatabase = NULL,
        }
       }
     }
+      }
 
     # US S-Curve
     tibble::as_tibble(gcamdata_files[["L2244.TechSCurve_nuc_gen2_USA"]]) %>%
@@ -626,7 +628,10 @@ readgcam <- function(gcamdatabase = NULL,
       dplyr::filter(!is.na(value))
     datax <- dplyr::bind_rows(datax, tbl)
   }
+  }
 
+
+  if(!is.null(gcamdata_folder)){
   # Lifetime Parameters
   paramx<-"lifetime_yr"
   if(paramx %in% paramsSelectx){
@@ -724,6 +729,7 @@ readgcam <- function(gcamdatabase = NULL,
       dplyr::ungroup()%>%
       dplyr::filter(!is.na(value))
     datax <- dplyr::bind_rows(datax, tbl)
+  }
   }
 
 
