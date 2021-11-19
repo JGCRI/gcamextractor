@@ -18,7 +18,7 @@ rgcam::localDBConn("C:/Z/models/GCAMVersions/gcam-usa-im3/output","database_SSP5
 dataGCAM <- readgcam(reReadData = T,
                      gcamdatabase = gcamdatabase_i,
                      gcamdata_folder = gcamdata_folder_i,
-                     dataProjFile = "C:/Z/models/gcamextractor/outputs/readGCAM/dataProj_cerf.proj",
+                     dataProjFile = "C:/Z/models/gcamextractor/cerf/dataProj_cerf.proj",
                      regionsSelect = NULL,
                      paramsSelect = "cerf",
                      folder = "cerf")
@@ -26,9 +26,10 @@ dataGCAM <- readgcam(reReadData = T,
 # reReadData = T
 # gcamdatabase = gcamdatabase_i
 # gcamdata_folder = gcamdata_folder_i
-# dataProjFile = "C:/Z/models/gcamextractor/outputs/readGCAM/dataProj_cerf.proj"
+# dataProjFile = "C:/Z/models/gcamextractor/cerf/dataProj_cerf.proj"
 # regionsSelect = NULL
 # paramsSelect= "cerf"
+# folder = "cerf"
 
 
 

@@ -104,15 +104,15 @@ readgcam <- function(gcamdatabase = NULL,
   # nameAppend=""
   # saveData = T
 
-  #----------------
+  #................
   # Initialize variables by setting to NULL
-  #----------------
+  #................
 
   NULL -> vintage -> year -> xLabel -> x -> value -> sector -> scenario -> region -> param -> origX -> origValue ->
     origUnits -> origScen -> origQuery -> classPalette2 -> classPalette1 -> classLabel2 -> classLabel1 -> class2 ->
     class1 -> connx -> aggregate -> Units -> sources -> paramx -> fuel -> technology -> input -> output -> water ->
     landleaf -> ghg -> Convert -> regionsSelectAll->cf1971to2100->gcamCapacityFactor -> . -> GWPAR5 -> tblelecByTechTWh ->
-    totalFFINonCO2 -> FracBioFuel -> FracFossilFuel -> TotalLiquids -> agg_tech->
+    totalFFINonCO2 -> FracBioFuel -> FracFossilFuel -> TotalLiquids -> agg_tech->scenarios->queries->
     class_temp -> resource -> subRegAreaSum -> subsector->tblFinalNrgIntlAvShipMod -> 'transportation' ->
     'International Aviation' -> 'International Ship' -> 'International Aviation oil' -> 'a oil' ->
     'International Ship oil' -> 'International Aviation liquids' -> liquids -> 'International Ship liquids'->crop->
@@ -131,9 +131,15 @@ readgcam <- function(gcamdatabase = NULL,
     }
   }
 
-#---------------------
+#.....................
+# Read in all raw gcamdata base and gcam folder data.
+#.....................
+
+  if(T){ # Read in all raw gcamdata base and gcam folder data.
+
+#.....................
 # Params and Queries
-#---------------------
+#.....................
 
   paramQueryMap <- (gcamextractor::map_param_query)%>%dplyr::select(group,param,query,gcamdata)
 
@@ -160,15 +166,18 @@ readgcam <- function(gcamdatabase = NULL,
     queriesSelectx <- as.vector(unlist(unique(paramQueryMap$query)))
   }
 
-#-----------------------------
+  queriesSelectx <- queriesSelectx [!is.na(queriesSelectx )]
+
+#.............................
 # Create necessary directories if they dont exist.
-#----------------------------
+#............................
+
   if (!dir.exists(folder)){
     dir.create(folder)}  # Output Directory
 
-#----------------
+#................
 # Set file paths
-#----------------
+#................
 
   if(is.null(gcamdatabase)){
     gcamdatabasePath = NULL
@@ -203,7 +212,6 @@ readgcam <- function(gcamdatabase = NULL,
     }
   }
 
-
   if(is.null(dataProjFile)){
     dataProj = "dataProj"
     dataProjPath = gsub("//","/",paste(folder,"/", sep = ""))
@@ -220,6 +228,8 @@ readgcam <- function(gcamdatabase = NULL,
         print(paste("Connecting to the dataProjFile provided ",dataProjFile,"...",sep=""))}else{
           dataProjPath <- gsub("[^/]+$","",dataProjFile)
           dataProj <- basename(dataProjFile)
+          print(paste0("Creating folder for dataProjFile: ", dataProjFile))
+          if(!dir.exists(dataProjPath)){dir.create(dataProjPath)}
           print(gsub("//","/",paste("Will save GCAM data to ",dataProjPath,"/",dataProjFile,"...",sep="")))
         }
       }else{
@@ -232,7 +242,6 @@ readgcam <- function(gcamdatabase = NULL,
     }
     }
   }
-
 
   # Set new scenario names if provided
   if (is.null(scenOrigNames)) {
@@ -247,10 +256,9 @@ readgcam <- function(gcamdatabase = NULL,
     }
     }
 
-#---------------------------------------------
+#.............................................
 # Read gcam database or existing dataProj.proj
-#--------------------------------------------
-
+#............................................
 
   # In case user sets reReadData=F and provides a .proj file instead of a gcamdatabase
   if((is.null(gcamdatabasePath) | is.null(gcamdatabaseName)) &
@@ -392,8 +400,10 @@ readgcam <- function(gcamdatabase = NULL,
     }
 
     for (scenario_i in scenOrigNames) {
-       dataProj.proj <- rgcam::addScenario(conn = rgcam::localDBConn(gcamdatabasePath, gcamdatabaseName), proj = gsub("//","/",paste(dataProjPath, "/", dataProj, sep = "")),
-                                           scenario = scenario_i, queryFile = gsub("//","/",paste(queryPath, "/subSetQueries.xml", sep = "")))  # Check your queries file
+       dataProj.proj <- rgcam::addScenario(conn = rgcam::localDBConn(gcamdatabasePath, gcamdatabaseName),
+                                           proj = gsub("//","/",paste(dataProjPath, "/", dataProj, sep = "")),
+                                           scenario = scenario_i,
+                                           queryFile = gsub("//","/",paste(queryPath, "/subSetQueries.xml", sep = "")))  # Check your queries file
       }
 
     dataProjLoaded <- rgcam::loadProject(gsub("//","/",paste(dataProjPath, "/", dataProj, sep = "")))
@@ -446,7 +456,7 @@ readgcam <- function(gcamdatabase = NULL,
       # Read in each file needed and assign to list and rename the list item
       gcamdata_files <- list()
       for(i in 1:length(gcamdata_filenames)){
-        gcamdata_file_i <-  tibble::as_tibble(read.csv(paste0(gcamdata_folder, "/outputs/", gcamdata_filenames[[i]], ".csv"), comment.char = "#"))
+        gcamdata_file_i <-  tibble::as_tibble(read.csv(paste0(gcamdata_folder, "/outputs/", gsub(".csv","",gcamdata_filenames[[i]]), ".csv"), comment.char = "#"))
         gcamdata_files[[i]] <- gcamdata_file_i
         names(gcamdata_files)[[i]] <- gcamdata_filenames[[i]]
       }
@@ -454,6 +464,12 @@ readgcam <- function(gcamdatabase = NULL,
     }
   }
 
+} # Close Read in all raw gcamdata base and gcam folder data.
+
+
+#.....................
+# Collect and format selected parameters
+#.....................
 
   # Check if any of the selected parameters are available in the GCAM data
   if(any(paramsSelectx %in% paramsSelectAll)){
@@ -464,8 +480,52 @@ readgcam <- function(gcamdatabase = NULL,
 
   queriesx <- queriesx[queriesx %in% queries]
 
-  paramx<-"lifetime_scurve_yr"
+  # Capacity Factor USA Input
+  paramx<-"capacity_factor_usa_in"
+  if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
+    queryx <- "elec investment capacity factor"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
+      }
+      tbl <- tbl %>%
+        dplyr::mutate(param = paramx,
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      units = "Capacity Factor",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = sector,
+                      classLabel1 = "investment_segment",
+                      classPalette1 = "pal_all",
+                      class2 = sector_1,
+                      classLabel2 = "technology",
+                      classPalette2 = "pal_all")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
   # S Curve Parameters
+  paramx<-"lifetime_scurve_yr"
   if(paramx %in% paramsSelectx){
 
     print(paste0("Running param: ", paramx,"..."))
@@ -567,8 +627,8 @@ readgcam <- function(gcamdatabase = NULL,
     datax <- dplyr::bind_rows(datax, tbl)
   }
 
+  # Lifetime Parameters
   paramx<-"lifetime_yr"
-  # S Curve Parameters
   if(paramx %in% paramsSelectx){
 
     print(paste0("Running param: ", paramx,"..."))
@@ -1306,9 +1366,9 @@ readgcam <- function(gcamdatabase = NULL,
     tblUSACogen<-tibble::tibble()
     tblGCAMReg<-tibble::tibble()
 
-    #-------------
+    #.............
     # For GCAM USA no cogen
-    #-------------
+    #.............
     queryx <- "elec gen by gen tech USA"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -1345,9 +1405,9 @@ readgcam <- function(gcamdatabase = NULL,
                       classLabel2 = "Technology",
                       classPalette2 = "pal_all")
     }
-    #-------------
+    #.............
     # For GCAM USA cogen
-    #-------------
+    #.............
     # queryx <- "elec gen by gen tech cogen USA"
     # if (queryx %in% queriesx) {
     #   tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -1384,9 +1444,9 @@ readgcam <- function(gcamdatabase = NULL,
     #                   classPalette2 = "pal_all")
     # }
     tblUSACogen <- tibble::tibble()
-      #--------------------
+      #....................
       # GCAM other Regions
-      #------------------------
+      #........................
       queryx <- "elec gen by gen tech and cooling tech"
       if (queryx %in% queriesx) {
         tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -3754,9 +3814,9 @@ readgcam <- function(gcamdatabase = NULL,
   }
 
 
-#-----------------------
+#.......................
 # AR5 GTP
-#----------------------
+#......................
 
   paramx <- "emissNonCO2BySectorGTPAR5"
   if(paramx %in% paramsSelectx){
@@ -4641,9 +4701,9 @@ readgcam <- function(gcamdatabase = NULL,
   datax<-datax%>%unique()
 
 
-  # -----------
+  # ...........
   # unit Conversions
-  # -----------
+  # ...........
   dataxEJtoMTOE <- datax %>% dplyr::filter(grepl("\\(EJ\\)",units)) %>%
     dplyr::mutate(value=value*gcamextractor::convert$conv_EJ_to_MTOE,
                   units = gsub("\\(EJ\\)","(Mtoe)",units),
@@ -4704,9 +4764,9 @@ readgcam <- function(gcamdatabase = NULL,
   # dplyr::filter(x %in% c(2010:2050),param=="elecNewCapGW",scenario=="GCAMRef")%>%
   # dplyr::group_by(scenario,x)%>%dplyr::summarize(sum=sum(value))
 
-  #---------------------
+  #.....................
   # Save Data in CSV
-  #---------------------
+  #.....................
 
   datax <- datax  %>% unique()
 
