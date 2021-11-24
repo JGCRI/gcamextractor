@@ -1474,4 +1474,13 @@
                         <showAttribute attribute-name="year" level="technology"/>
                     </supplyDemandQuery>
    </aQuery>
+   <aQuery>   
+     <all-regions/>
+               <supplyDemandQuery title="prices by sector">
+                <axis1 name="sector">sector</axis1>
+                <axis2 name="Year">cost</axis2>
+                <xPath buildList="true" dataName="Price" group="false" sumAll="false">*[@type = 'sector']/cost/text()</xPath>
+                <comments/>
+            </supplyDemandQuery>
+	</aQuery>
 </queries>

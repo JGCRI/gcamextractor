@@ -25,11 +25,13 @@ library(dplyr)
 
 # Tests using .proj file =======================================================
 # Test arguments
+paramsSelect_i = (map_param_query$group%>%unique())[!(map_param_query$group%>%unique()) %in% "cerf"]
+
 gcamData <- gcamextractor::readgcam(queryFile = NULL,
                                     dataProjFile = gcamextractor::example_gcamv54_argentina_colombia_2025_proj,
                                     scenOrigNames = 'Reference',
                                     scenNewNames = 'Ref',
-                                    paramsSelect = 'All',
+                                    paramsSelect = paramsSelect_i,
                                     regionsSelect = 'Colombia')
 
 

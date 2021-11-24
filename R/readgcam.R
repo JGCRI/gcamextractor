@@ -116,7 +116,8 @@ readgcam <- function(gcamdatabase = NULL,
     class_temp -> resource -> subRegAreaSum -> subsector->tblFinalNrgIntlAvShipMod -> 'transportation' ->
     'International Aviation' -> 'International Ship' -> 'International Aviation oil' -> 'a oil' ->
     'International Ship oil' -> 'International Aviation liquids' -> liquids -> 'International Ship liquids'->crop->
-    paramsSelectAll -> tblFinalNrgIntlAvShip->datax->group->basin->subRegion->query->subresource-> transport
+    paramsSelectAll -> tblFinalNrgIntlAvShip->datax->group->basin->subRegion->query->subresource-> transport ->
+    gcamdata -> half.life -> lifetime -> read.csv -> sector_1 -> steepness
 
   if(!is.null(regionsSelect)){
     if(any(grepl("$all^", regionsSelect, ignore.case = T))){
@@ -456,7 +457,7 @@ readgcam <- function(gcamdatabase = NULL,
       # Read in each file needed and assign to list and rename the list item
       gcamdata_files <- list()
       for(i in 1:length(gcamdata_filenames)){
-        gcamdata_file_i <-  tibble::as_tibble(read.csv(paste0(gcamdata_folder, "/outputs/", gsub(".csv","",gcamdata_filenames[[i]]), ".csv"), comment.char = "#"))
+        gcamdata_file_i <-  tibble::as_tibble(utils::read.csv(paste0(gcamdata_folder, "/outputs/", gsub(".csv","",gcamdata_filenames[[i]]), ".csv"), comment.char = "#"))
         gcamdata_files[[i]] <- gcamdata_file_i
         names(gcamdata_files)[[i]] <- gcamdata_filenames[[i]]
       }
@@ -499,11 +500,11 @@ readgcam <- function(gcamdatabase = NULL,
                       origUnits = "1975USD/GJ",
                       origX = year,
                       subRegion=region,
-                      region = dplyr::if_else(region %in% regions_US52, "USA", region),
+                      region = dplyr::if_else(region %in% gcamextractor::regions_US52, "USA", region),
                       scenario = scenNewNames,
-                      value = (value*gdp_deflator(2015,1975)/0.2777778),
+                      value = (value*gcamextractor::gdp_deflator(2015,1975)/0.2777778),
                       units = "OnM Cost (2015 USD/MWh)",
-                      vintage = stringr::str_sub(technology,-4,-1),
+                      vintage = paste("Vint_",stringr::str_sub(technology,-4,-1), sep = ""),
                       technology = stringr::str_sub(technology,0,-11),
                       x = year,
                       xLabel = "Year",
@@ -528,7 +529,7 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
-  # Variable OnM costs electricity generation
+  # Variable OnM escalation rate costs electricity generation
   paramx<-"elec_variable_om_escl_rate_2015USDperMWh"
   if(paramx %in% paramsSelectx){
     print(paste0("Running param: ", paramx,"..."))
@@ -539,8 +540,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origUnits) %>%
         dplyr::mutate(param = paramx,
                       value_old = value,
-                      lag_val = lag(value),
-                      value = round(((value - lag(value)) / lag(value)),4),
+                      lag_val = dplyr::lag(value),
+                      value = round(((value - dplyr::lag(value)) / dplyr::lag(value)),4),
                       units = "OnM Cost Escalation Rate (2015 USD/MWh)") %>%
         dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
                       aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
@@ -554,6 +555,86 @@ readgcam <- function(gcamdatabase = NULL,
     } else {
       # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
     }
+
+  # Fuel price
+  paramx<-"elec_fuel_price_2015USDperMBTU"
+  if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
+    queryx <- "prices by sector"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
+      }
+      tbl <- tbl %>%
+        dplyr::filter(sector %in% c("refined liquids industrial",
+                                    "regional biomass",
+                                    "regional coal",
+                                    "wholesale gas",
+                                    "nuclearFuelGenII",
+                                    "nuclearFuelGenIII")) %>%
+        dplyr::mutate(param = paramx,
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = "1975USD/GJ",
+                      origX = year,
+                      subRegion=region,
+                      region = dplyr::if_else(region %in% gcamextractor::regions_US52, "USA", region),
+                      scenario = scenNewNames,
+                      value = (value*gcamextractor::gdp_deflator(2015,1975)/0.947),
+                      units = "Fuel Cost (2015 USD/MBTU)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = sector,
+                      classLabel1 = "sector",
+                      classPalette1 = "pal_all",
+                      class2 = "class2",
+                      classLabel2 = "class2",
+                      classPalette2 = "pal_all")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      tbl_fuel_price <- tbl
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+  # Fuel price escalation rate
+  paramx<-"elec_fuel_price_escl_rate_2015USDperMBTU"
+  if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
+
+    tbl <- tbl_fuel_price %>%
+      dplyr::group_by(scenario, region, subRegion, param, sources, class1, class2, xLabel,units,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origUnits) %>%
+      dplyr::mutate(param = paramx,
+                    value_old = value,
+                    lag_val = dplyr::lag(value),
+                    value = round(((value - dplyr::lag(value)) / dplyr::lag(value)),4),
+                    units = "Fuel Price Escalation Rate (2015 USD/MBTU)") %>%
+      dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                    aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                    origScen, origQuery, origValue, origUnits, origX)%>%
+      dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+      dplyr::ungroup()%>%
+      dplyr::filter(!is.na(value))
+    datax <- dplyr::bind_rows(datax, tbl)
+  } else {
+    # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+  }
 
   # Capacity Factor USA Input
   paramx<-"elec_capacity_factor_usa_in"
@@ -704,7 +785,6 @@ readgcam <- function(gcamdatabase = NULL,
     datax <- dplyr::bind_rows(datax, tbl)
   }
   }
-
 
   if(!is.null(gcamdata_folder)){
   # Lifetime Parameters
@@ -3069,7 +3149,7 @@ readgcam <- function(gcamdatabase = NULL,
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
-    #emiss_sector_mapping <- read.csv(CO2mappingFile, skip=1)
+    #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
     tbl <- tbl %>%
       dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
       dplyr::mutate(origValue=value,value=value*Convert*44/12,
@@ -3130,7 +3210,7 @@ readgcam <- function(gcamdatabase = NULL,
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
-      #emiss_sector_mapping <- read.csv(CO2mappingFile, skip=1)
+      #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
       tblCore <- tbl %>%
         dplyr::filter(ghg!="CO2")%>%
         dplyr::filter(scenario %in% scenOrigNames)%>%
@@ -3204,7 +3284,7 @@ readgcam <- function(gcamdatabase = NULL,
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
-      #emiss_sector_mapping <- read.csv(CO2mappingFile, skip=1)
+      #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
       tblUSA <- tbl %>%
         dplyr::filter(ghg!="CO2")%>%
         dplyr::filter(scenario %in% scenOrigNames)%>%
@@ -3436,7 +3516,7 @@ readgcam <- function(gcamdatabase = NULL,
       # if (!is.null(regionsSelect)) {
       #   tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       # }
-      #emiss_sector_mapping <- read.csv(CO2mappingFile, skip=1)
+      #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
       tbl <- tbl %>%
         dplyr::filter(scenario %in% scenOrigNames)%>%
         dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
@@ -3608,7 +3688,7 @@ readgcam <- function(gcamdatabase = NULL,
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
-      #emiss_sector_mapping <- read.csv(CO2mappingFile, skip=1)
+      #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
       tbl <- tbl %>%
         dplyr::filter(scenario %in% scenOrigNames)%>%
         dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
@@ -3670,7 +3750,7 @@ readgcam <- function(gcamdatabase = NULL,
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
-      #emiss_sector_mapping <- read.csv(CO2mappingFile, skip=1)
+      #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
       tbl <- tbl %>%
         dplyr::filter(scenario %in% scenOrigNames)%>%
         dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
@@ -3983,7 +4063,7 @@ readgcam <- function(gcamdatabase = NULL,
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
-      #emiss_sector_mapping <- read.csv(CO2mappingFile, skip=1)
+      #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
       tbl <- tbl %>%
         dplyr::filter(scenario %in% scenOrigNames)%>%
         dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
@@ -4047,7 +4127,7 @@ readgcam <- function(gcamdatabase = NULL,
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
-      #emiss_sector_mapping <- read.csv(CO2mappingFile, skip=1)
+      #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
       tbl <- tbl %>%
         dplyr::filter(scenario %in% scenOrigNames)%>%
         dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%

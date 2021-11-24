@@ -34,8 +34,6 @@ Imports:
 Suggests: 
     rmarkdown,
     testthat,
-    pander,
-    kableExtra
 Remotes: 
 	github::JGCRI/rgcam,
 	github::JGCRI/rpackageutils	

@@ -28,17 +28,4 @@ dataProjFile = dataProjFile_i
 regionsSelect = regionsSelect_i
 paramsSelect = paramsSelect_i
 folder = folder_i
-
-
-
-dataGCAM$data
-dataGCAM$dataAggClass1
-(dataGCAM$dataAggClass1)$subRegion%>%unique()
-
-
-reReadData = F
-#gcamdatabase = gcamdatabase_i,
-dataProjFile = "C:/Z/models/gcamextractor/outputs/readGCAM/dataProj.proj"
-regionsSelect = "Colombia"
-paramsSelect= param_i
-
+queryFile=NULL
