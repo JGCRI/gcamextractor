@@ -29,13 +29,12 @@ map_param_query <- tibble::tribble(
   "cerf","elec_variable_om_escl_rate_2015USDperMWh",'elec operating costs by tech and vintage',"pal_hot","no",
   "cerf","elec_fuel_price_2015USDperMBTU","prices by sector","pal_hot","no",
   "cerf","elec_fuel_price_escl_rate_2015USDperMBTU","prices by sector","pal_hot","no",
+  "cerf","elec_cap_usa_GW","elec capacity by tech and vintage","pal_hot","no",
   # "cerf","heat_rate_BTUperkWh","pal_hot","no",
   # "cerf","carbon_capture_rate_fraction","pal_hot","no",
   # "cerf","fuel_co2_content_tonsperMWh","pal_hot","no",
   # "cerf","carbon_esc_rate_fraction","pal_hot","no",
-  # "cerf","carbon_tax_USDperTon","pal_hot","no",
-  # "cerf","New capacity by vintage","pal_hot","no",
-  # "cerf","Retired capacity by vintage","pal_hot","no",
+  # #"cerf","carbon_tax_USDperTon","pal_hot","no",
   # #unit_size,"pal_hot","no",
   # #discount_rate,
   # Energy
@@ -73,7 +72,6 @@ map_param_query <- tibble::tribble(
   "electricity","elecCapByFuel", c("elec gen by gen tech cogen USA","elec gen by gen tech USA","elec gen by gen tech and cooling tech"),"pal_hot","no",
   "electricity","elecFinalBySecTWh",  "inputs by tech","pal_hot","no",
   "electricity","elecFinalByFuelTWh", "Final energy by detailed end-use sector and fuel","pal_hot","no",
-  "cerf","elec_variable_om_2015USDperMWh",'elec operating costs by tech and vintage',"pal_hot","no",
   # Transport
   "transport","transportPassengerVMTByMode", "transport service output by mode","pal_hot","no",
   "transport","transportFreightVMTByMode", "transport service output by mode","pal_hot","no",
@@ -148,19 +146,6 @@ use_data(map_param_query, version=3, overwrite=T)
 #-------------------
 # Data Files
 #-------------------
-
-# Example proj file for Colombia, Argentina
-# gcamdatabase_i = "C:/Z/models/GCAMVersions/exampleDatabases/example_gcamv54_argentina_colombia_2025"
-# dataGCAM <- readgcam(reReadData = T,
-#                      gcamdatabase = gcamdatabase_i,
-#                      dataProjFile = "C:/Z/models/gcamextractor/outputs/readGCAM/dataProj.proj",
-#                      regionsSelect = c("Argentina","Colombia"),
-#                      paramsSelect= "all")
-# Example .proj file
-#projFile <-"C:/Z/projects/metisGCAMUSA/metisOutputs/readGCAM/exampleGCAMproj.proj"
-#projFile <-paste0("C:/Z/models/gcamextractor/outputs/readGCAM/dataProj.proj")
-#example_gcamv54_argentina_colombia_2025_proj <- rgcam::loadProject(projFile)
-#use_data(example_gcamv54_argentina_colombia_2025_proj, version=3, overwrite=T)
 
 # XMl Query Files
 xmlFilePath = paste0(getwd(),"/inst/extdata/queries.xml")

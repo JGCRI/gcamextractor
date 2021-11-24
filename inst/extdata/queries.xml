@@ -1483,4 +1483,13 @@
                 <comments/>
             </supplyDemandQuery>
 	</aQuery>
+	<aQuery>   
+				<supplyDemandQuery title="elec capacity by tech and vintage">
+                        <axis1 name="technology">technology</axis1>
+                        <axis2 name="Year">capacity[@vintage]</axis2>
+                        <xPath buildList="true" dataName="capacity" group="false" sumAll="false">*[@type = 'sector' (: collapse :) and (@name='electricity')]//*[@type = 'subsector']//*[@type = 'technology']/capacity/node()</xPath>
+                        <comments/>
+                        <showAttribute attribute-name="year" level="technology"/>
+                </supplyDemandQuery>
+		</aQuery>
 </queries>

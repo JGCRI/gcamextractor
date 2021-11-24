@@ -632,14 +632,16 @@ mytable = data.frame(
                       "elec_variable_om_2015USDperMWh",
                       "elec_variable_om_escl_rate_2015USDperMWh",
                       "elec_fuel_escl_rate_2015USDperMBTU",
-                      "elec_fuel_price_escl_rate_2015USDperMBTU"),
+                      "elec_fuel_price_escl_rate_2015USDperMBTU",
+                      "elec_cap_usa_GW"),
     Description = c("Technology Lifetime (Yr)",
                     "Base year S-Curve Lifetime, Steepness, half life",
                     "Capacity Factor assumptions for US States by investment segments (baseline, intermediate, subpeak, peak",
                     "Variable OnM cost (2015 USD/MWh)",
                     "Variable OnM cost escalation rate (2015 USD/MWh)",
                     "Fuel price (2015 USD/MBTU)",
-                    "Fuel price escalation rate (2015 USD/MBTU)"
+                    "Fuel price escalation rate (2015 USD/MBTU)",
+                    "Installed Capacity in GW"
                     ),
     Unit     = c("year",
                  "* lifetime (yr)\
@@ -649,15 +651,18 @@ mytable = data.frame(
                  "2015 USD/MWh",
                  "2015 USD/MWh",
                  "2015 USD/MBTU",
-                 "2015 USD/MBTU"),
+                 "2015 USD/MBTU",
+                 "GW"),
     Queries = c("NA",
                 "NA",
                 "elec investment capacity factor",
                 "elec operating costs by tech and vintage",
                 "elec operating costs by tech and vintage",
                 "prices by sector",
-                "prices by sector"),
+                "prices by sector",
+                "elec capacity by tech and vintage"),
     `GCAM version tested` = c("v5.3",
+                              "v5.3",
                               "v5.3",
                               "v5.3",
                               "v5.3",
@@ -676,6 +681,7 @@ mytable = data.frame(
                          "None",
                          "None",
                          "None",
+                         "None",
                          "None")
     )
 
@@ -683,18 +689,12 @@ pander::pander(mytable, keep.line.breaks = TRUE, style = 'grid', justify = 'left
                split.tables=Inf, split.cells=100)
 ```
 
-* capacity_factor
-* variable_cost_esc_rate_fraction
-* fuel_esc_rate_fraction
-* variable_om_USDperMWh
 * heat_rate_BTUperkWh
 * fuel_price_USDperGJ
 * carbon_capture_rate_fraction
 * fuel_co2_content_tonsperMWh
 * carbon_esc_rate_fraction
 * carbon_tax_USDperTon
-* New capacity by vintage
-* Retired capacity by vintage
 
 
 
