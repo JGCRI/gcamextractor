@@ -480,8 +480,83 @@ readgcam <- function(gcamdatabase = NULL,
 
   queriesx <- queriesx[queriesx %in% queries]
 
+  # Variable OnM costs electricity generation
+  paramx<-"elec_variable_om_2015USDperMWh"
+  if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
+    queryx <- "elec operating costs by tech and vintage"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
+      }
+      tbl <- tbl %>%
+        dplyr::mutate(param = paramx,
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = "1975USD/GJ",
+                      origX = year,
+                      subRegion=region,
+                      region = dplyr::if_else(region %in% regions_US52, "USA", region),
+                      scenario = scenNewNames,
+                      value = (value*gdp_deflator(2015,1975)/0.2777778),
+                      units = "OnM Cost (2015 USD/MWh)",
+                      vintage = stringr::str_sub(technology,-4,-1),
+                      technology = stringr::str_sub(technology,0,-11),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = subsector,
+                      classLabel1 = "subsector",
+                      classPalette1 = "pal_all",
+                      class2 = technology,
+                      classLabel2 = "technology",
+                      classPalette2 = "pal_all")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      tbl_var_om <- tbl
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+  # Variable OnM costs electricity generation
+  paramx<-"elec_variable_om_escl_rate_2015USDperMWh"
+  if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
+
+    tbl <- tbl_var_om %>%
+      dplyr::group_by(scenario, region, subRegion, param, sources, class1, class2, xLabel,units,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origUnits) %>%
+        dplyr::mutate(param = paramx,
+                      value_old = value,
+                      lag_val = lag(value),
+                      value = round(((value - lag(value)) / lag(value)),4),
+                      units = "OnM Cost Escalation Rate (2015 USD/MWh)") %>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }
+
   # Capacity Factor USA Input
-  paramx<-"capacity_factor_usa_in"
+  paramx<-"elec_capacity_factor_usa_in"
   if(paramx %in% paramsSelectx){
     print(paste0("Running param: ", paramx,"..."))
     queryx <- "elec investment capacity factor"
@@ -525,7 +600,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   if(!is.null(gcamdata_folder)){
   # S Curve Parameters
-  paramx<-"lifetime_scurve_yr"
+  paramx<-"elec_lifetime_scurve_yr"
   if(paramx %in% paramsSelectx){
 
     print(paste0("Running param: ", paramx,"..."))
@@ -575,7 +650,7 @@ readgcam <- function(gcamdatabase = NULL,
                   dplyr::mutate(classLabel1 = "subsector",
                                 classLabel2 = "technology",
                                 param = paramx,
-                                region = "USA")) -> lifetime_scurve_us
+                                region = "USA")) -> elec_lifetime_scurve_us
 
     # Global S-Curve
     tibble::as_tibble(gcamdata_files[["L2233.GlobalTechSCurve_elec_cool"]]) %>%
@@ -586,23 +661,23 @@ readgcam <- function(gcamdatabase = NULL,
                     classLabel2 = "technology",
                     param = paramx,
                     region = "Global",
-                    subRegion = "Global") -> lifetime_scurve_global
+                    subRegion = "Global") -> elec_lifetime_scurve_global
 
     # Combined S-Curve
-    lifetime_scurve_comb <- lifetime_scurve_us %>%
-      dplyr::bind_rows(lifetime_scurve_global)
+    elec_lifetime_scurve_comb <- elec_lifetime_scurve_us %>%
+      dplyr::bind_rows(elec_lifetime_scurve_global)
 
-    # Collapse into lifetime_scurve_yr param
-    lifetime_scurve_comb_long <- lifetime_scurve_comb %>%
+    # Collapse into elec_lifetime_scurve_yr param
+    elec_lifetime_scurve_comb_long <- elec_lifetime_scurve_comb %>%
       dplyr::mutate(param = paramx,
                     classLabel1 = "scurve_param") %>%
       dplyr::select(-class1)%>%
       tidyr::gather(key="class1",value="value",
                     -year,-subRegion,-class2,-classLabel1,
                     -classLabel2,-param,-region);
-    lifetime_scurve_comb_long
+    elec_lifetime_scurve_comb_long
 
-    tbl <- lifetime_scurve_comb_long %>%
+    tbl <- elec_lifetime_scurve_comb_long %>%
       dplyr::mutate(param = paramx,
                     sources = "Sources",
                     origScen = "origScen",
@@ -633,7 +708,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   if(!is.null(gcamdata_folder)){
   # Lifetime Parameters
-  paramx<-"lifetime_yr"
+  paramx<-"elec_lifetime_yr"
   if(paramx %in% paramsSelectx){
 
     print(paste0("Running param: ", paramx,"..."))
@@ -677,7 +752,7 @@ readgcam <- function(gcamdatabase = NULL,
                   dplyr::mutate(classLabel1 = "subsector",
                                 classLabel2 = "technology",
                                 param = paramx,
-                                region = "USA")) -> lifetime_us
+                                region = "USA")) -> elec_lifetime_us
 
     # Global S-Curve
     tibble::as_tibble(gcamdata_files[["L2233.GlobalTechLifetime_elec_cool"]]) %>%
@@ -697,14 +772,14 @@ readgcam <- function(gcamdatabase = NULL,
                                         classLabel2 = "technology",
                                         param = paramx,
                                         region = "Global",
-                                        subRegion = "Global"))-> lifetime_global
+                                        subRegion = "Global"))-> elec_lifetime_global
 
     # Combined S-Curve
-    lifetime_comb <- lifetime_us %>%
-      dplyr::bind_rows(lifetime_global) %>%
+    elec_lifetime_comb <- elec_lifetime_us %>%
+      dplyr::bind_rows(elec_lifetime_global) %>%
       dplyr::rename(value=lifetime)
 
-    tbl <- lifetime_comb %>%
+    tbl <- elec_lifetime_comb %>%
       dplyr::mutate(param = paramx,
                     sources = "Sources",
                     origScen = "origScen",

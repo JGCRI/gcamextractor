@@ -1459,5 +1459,19 @@
                     <comments/>
                 </supplyDemandQuery>
    </aQuery>
- 
+   <aQuery>   
+     <all-regions/>
+                    <supplyDemandQuery title="elec operating costs by tech and vintage">
+                        <axis1 name="technology">technology</axis1>
+                        <axis2 name="Year">operating-cost[@vintage]</axis2>
+                        <xPath buildList="true" dataName="operating-cost" group="false" sumAll="false">
+                  *[@type='sector' and @name='electricity']/
+                  *[@type='subsector']/
+                  *[@type='technology']/
+                  operating-cost/node()
+               </xPath>
+                        <comments>variable costs only</comments>
+                        <showAttribute attribute-name="year" level="technology"/>
+                    </supplyDemandQuery>
+   </aQuery>
 </queries>

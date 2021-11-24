@@ -626,21 +626,32 @@ The parameters extracted for CERF are as follows with links to the relevant para
 ```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
 library(pander)
 mytable = data.frame(
-    Parameter     = c("lifetime_yr",
-                      "lifetime_scurve_yr",
-                      "capacity_factor_usa_in"),
+    Parameter     = c("elec_lifetime_yr",
+                      "elec_lifetime_scurve_yr",
+                      "elec_capacity_factor_usa_in",
+                      "elec_variable_om_2015USDperMWh",
+                      "elec_variable_om_escl_rate_2015USDperMWh"),
     Description = c("Technology Lifetime (Yr)",
                     "Base year S-Curve Lifetime, Steepness, half life",
-                    "Capacity Factor assumptions for US States by investment segments (baseline, intermediate, subpeak, peak"),
+                    "Capacity Factor assumptions for US States by investment segments (baseline, intermediate, subpeak, peak",
+                    "Variable OnM cost (2015 USD/MWh)",
+                    "Variable OnM cost escalation rate (2015 USD/MWh)"
+                    ),
     Unit     = c("year",
                  "* lifetime (yr)\
                  \n* steepness (no units)\
                  \n* half life (yr)",
-                 "None"),
+                 "None",
+                 "2015 USD/MWh",
+                 "2015 USD/MWh"),
     Queries = c("NA",
                 "NA",
-                "elec investment capacity factor"),
+                "elec investment capacity factor",
+                "elec operating costs by tech and vintage",
+                "elec operating costs by tech and vintage"),
     `GCAM version tested` = c("v5.3",
+                              "v5.3",
+                              "v5.3",
                               "v5.3",
                               "v5.3"),
     `gcamdata files` = c("* L223.TechLifetime_Dispatch\
@@ -651,6 +662,8 @@ mytable = data.frame(
                          \n* L223.TechSCurve_Dispatch\
                          \n* L2241.TechSCurve_coalret_vintage_dispatch_gcamusa\
                          \n* L2233.GlobalTechSCurve_elec_cool",
+                         "None",
+                         "None",
                          "None")
     )
 
