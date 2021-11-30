@@ -728,8 +728,8 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+  # Lifetime S Curve Parameters
   if(!is.null(gcamdata_folder)){
-  # S Curve Parameters
   paramx<-"elec_lifetime_scurve_yr"
   if(paramx %in% paramsSelectx){
 
@@ -835,8 +835,8 @@ readgcam <- function(gcamdatabase = NULL,
   }
   }
 
-  if(!is.null(gcamdata_folder)){
   # Lifetime Parameters
+  if(!is.null(gcamdata_folder)){
   paramx<-"elec_lifetime_yr"
   if(paramx %in% paramsSelectx){
 
@@ -857,11 +857,6 @@ readgcam <- function(gcamdatabase = NULL,
         }
       }
     }
-
-    tibble::as_tibble(gcamdata_files[["L223.TechLifetime_Dispatch"]]);
-    tibble::as_tibble(gcamdata_files[["L2242.TechLifetime_hydro"]]);
-    tibble::as_tibble(gcamdata_files[["L2233.GlobalTechLifetime_elec_cool"]]);
-    tibble::as_tibble(gcamdata_files[["L2233.GlobalIntTechLifetime_elec_cool"]]);
 
     # US S-Curve
     tibble::as_tibble(gcamdata_files[["L223.TechLifetime_Dispatch"]]) %>%
@@ -935,6 +930,91 @@ readgcam <- function(gcamdatabase = NULL,
     datax <- dplyr::bind_rows(datax, tbl)
   }
   }
+
+  # Fuel CO2 Content
+  if(!is.null(gcamdata_folder)){
+    paramx<-"energy_fuel_co2_content_tonsperMWh"
+    if(paramx %in% paramsSelectx){
+
+      print(paste0("Running param: ", paramx,"..."))
+
+      # Check if all required files are present
+      (paramQueryMap %>%
+          dplyr::filter(param %in% paramx))$gcamdata %>%
+        unlist() %>%
+        unique() -> gcamdata_files_needed
+
+      if(dir.exists(gcamdata_folder)){
+        for(file_i in gcamdata_files_needed){
+          file_ix <- paste0(gcamdata_folder, "/outputs/", file_i, ".csv")
+          if(!file.exists(file_ix)){
+            print(paste0("File needed does not exist: ", file_ix))
+            print("Some results may be missing.")
+          }
+        }
+      }
+
+      # Global CO2 content
+      tibble::as_tibble(gcamdata_files[["L202.CarbonCoef"]]) %>%
+        dplyr::select(region,
+                      class1 = PrimaryFuelCO2Coef.name,
+                      origValue = PrimaryFuelCO2Coef) %>%
+        dplyr::mutate(classLabel1 = "fuel",
+                      classLabel2 = "class2",
+                      param = paramx,
+                      subRegion = region,
+                      origUnits = "kg C per GJ") %>%
+        # US CO2 content
+        dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["L222.CarbonCoef_en_USA"]]) %>%
+                           dplyr::select(region,
+                                         class1 = PrimaryFuelCO2Coef.name,
+                                         origValue = PrimaryFuelCO2Coef) %>%
+                           dplyr::mutate(classLabel1 = "fuel",
+                                         classLabel2 = "class2",
+                                         param = paramx,
+                                         subRegion = region,
+                                         region = "USA",
+                                         origUnits = "kg C per GJ")) %>%
+        # US CO2 carbon content
+        dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["L2261.CarbonCoef_bio_USA"]]) %>%
+                           dplyr::select(region,
+                                         class1 = PrimaryFuelCO2Coef.name,
+                                         origValue = PrimaryFuelCO2Coef) %>%
+                           dplyr::mutate(classLabel1 = "fuel",
+                                         classLabel2 = "class2",
+                                         param = paramx,
+                                         subRegion = region,
+                                         region = "USA",
+                                         origUnits = "kg C per GJ")) -> tbl_comb
+
+      tbl <- tbl_comb %>%
+        dplyr::mutate(param = paramx,
+                      value = (origValue * gcamextractor::convert$conv_C_CO2 * 0.001) / gcamextractor::convert$conv_GJ_to_MWh,
+                      sources = "Sources",
+                      origScen = "origScen",
+                      origQuery = "origQuery",
+                      origX = NA_real_,
+                      scenario = "scenario",
+                      units = "Fuel CO2 Content (Tons per MWh)",
+                      vintage = "vintage",
+                      x = NA_real_,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class2 = "class2",
+                      classPalette1 = "pal_all",
+                      classPalette2 = "pal_all") %>%
+        dplyr::select(scenario, region, subRegion,param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    }
+  }
+
 
 
   paramx<-"energyFinalConsumByIntlShpAvEJ"
