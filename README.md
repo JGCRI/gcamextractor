@@ -25,7 +25,7 @@
 <!-------------------------->
 <!-------------------------->
 
-Khan, Z., Zhao, M., Wild, T., Vernon, C., 2021. gcamextractor - An R package to extract and process GCAM data into standardized tables and units. (In progress) Journal of Open Source Software, DOI: XXXX
+Khan, Z., Zhao, M., Wild, T., Vernon, C., 2022. gcamextractor - An R package to extract and process GCAM data into standardized tables and units. (In progress) Journal of Open Source Software, DOI: XXXX
 
 
 <!-------------------------->
