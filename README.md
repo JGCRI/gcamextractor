@@ -10,9 +10,6 @@
 
 `gcamextractor` is an R package used to extract and process GCAM data and manipulate into standardized tables. `gcamextractor` converts GCAM outputs into commonly used units as well as aggregates across different classes and sectors for easy use in plots, maps and tables.
 
-For more detailed information on using `gcamextractor`, click the green **User Guide** button below. 
-To access the `gcamextractor` cheatsheet click the yellow **Cheatsheet** button (In progress...).
-
 <br>
 
 <p align="center">
