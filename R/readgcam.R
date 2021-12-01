@@ -1015,7 +1015,108 @@ readgcam <- function(gcamdatabase = NULL,
     }
   }
 
+  # Carbon Capture Rate Fraction
+  if(!is.null(gcamdata_folder)){
+    paramx<-"elec_carbon_capture_rate_fraction"
+    if(paramx %in% paramsSelectx){
 
+      print(paste0("Running param: ", paramx,"..."))
+
+      # Check if all required files are present
+      (paramQueryMap %>%
+          dplyr::filter(param %in% paramx))$gcamdata %>%
+        unlist() %>%
+        unique() -> gcamdata_files_needed
+
+      if(dir.exists(gcamdata_folder)){
+        for(file_i in gcamdata_files_needed){
+          file_ix <- paste0(gcamdata_folder, "/outputs/", file_i, ".csv")
+          if(!file.exists(file_ix)){
+            print(paste0("File needed does not exist: ", file_ix))
+            print("Some results may be missing.")
+          }
+        }
+      }
+
+      # US carbon capture
+      tibble::as_tibble(gcamdata_files[["L223.TechCarbonCapture_Dispatch"]]) %>%
+        dplyr::select(subRegion = region,
+                      class1 = subsector,
+                      class2 = technology,
+                      origValue = remove.fraction,
+                      year) %>%
+        dplyr::mutate(classLabel1 = "subsector",
+                      classLabel2 = "technology",
+                      param = paramx,
+                      origUnits = "Carbon Capture Rate (fraction)",
+                      region = "USA") %>%
+        # US CO2 content
+        dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["L2233.GlobalTechCapture_elec_cool"]]) %>%
+                           dplyr::select(class1 = subsector.name,
+                                         class2 = technology,
+                                         origValue = remove.fraction,
+                                         year) %>%
+                           dplyr::mutate(class1 = gsub(" \\(.*","",class1),
+                                         classLabel1 = "subsector",
+                                         classLabel2 = "technology",
+                                         param = paramx,
+                                         subRegion = "Global",
+                                         region = "Global",
+                                         origUnits = "Carbon Capture Rate (fraction)")) -> tbl_comb
+
+      tbl <- tbl_comb %>%
+        dplyr::mutate(param = paramx,
+                      value = origValue,
+                      sources = "Sources",
+                      origScen = "origScen",
+                      origQuery = "origQuery",
+                      origX = year,
+                      scenario = "scenario",
+                      units = "Carbon Capture Rate (fraction)",
+                      vintage = "vintage",
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class2 = "class2",
+                      classPalette1 = "pal_all",
+                      classPalette2 = "pal_all") %>%
+        dplyr::select(scenario, region, subRegion,param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      tbl_carbon_capture_rate <- tbl
+      datax <- dplyr::bind_rows(datax, tbl)
+    }
+  }
+
+  # Carbon Capture Escalaction Rate Fraction
+  paramx<-"elec_carbon_capture_escl_rate_fraction"
+  if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
+
+    tbl <- tbl_carbon_capture_rate %>%
+      dplyr::group_by(scenario, region, subRegion, param, sources, class1, class2, xLabel,units,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origUnits) %>%
+      dplyr::mutate(param = paramx,
+                    value_old = value,
+                    lag_val = dplyr::lag(value),
+                    value = round(((value - dplyr::lag(value)) / dplyr::lag(value)),4),
+                    units = "Carbon Capture Escalation Rate (fraction)") %>%
+      dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                    aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                    origScen, origQuery, origValue, origUnits, origX)%>%
+      dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+      dplyr::ungroup()%>%
+      dplyr::filter(!is.na(value))
+    datax <- dplyr::bind_rows(datax, tbl)
+  }
 
   paramx<-"energyFinalConsumByIntlShpAvEJ"
   # Total final energy by aggregate end-use sector
@@ -1063,7 +1164,6 @@ readgcam <- function(gcamdatabase = NULL,
     } else {
       # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
-
 
   paramx<-"energyFinalConsumBySecEJ"
   # Total final energy by aggregate end-use sector

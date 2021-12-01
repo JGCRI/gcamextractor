@@ -634,7 +634,9 @@ mytable = data.frame(
                       "elec_fuel_escl_rate_2015USDperMBTU",
                       "elec_fuel_price_escl_rate_2015USDperMBTU",
                       "elec_cap_usa_GW",
-                      "energy_fuel_co2_content_tonsperMWh"),
+                      "energy_fuel_co2_content_tonsperMWh",
+                      "elec_carbon_capture_rate_fraction",
+                      "elec_carbon_capture_escl_rate_fraction"),
     Description = c("Technology Lifetime (Yr)",
                     "Base year S-Curve Lifetime, Steepness, half life",
                     "Capacity Factor assumptions for US States by investment segments (baseline, intermediate, subpeak, peak",
@@ -643,7 +645,9 @@ mytable = data.frame(
                     "Fuel price (2015 USD/MBTU)",
                     "Fuel price escalation rate (2015 USD/MBTU)",
                     "Installed Capacity in GW",
-                    "Fuel CO2 Content"
+                    "Fuel CO2 Content",
+                    "Carbon Capture Rate (fraction)",
+                    "Carbon Capture Escalation Rate (fraction)"
                     ),
     Unit     = c("year",
                  "* lifetime (yr)\
@@ -655,7 +659,9 @@ mytable = data.frame(
                  "2015 USD/MBTU",
                  "2015 USD/MBTU",
                  "GW",
-                 "Tons per MWh"),
+                 "Tons per MWh",
+                 "Fraction",
+                 "Fraction"),
     Queries = c("NA",
                 "NA",
                 "elec investment capacity factor",
@@ -664,8 +670,12 @@ mytable = data.frame(
                 "prices by sector",
                 "prices by sector",
                 "elec capacity by tech and vintage",
+                "NA",
+                "NA",
                 "NA"),
     `GCAM version tested` = c("v5.3",
+                              "v5.3",
+                              "v5.3",
                               "v5.3",
                               "v5.3",
                               "v5.3",
@@ -690,7 +700,9 @@ mytable = data.frame(
                          "None",
                          "* L2261.CarbonCoef_bio_USA\
                          \n* L202.CarbonCoef\
-                         \n* L222.CarbonCoef_en_USA")
+                         \n* L222.CarbonCoef_en_USA",
+                         "* L223.TechCarbonCapture_Dispatch\
+                         \n* L2233.GlobalTechCapture_elec_cool")
     )
 
 pander::pander(mytable, keep.line.breaks = TRUE, style = 'grid', justify = 'left', 
@@ -699,8 +711,6 @@ pander::pander(mytable, keep.line.breaks = TRUE, style = 'grid', justify = 'left
 
 * heat_rate_BTUperkWh
 * fuel_price_USDperGJ
-* carbon_capture_rate_fraction
-* carbon_esc_rate_fraction
 * carbon_tax_USDperTon
 
 
