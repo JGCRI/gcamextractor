@@ -702,6 +702,8 @@ mytable = data.frame(
                          \n* L202.CarbonCoef\
                          \n* L222.CarbonCoef_en_USA",
                          "* L223.TechCarbonCapture_Dispatch\
+                         \n* L2233.GlobalTechCapture_elec_cool",
+                         "* L223.TechCarbonCapture_Dispatch\
                          \n* L2233.GlobalTechCapture_elec_cool")
     )
 
