@@ -1,7 +1,7 @@
 pandoc: 2.7.3
-pkgdown: 1.6.1
+pkgdown: 2.0.0
 pkgdown_sha: ~
 articles:
   vignette_readgcam: vignette_readgcam.html
-last_built: 2021-11-30T14:00Z
+last_built: 2021-12-01T11:53Z
 

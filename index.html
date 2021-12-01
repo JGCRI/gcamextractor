@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-home">
       <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">gcamextractor</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
@@ -65,12 +67,12 @@
   </a>
 </li>
 <li>
-  <a href="https://github.com/JGCRI/gcamextractor/blob/main/gcamextractorCheatsheet.pdf">cheatsheet</a>
+  <a href="https://github.com/JGCRI/gcamextractor/blob/main/gcamextractorCheatsheet.pdf" class="external-link">cheatsheet</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/JGCRI/gcamextractor/">
+  <a href="https://github.com/JGCRI/gcamextractor/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -91,96 +93,110 @@
 
 <!-------------------------->
 <!-------------------------->
-<div id="introduction" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#introduction" class="anchor"></a><a name="Introduction"></a>Introduction</h1></div>
+<div class="section level1">
+<div class="page-header"><h1 id="introduction">
+<a name="Introduction"></a>Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h1></div>
 <!-------------------------->
 <!-------------------------->
 <p><code>gcamextractor</code> is an R package used to extract and process GCAM data and manipulate into standardized tables. <code>gcamextractor</code> converts GCAM outputs into commonly used units as well as aggregates across different classes and sectors for easy use in plots, maps and tables.</p>
 <p>For more detailed information on using <code>gcamextractor</code>, click the green <strong>User Guide</strong> button below. To access the <code>gcamextractor</code> cheatsheet click the yellow <strong>Cheatsheet</strong> button (In progress…).</p>
 <p><br></p>
 <p align="center">
-<a href="https://jgcri.github.io/gcamextractor/articles/vignette_readgcam.html" target="_blank"><img src="https://github.com/JGCRI/jgcricolors/blob/main/vignettes/button_user_guide.PNG?raw=true" alt="https://jgcri.github.io/rmap/articles/vignette_map.html" height="60"></a> <img src="https://github.com/JGCRI/jgcricolors/blob/main/vignettes/button_divider.PNG?raw=true" height="40"><a href="https://jgcri.github.io/gcamextractor/cheatsheet.pdf" target="_blank"><img src="https://github.com/JGCRI/jgcricolors/blob/main/vignettes/button_cheatsheet.PNG?raw=true" alt="https://jgcri.github.io/gcamextractor/cheatsheet.pdf" height="60"></a>
+<a href="https://jgcri.github.io/gcamextractor/articles/vignette_readgcam.html" target="_blank" class="external-link"><img src="https://github.com/JGCRI/jgcricolors/blob/main/articles/button_user_guide.PNG?raw=true" alt="https://jgcri.github.io/rmap/articles/vignette_map.html" height="60"></a> <img src="https://github.com/JGCRI/jgcricolors/blob/main/articles/button_divider.PNG?raw=true" height="40"><a href="https://jgcri.github.io/gcamextractor/cheatsheet.pdf" target="_blank" class="external-link"><img src="https://github.com/JGCRI/jgcricolors/blob/main/articles/button_cheatsheet.PNG?raw=true" alt="https://jgcri.github.io/gcamextractor/cheatsheet.pdf" height="60"></a>
 </p>
 <!-------------------------->
 <!-------------------------->
 </div>
-<div id="citation" class="section level1">
-<h1 class="hasAnchor">
-<a href="#citation" class="anchor"></a><a name="Citation"></a>Citation</h1>
+<div class="section level1">
+<h1 id="citation">
+<a name="Citation"></a>Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h1>
 <!-------------------------->
 <!-------------------------->
 <p>Khan, Z., Zhao, M., Wild, T., Vernon, C., 2021. gcamextractor - An R package to extract and process GCAM data into standardized tables and units. (In progress) Journal of Open Source Software, DOI: XXXX</p>
 <!-------------------------->
 <!-------------------------->
 </div>
-<div id="installation-guides" class="section level1">
-<h1 class="hasAnchor">
-<a href="#installation-guides" class="anchor"></a><a name="InstallationGuides"></a>Installation Guides</h1>
+<div class="section level1">
+<h1 id="installation-guides">
+<a name="InstallationGuides"></a>Installation Guides<a class="anchor" aria-label="anchor" href="#installation-guides"></a>
+</h1>
 <!-------------------------->
 <!-------------------------->
-<ol>
+<ol style="list-style-type: decimal">
 <li>
 <p>Download and install:</p>
 <ul>
-<li>R (<a href="https://www.r-project.org/" class="uri">https://www.r-project.org/</a>)</li>
-<li>R studio (<a href="https://www.rstudio.com/" class="uri">https://www.rstudio.com/</a>)</li>
+<li>R (<a href="https://www.r-project.org/" class="external-link uri">https://www.r-project.org/</a>)</li>
+<li>R studio (<a href="https://www.rstudio.com/" class="external-link uri">https://www.rstudio.com/</a>)</li>
 </ul>
 </li>
 <li><p>Open R studio:</p></li>
 </ol>
-<pre><code>install.packages('devtools')
-devtools::install_github('JGCRI/gcamextractor')</code></pre>
+<pre><code><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'devtools'</span><span class="op">)</span>
+<span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">'JGCRI/gcamextractor'</span><span class="op">)</span></code></pre>
 </div>
 
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="links">
-<h2>Links</h2>
+<h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li>Browse source code at <br><a href="https://github.com/JGCRI/gcamextractor/">https://​github.com/​JGCRI/​gcamextractor/​</a>
-</li>
-<li>Report a bug at <br><a href="https://github.com/JGCRI/gcamextractor/issues">https://​github.com/​JGCRI/​gcamextractor/​issues</a>
-</li>
-</ul>
-</div>
-<div class="license">
-<h2>License</h2>
-<ul class="list-unstyled">
-<li>
-<a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a>
-</li>
-</ul>
-</div>
-<div class="developers">
-<h2>Developers</h2>
-<ul class="list-unstyled">
-<li>Zarrar Khan <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-8147-8553" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
-<li>Mengqi Zhao <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0001-5385-2758" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
-<li>Tom Wild <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-8147-8553" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
-<li>Chris Vernon <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-3406-6214" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li><a href="https://github.com/JGCRI/gcamextractor/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/JGCRI/gcamextractor/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
 
-  <div class="dev-status">
-<h2>Dev status</h2>
+<div class="license">
+<h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/JGCRI/gcamextractor/actions/workflows/docs.yaml"><img src="https://github.com/JGCRI/gcamextractor/actions/workflows/docs.yaml/badge.svg" alt="docs"></a></li>
-<li><a href="https://github.com/JGCRI/gcamextractor/actions/workflows/build.yml"><img src="https://github.com/JGCRI/gcamextractor/actions/workflows/build.yml/badge.svg?branch=main" alt="build"></a></li>
-<li><a href="https://codecov.io/gh/JGCRI/gcamextractor"><img src="https://codecov.io/gh/JGCRI/gcamextractor/branch/main/graph/badge.svg?token=KXSIV6YGEN" alt="codecov"></a></li>
+<li>
+<a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a>
+</li>
 </ul>
 </div>
+
+
+<div class="citation">
+<h2 data-toc-skip>Citation</h2>
+<ul class="list-unstyled">
+<li><a href="authors.html#citation">Citing gcamextractor</a></li>
+</ul>
 </div>
+
+<div class="developers">
+<h2 data-toc-skip>Developers</h2>
+<ul class="list-unstyled">
+<li>Zarrar Khan <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-8147-8553" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Mengqi Zhao <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0001-5385-2758" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Tom Wild <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-8147-8553" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Chris Vernon <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-3406-6214" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+</ul>
+</div>
+
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/JGCRI/gcamextractor/actions/workflows/docs.yaml" class="external-link"><img src="https://github.com/JGCRI/gcamextractor/actions/workflows/docs.yaml/badge.svg" alt="docs"></a></li>
+<li><a href="https://github.com/JGCRI/gcamextractor/actions/workflows/build.yml" class="external-link"><img src="https://github.com/JGCRI/gcamextractor/actions/workflows/build.yml/badge.svg?branch=main" alt="build"></a></li>
+<li><a href="https://codecov.io/gh/JGCRI/gcamextractor" class="external-link"><img src="https://codecov.io/gh/JGCRI/gcamextractor/branch/main/graph/badge.svg?token=KXSIV6YGEN" alt="codecov"></a></li>
+</ul>
+</div>
+
+  </div>
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by Zarrar Khan, Mengqi Zhao, Tom Wild, Chris Vernon.</p>
+  <p></p>
+<p>Developed by Zarrar Khan, Mengqi Zhao, Tom Wild, Chris Vernon.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.0.</p>
 </div>
 
       </footer>
@@ -188,6 +204,8 @@ devtools::install_github('JGCRI/gcamextractor')</code></pre>
 
   
 
+
+  
 
   </body>
 </html>
