@@ -631,12 +631,13 @@ mytable = data.frame(
                       "elec_capacity_factor_usa_in",
                       "elec_variable_om_2015USDperMWh",
                       "elec_variable_om_escl_rate_2015USDperMWh",
-                      "elec_fuel_escl_rate_2015USDperMBTU",
+                      "elec_fuel_price_2015USDperMBTU",
                       "elec_fuel_price_escl_rate_2015USDperMBTU",
                       "elec_cap_usa_GW",
                       "energy_fuel_co2_content_tonsperMWh",
                       "elec_carbon_capture_rate_fraction",
-                      "elec_carbon_capture_escl_rate_fraction"),
+                      "elec_carbon_capture_escl_rate_fraction",
+                      "elec_heat_rate_BTUperkWh"),
     Description = c("Technology Lifetime (Yr)",
                     "Base year S-Curve Lifetime, Steepness, half life",
                     "Capacity Factor assumptions for US States by investment segments (baseline, intermediate, subpeak, peak",
@@ -647,7 +648,8 @@ mytable = data.frame(
                     "Installed Capacity in GW",
                     "Fuel CO2 Content",
                     "Carbon Capture Rate (fraction)",
-                    "Carbon Capture Escalation Rate (fraction)"
+                    "Carbon Capture Escalation Rate (fraction)",
+                    "Heat Rate (BTU per kWh)"
                     ),
     Unit     = c("year",
                  "* lifetime (yr)\
@@ -661,7 +663,8 @@ mytable = data.frame(
                  "GW",
                  "Tons per MWh",
                  "Fraction",
-                 "Fraction"),
+                 "Fraction",
+                 "BTU per kWh"),
     Queries = c("NA",
                 "NA",
                 "elec investment capacity factor",
@@ -672,8 +675,10 @@ mytable = data.frame(
                 "elec capacity by tech and vintage",
                 "NA",
                 "NA",
-                "NA"),
+                "NA",
+                "elec coeff"),
     `GCAM version tested` = c("v5.3",
+                              "v5.3",
                               "v5.3",
                               "v5.3",
                               "v5.3",
@@ -704,16 +709,12 @@ mytable = data.frame(
                          "* L223.TechCarbonCapture_Dispatch\
                          \n* L2233.GlobalTechCapture_elec_cool",
                          "* L223.TechCarbonCapture_Dispatch\
-                         \n* L2233.GlobalTechCapture_elec_cool")
+                         \n* L2233.GlobalTechCapture_elec_cool",
+                         "None")
     )
 
 pander::pander(mytable, keep.line.breaks = TRUE, style = 'grid', justify = 'left', 
                split.tables=Inf, split.cells=100)
 ```
-
-* heat_rate_BTUperkWh
-* fuel_price_USDperGJ
-* carbon_tax_USDperTon
-
 
 

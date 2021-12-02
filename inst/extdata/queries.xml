@@ -1492,4 +1492,14 @@
                         <showAttribute attribute-name="year" level="technology"/>
                 </supplyDemandQuery>
 		</aQuery>
+	<aQuery>  
+		        <supplyDemandQuery title="elec coeff">
+                    <axis1 name="sector">technology</axis1>
+                    <axis2 name="Year">technology[@year]</axis2>
+                    <xPath buildList="true" dataName="output" group="false" sumAll="false">
+                  *[@type='sector' and (@name='base load generation' or @name='intermediate generation' or @name='subpeak generation' or @name='peak generation' or @name='electricity')]//IO-coefficient/node()
+                        </xPath>
+                    <comments/>
+                </supplyDemandQuery>
+		</aQuery>
 </queries>

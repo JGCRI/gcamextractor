@@ -481,7 +481,59 @@ readgcam <- function(gcamdatabase = NULL,
 
   queriesx <- queriesx[queriesx %in% queries]
 
-  # Variable OnM costs electricity generation
+  # elec_heat_rate_BTUperkWh
+  paramx<-"elec_heat_rate_BTUperkWh"
+  if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
+    queryx <- "elec coeff"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
+      }
+      tbl <- tbl %>%
+        # remove secondary inputs
+        dplyr::filter(!grepl("backup", input),
+               !grepl("credits", input),
+               !grepl("water", input)) %>%
+        dplyr::mutate(param = paramx,
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year,
+                      subRegion=region,
+                      region = dplyr::if_else(region %in% gcamextractor::regions_US52, "USA", region),
+                      scenario = scenNewNames,
+                      value = (value*gcamextractor::convert$conv_BTU_per_kWh),
+                      units = "Heat Rate (BTU per kWh)",
+                      vintage = gsub("vintage=", "Vint_",`io-coefficient`),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = gsub("elec_","",input),
+                      classLabel1 = "subsector",
+                      classPalette1 = "pal_all",
+                      class2 = sector_1,
+                      classLabel2 = "technology",
+                      classPalette2 = "pal_all")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }
+  }
+
+
+  # Elec capacity by tech and vintage
   paramx<-"elec_cap_usa_GW"
   if(paramx %in% paramsSelectx){
     print(paste0("Running param: ", paramx,"..."))
