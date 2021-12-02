@@ -1,5 +1,9 @@
 title: gcamextractor
 
+home:
+  sidebar:
+    structure: [links, license, community, citation, authors, dev]
+
 navbar:
   type: inverse
   left:
