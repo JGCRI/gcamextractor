@@ -30,7 +30,7 @@ map_param_query <- tibble::tribble(
   "cerf","elec_fuel_price_2015USDperMBTU","prices by sector","pal_hot","no",
   "cerf","elec_fuel_price_escl_rate_2015USDperMBTU","prices by sector","pal_hot","no",
   "cerf","elec_cap_usa_GW","elec capacity by tech and vintage","pal_hot","no",
-  "cerf","energy_fuel_co2_content_tonsperMWh",NA,"pal_hot",c("L2261.CarbonCoef_bio_USA",
+  "cerf","energy_fuel_co2_content_tonsperMBTU",NA,"pal_hot",c("L2261.CarbonCoef_bio_USA",
                                                       "L202.CarbonCoef",
                                                       "L222.CarbonCoef_en_USA"),
   "cerf","elec_carbon_capture_rate_fraction",NA,"pal_hot",c("L223.TechCarbonCapture_Dispatch",
@@ -176,6 +176,63 @@ use_data(data_queries, version=3, overwrite=T)
 #-------------------
 # Regional Mapping
 #-------------------
+
+
+map_state_to_gridregion <- tibble::tribble(
+  ~state, ~grid_region, ~country,
+  "AK","Alaska grid","USA",
+  "CA","California grid","USA",
+  "IN","Central	East grid","USA",
+  "KY","Central	East grid","USA",
+  "MI","Central	East grid","USA",
+  "OH","Central	East grid","USA",
+  "WV","Central	East grid","USA",
+  "IL","Central	Northeast	grid","USA",
+  "MO","Central	Northeast	grid","USA",
+  "WI","Central	Northeast	grid","USA",
+  "IA","Central	Northwest	grid","USA",
+  "MN","Central	Northwest	grid","USA",
+  "ND","Central	Northwest	grid","USA",
+  "NE","Central	Northwest	grid","USA",
+  "SD","Central	Northwest	grid","USA",
+  "KS","Central	Southwest	grid","USA",
+  "OK","Central	Southwest	grid","USA",
+  "FL","Florida	grid","USA",
+  "HI","Hawaii	grid","USA",
+  "DC","Mid-Atlantic grid","USA",
+  "DE","Mid-Atlantic grid","USA",
+  "MD","Mid-Atlantic grid","USA",
+  "NJ","Mid-Atlantic grid","USA",
+  "PA","Mid-Atlantic grid","USA",
+  "CT","New	England	grid","USA",
+  "MA","New	England	grid","USA",
+  "ME","New	England	grid","USA",
+  "NH","New	England	grid","USA",
+  "RI","New	England	grid","USA",
+  "VT","New	England	grid","USA",
+  "NY","New	York grid","USA",
+  "ID","Northwest	grid","USA",
+  "MT","Northwest	grid","USA",
+  "NV","Northwest	grid","USA",
+  "OR","Northwest	grid","USA",
+  "UT","Northwest	grid","USA",
+  "WA","Northwest	grid","USA",
+  "AL","Southeast	grid","USA",
+  "AR","Southeast	grid","USA",
+  "GA","Southeast	grid","USA",
+  "LA","Southeast	grid","USA",
+  "MS","Southeast	grid","USA",
+  "NC","Southeast	grid","USA",
+  "SC","Southeast	grid","USA",
+  "TN","Southeast	grid","USA",
+  "VA","Southeast	grid","USA",
+  "AZ","Southwest	grid","USA",
+  "CO","Southwest	grid","USA",
+  "NM","Southwest	grid","USA",
+  "WY","Southwest	grid","USA",
+  "TX","Texas	grid","USA")
+use_data(map_state_to_gridregion, version=3, overwrite=T)
+
 
 map_country_to_gcam_region <- tibble::tribble(
   ~gcam_region_code	,	~country_code	,	~gcam_region	,	~country	,
@@ -485,6 +542,7 @@ convert <- list(
   conv_EJ_to_GWh = 277777.778,
   conv_GJ_to_MWh = 0.277777778,
   conv_GW_to_kW = 1e6,
+  conv_MWh_to_MBTU = 3.412e+6,
   conv_BTU_per_kWh = 3412,
   conv_1975USDperGJ_to_2017USDperMWh =  gdp_deflator(year=2017,base_year=1975)/0.2777778,
   conv_1975USDperGJ_to_2017USDperMBTU =  gdp_deflator(year=2017,base_year=1975)/0.947,
@@ -702,6 +760,4 @@ regions_gcam_basins <- c( "Adriatic_Sea_Greece_Black_Sea_Coast","Africa_East_Cen
                   "Ziya_He_Interior")
 
 use_data(regions_gcam_basins, version=3, overwrite=T)
-
-
 

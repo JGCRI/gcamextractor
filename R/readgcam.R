@@ -511,7 +511,7 @@ readgcam <- function(gcamdatabase = NULL,
                       vintage = gsub("vintage=", "Vint_",`io-coefficient`),
                       x = year,
                       xLabel = "Year",
-                      aggregate = "sum",
+                      aggregate = "mean",
                       class1 = gsub("elec_","",input),
                       classLabel1 = "subsector",
                       classPalette1 = "pal_all",
@@ -609,7 +609,7 @@ readgcam <- function(gcamdatabase = NULL,
                       technology = stringr::str_sub(technology,0,-11),
                       x = year,
                       xLabel = "Year",
-                      aggregate = "sum",
+                      aggregate = "mean",
                       class1 = subsector,
                       classLabel1 = "subsector",
                       classPalette1 = "pal_all",
@@ -643,7 +643,7 @@ readgcam <- function(gcamdatabase = NULL,
                       value_old = value,
                       lag_val = dplyr::lag(value),
                       value = round(((value - dplyr::lag(value)) / dplyr::lag(value)),4),
-                      units = "OnM Cost Escalation Rate (2015 USD/MWh)") %>%
+                      units = "OnM Cost Escalation Rate (fraction)") %>%
         dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
                       aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
                       origScen, origQuery, origValue, origUnits, origX)%>%
@@ -653,8 +653,6 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
     }
 
   # Fuel price
@@ -667,13 +665,25 @@ readgcam <- function(gcamdatabase = NULL,
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
-      tbl <- tbl %>%
+
+      # Regional Biomass reported at National Level
+      tbl_bio <- tbl %>%
+        dplyr::filter(sector %in% c("regional biomass")) %>%
+        dplyr::filter(region %in% gcamextractor::regions_US52); tbl_bio
+
+      # Fossil fuels reported at Grid Region Level
+      tbl_fossil <- tbl %>%
         dplyr::filter(sector %in% c("refined liquids industrial",
-                                    "regional biomass",
                                     "regional coal",
-                                    "wholesale gas",
-                                    "nuclearFuelGenII",
-                                    "nuclearFuelGenIII")) %>%
+                                    "wholesale gas")) %>%
+        dplyr::rename(grid_region="region") %>%
+        dplyr::left_join(gcamextractor::map_state_to_gridregion, by="grid_region") %>%
+        dplyr::filter(!is.na(state)) %>%
+        dplyr::rename(region=state) %>%
+        dplyr::select(-grid_region,-country); tbl_fossil
+
+      tbl_comb <- tbl_bio %>%
+        dplyr::bind_rows(tbl_fossil) %>%
         dplyr::mutate(param = paramx,
                       sources = "Sources",
                       origScen = scenario,
@@ -689,7 +699,7 @@ readgcam <- function(gcamdatabase = NULL,
                       vintage = paste("Vint_", year, sep = ""),
                       x = year,
                       xLabel = "Year",
-                      aggregate = "sum",
+                      aggregate = "mean",
                       class1 = sector,
                       classLabel1 = "sector",
                       classPalette1 = "pal_all",
@@ -704,8 +714,8 @@ readgcam <- function(gcamdatabase = NULL,
                         origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
         dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
-      tbl_fuel_price <- tbl
-      datax <- dplyr::bind_rows(datax, tbl)
+      tbl_fuel_price <- tbl_comb
+      datax <- dplyr::bind_rows(datax, tbl_comb)
     } else {
       # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
@@ -723,7 +733,7 @@ readgcam <- function(gcamdatabase = NULL,
                     value_old = value,
                     lag_val = dplyr::lag(value),
                     value = round(((value - dplyr::lag(value)) / dplyr::lag(value)),4),
-                    units = "Fuel Price Escalation Rate (2015 USD/MBTU)") %>%
+                    units = "Fuel Price Escalation Rate (fraction)") %>%
       dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
                     aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
                     origScen, origQuery, origValue, origUnits, origX)%>%
@@ -748,19 +758,22 @@ readgcam <- function(gcamdatabase = NULL,
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
       tbl <- tbl %>%
+        dplyr::filter(region %in% gcamextractor::regions_US52) %>%
         dplyr::mutate(param = paramx,
                       sources = "Sources",
                       origScen = scenario,
                       origQuery = queryx,
                       origValue = value,
                       origUnits = Units,
-                      origX = year, subRegion=region,
+                      origX = year,
+                      subRegion=region,
+                      region = "USA",
                       scenario = scenNewNames,
                       units = "Capacity Factor",
                       vintage = paste("Vint_", year, sep = ""),
                       x = year,
                       xLabel = "Year",
-                      aggregate = "sum",
+                      aggregate = "mean",
                       class1 = sector,
                       classLabel1 = "investment_segment",
                       classPalette1 = "pal_all",
@@ -872,7 +885,7 @@ readgcam <- function(gcamdatabase = NULL,
                     vintage = paste("Vint_", year, sep = ""),
                     x = year,
                     xLabel = "Year",
-                    aggregate = "sum",
+                    aggregate = "mean",
                     classPalette1 = "pal_all",
                     classPalette2 = "pal_all")%>%
       dplyr::select(scenario, region, subRegion,param, sources, class1, class2, x, xLabel, vintage, units, value,
@@ -968,7 +981,7 @@ readgcam <- function(gcamdatabase = NULL,
                     vintage = paste("Vint_", year, sep = ""),
                     x = year,
                     xLabel = "Year",
-                    aggregate = "sum",
+                    aggregate = "mean",
                     classPalette1 = "pal_all",
                     classPalette2 = "pal_all")%>%
       dplyr::select(scenario, region, subRegion,param, sources, class1, class2, x, xLabel, vintage, units, value,
@@ -985,7 +998,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   # Fuel CO2 Content
   if(!is.null(gcamdata_folder)){
-    paramx<-"energy_fuel_co2_content_tonsperMWh"
+    paramx<-"energy_fuel_co2_content_tonsperMBTU"
     if(paramx %in% paramsSelectx){
 
       print(paste0("Running param: ", paramx,"..."))
@@ -1041,20 +1054,21 @@ readgcam <- function(gcamdatabase = NULL,
 
       tbl <- tbl_comb %>%
         dplyr::mutate(param = paramx,
-                      value = (origValue * gcamextractor::convert$conv_C_CO2 * 0.001) / gcamextractor::convert$conv_GJ_to_MWh,
+                      value = ((origValue * gcamextractor::convert$conv_C_CO2 * 0.001) / gcamextractor::convert$conv_GJ_to_MWh)*gcamextractor::convert$conv_MWh_to_MBTU,
                       sources = "Sources",
                       origScen = "origScen",
                       origQuery = "origQuery",
                       origX = NA_real_,
                       scenario = "scenario",
-                      units = "Fuel CO2 Content (Tons per MWh)",
+                      units = "Fuel CO2 Content (Tons per MBTU)",
                       vintage = "vintage",
                       x = NA_real_,
                       xLabel = "Year",
-                      aggregate = "sum",
+                      aggregate = "mean",
                       class2 = "class2",
                       classPalette1 = "pal_all",
                       classPalette2 = "pal_all") %>%
+        dplyr::filter(!grepl("remove",subRegion)) %>%
         dplyr::select(scenario, region, subRegion,param, sources, class1, class2, x, xLabel, vintage, units, value,
                       aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
                       origScen, origQuery, origValue, origUnits, origX)%>%
@@ -1128,7 +1142,7 @@ readgcam <- function(gcamdatabase = NULL,
                       vintage = paste("Vint_", year, sep = ""),
                       x = year,
                       xLabel = "Year",
-                      aggregate = "sum",
+                      aggregate = "mean",
                       classPalette1 = "pal_all",
                       classPalette2 = "pal_all") %>%
         dplyr::select(scenario, region, subRegion,param, sources, class1, class2, x, xLabel, vintage, units, value,
