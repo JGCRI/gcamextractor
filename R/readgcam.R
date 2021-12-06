@@ -1068,7 +1068,7 @@ readgcam <- function(gcamdatabase = NULL,
                       class2 = "class2",
                       classPalette1 = "pal_all",
                       classPalette2 = "pal_all") %>%
-        dplyr::filter(!grepl("remove",subRegion)) %>%
+        dplyr::filter(!grepl("remove",subRegion, ignore.case = T)) %>%
         dplyr::select(scenario, region, subRegion,param, sources, class1, class2, x, xLabel, vintage, units, value,
                       aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
                       origScen, origQuery, origValue, origUnits, origX)%>%
@@ -5153,8 +5153,8 @@ readgcam <- function(gcamdatabase = NULL,
 
   if(nrow(datax)>0){
 
-  datax<-datax%>%unique()
-
+  datax <- datax %>%
+    unique()
 
   # ...........
   # unit Conversions
@@ -5188,7 +5188,8 @@ readgcam <- function(gcamdatabase = NULL,
                                                                           "emissCO2CumGlobal2010to2100",
                                                                           "emissCO2CumGlobal2010to2100RCP"))~ "RegionRemove",
                                          TRUE ~ region)) %>%
-        dplyr::filter(region != "RegionRemove")
+        dplyr::filter(!grepl("remove",region,ignore.case = T)) %>%
+        dplyr::filter(!grepl("remove",subRegion,ignore.case = T))
     }
 
     subRegions_i <-(datax %>% dplyr::filter(param==param_i,scenario==scenario_i))$subRegion%>%unique(); subRegions_i
@@ -5203,7 +5204,8 @@ readgcam <- function(gcamdatabase = NULL,
                                                                              "emissCO2CumGlobal2010to2100",
                                                                              "emissCO2CumGlobal2010to2100RCP"))~ "subRegionRemove",
                                          TRUE ~ subRegion)) %>%
-                        dplyr::filter(region != "RegionRemove")
+        dplyr::filter(!grepl("remove",region,ignore.case = T))  %>%
+        dplyr::filter(!grepl("remove",subRegion,ignore.case = T))
     }
   }
   }
