@@ -719,7 +719,7 @@ pander::pander(mytable, keep.line.breaks = TRUE, style = 'grid', justify = 'left
 
 
 <!-------------------------->
-## CERF
+## GO
 <!-------------------------->
 
 Use `cerf` for the `paramSelect` argument in `gcamextractor` to extract the relevant variables needed for the `CERF` model (https://github.com/IMMM-SFA/cerf).
