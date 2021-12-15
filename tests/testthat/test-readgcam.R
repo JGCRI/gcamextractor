@@ -25,7 +25,7 @@ library(dplyr)
 
 # Tests using .proj file =======================================================
 # Test arguments
-paramsSelect_i = (map_param_query$group%>%unique())[!(map_param_query$group%>%unique()) %in% "cerf"]
+paramsSelect_i = (map_param_query$group%>%unique())[!(map_param_query$group%>%unique()) %in% c("cerf","go")]
 
 gcamData <- gcamextractor::readgcam(queryFile = NULL,
                                     dataProjFile = gcamextractor::example_gcamv54_argentina_colombia_2025_proj,
