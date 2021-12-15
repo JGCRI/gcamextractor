@@ -1150,6 +1150,65 @@
 </tr>
 </tbody>
 </table>
+<!-------------------------->
+</div>
+<div class="section level2">
+<h2 id="cerf-1">CERF<a class="anchor" aria-label="anchor" href="#cerf-1"></a>
+</h2>
+<!-------------------------->
+<p>Use <code>cerf</code> for the <code>paramSelect</code> argument in <code>gcamextractor</code> to extract the relevant variables needed for the <code>CERF</code> model (<a href="https://github.com/IMMM-SFA/cerf" class="external-link uri">https://github.com/IMMM-SFA/cerf</a>).</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">library</span>(gcamextractor)</span>
+<span id="cb8-2"><a href="#cb8-2"></a></span>
+<span id="cb8-3"><a href="#cb8-3"></a>path_to_gcam_database &lt;-<span class="st"> "E:/gcamfolder/output/database_ref"</span> <span class="co"># Change to your path.</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a>path_to_gcam_projfile &lt;-<span class="st"> "E:/my_proj_file.proj"</span> <span class="co"># (OPTIONAL) Change to your .proj file path. </span></span>
+<span id="cb8-5"><a href="#cb8-5"></a>gcamextractor<span class="op">::</span>data_params <span class="co"># view available parameters</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a>dataGCAM &lt;-<span class="st"> </span>gcamextractor<span class="op">::</span><span class="kw">readgcam</span>(<span class="dt">gcamdatabase =</span> path_to_gcam_database,</span>
+<span id="cb8-7"><a href="#cb8-7"></a>                                    <span class="dt">dataProjFile =</span> path_to_gcam_projfile <span class="co"># Optional. Or go_proj_file.proj</span></span>
+<span id="cb8-8"><a href="#cb8-8"></a>                                    <span class="dt">paramsSelect =</span> <span class="st">"go"</span>,</span>
+<span id="cb8-9"><a href="#cb8-9"></a>                                    <span class="dt">folder =</span> <span class="st">"go"</span>)  <span class="co"># Set to "All" to read in all available params</span></span>
+<span id="cb8-10"><a href="#cb8-10"></a></span>
+<span id="cb8-11"><a href="#cb8-11"></a>df &lt;-<span class="st"> </span>dataGCAM<span class="op">$</span>data; df</span>
+<span id="cb8-12"><a href="#cb8-12"></a>dfParam &lt;-<span class="st"> </span>dataGCAM<span class="op">$</span>dataAggParam; dfParam</span>
+<span id="cb8-13"><a href="#cb8-13"></a>dfClass1 &lt;-<span class="st"> </span>dataGCAM<span class="op">$</span>dataAggClass1; dfClass1</span>
+<span id="cb8-14"><a href="#cb8-14"></a>dfClass2 &lt;-<span class="st"> </span>dataGCAM<span class="op">$</span>dataAggClass1; dfClass2</span></code></pre></div>
+<p>The parameters extracted for GO are as follows with links to the relevant parameters explanation:</p>
+<p><a name="table_cerf"></a> <strong>Table: GO</strong></p>
+<table style="width:100%;" class="table">
+<colgroup>
+<col width="24%">
+<col width="21%">
+<col width="11%">
+<col width="13%">
+<col width="16%">
+<col width="12%">
+</colgroup>
+<thead><tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+<th>Unit</th>
+<th>Queries</th>
+<th>GCAM.version.tested</th>
+<th>gcamdata.files</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>elec_fuel_price_2015USDperMBTU</td>
+<td>Fuel Price (2015 USD/MBTU)</td>
+<td>2015 USD/MBTU</td>
+<td>prices by sector</td>
+<td>v5.3</td>
+<td>None</td>
+</tr>
+<tr class="even">
+<td>elec_heat_rate_MBTUperMWh</td>
+<td>Heat Rate (MBTU per MWh)</td>
+<td>MBTU per MWh</td>
+<td>elec coeff</td>
+<td>v5.3</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
   </div>
