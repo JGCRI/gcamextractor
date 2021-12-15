@@ -483,7 +483,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   # elec_heat_rate_BTUperkWh
   paramx<-"elec_heat_rate_BTUperkWh"
-  if(paramx %in% paramsSelectx){
+  if(any(c(paramx,"elec_heat_rate_MBTUperMWh") %in% paramsSelectx)){
     print(paste0("Running param: ", paramx,"..."))
     queryx <- "elec coeff"
     if (queryx %in% queriesx) {
@@ -526,6 +526,23 @@ readgcam <- function(gcamdatabase = NULL,
                         origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
         dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
+      tbl_heat_rate_BTUperkWh <- tbl
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }
+  }
+
+  # elec_heat_rate_BTUperkWh
+  paramx<-"elec_heat_rate_MBTUperMWh"
+  if(paramx %in% paramsSelectx){
+    print(paste0("Running param: ", paramx,"..."))
+    queryx <- "elec coeff"
+    if (T) {
+      tbl <- tbl_heat_rate_BTUperkWh %>%
+        dplyr::mutate(param = paramx,
+                      value = value/1000,
+                      units = "Heat Rate (MBTU per MWh)")
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
       # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}

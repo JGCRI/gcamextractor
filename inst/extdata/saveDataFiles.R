@@ -38,6 +38,8 @@ map_param_query <- tibble::tribble(
   "cerf","elec_carbon_capture_escl_rate_fraction",NA,"pal_hot",c("L223.TechCarbonCapture_Dispatch",
                                                             "L2233.GlobalTechCapture_elec_cool"),
   "cerf","elec_heat_rate_BTUperkWh","elec coeff","pal_hot","no",
+  "go","elec_heat_rate_MBTUperMWh","elec coeff","pal_hot","no",
+  "go","elec_fuel_price_2015USDperMBTU","prices by sector","pal_hot","no",
   # #"cerf","carbon_tax_USDperTon","pal_hot","no",
   # #"cerf", unit_size,"pal_hot","no",
   # #"cerf", discount_rate,

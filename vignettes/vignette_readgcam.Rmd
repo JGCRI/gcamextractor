@@ -718,3 +718,56 @@ pander::pander(mytable, keep.line.breaks = TRUE, style = 'grid', justify = 'left
 ```
 
 
+<!-------------------------->
+## CERF
+<!-------------------------->
+
+Use `cerf` for the `paramSelect` argument in `gcamextractor` to extract the relevant variables needed for the `CERF` model (https://github.com/IMMM-SFA/cerf).
+
+```{r eval=F}
+library(gcamextractor)
+
+path_to_gcam_database <- "E:/gcamfolder/output/database_ref" # Change to your path.
+path_to_gcam_projfile <- "E:/my_proj_file.proj" # (OPTIONAL) Change to your .proj file path. 
+gcamextractor::data_params # view available parameters
+dataGCAM <- gcamextractor::readgcam(gcamdatabase = path_to_gcam_database,
+                                    dataProjFile = path_to_gcam_projfile # Optional. Or go_proj_file.proj
+                                    paramsSelect = "go",
+                                    folder = "go")  # Set to "All" to read in all available params
+
+df <- dataGCAM$data; df
+dfParam <- dataGCAM$dataAggParam; dfParam
+dfClass1 <- dataGCAM$dataAggClass1; dfClass1
+dfClass2 <- dataGCAM$dataAggClass1; dfClass2
+
+```
+
+The parameters extracted for GO are as follows with links to the relevant parameters explanation:
+
+<a name="table_cerf"></a>
+**Table: GO**
+
+```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
+library(pander)
+mytable = data.frame(
+    Parameter     = c("elec_fuel_price_2015USDperMBTU",
+                      "elec_heat_rate_MBTUperMWh"),
+    Description = c("Fuel Price (2015 USD/MBTU)",
+                    "Heat Rate (MBTU per MWh)"
+                    ),
+    Unit     = c("2015 USD/MBTU",
+                 "MBTU per MWh"),
+    Queries = c("prices by sector",
+                "prices by sector",
+                "elec coeff"),
+    `GCAM version tested` = c("v5.3",
+                              "v5.3"),
+    `gcamdata files` = c("None",
+                         "None")
+    )
+
+pander::pander(mytable, keep.line.breaks = TRUE, style = 'grid', justify = 'left', 
+               split.tables=Inf, split.cells=100)
+```
+
+
