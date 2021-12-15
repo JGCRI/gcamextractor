@@ -758,7 +758,6 @@ mytable = data.frame(
     Unit     = c("2015 USD/MBTU",
                  "MBTU per MWh"),
     Queries = c("prices by sector",
-                "prices by sector",
                 "elec coeff"),
     `GCAM version tested` = c("v5.3",
                               "v5.3"),
