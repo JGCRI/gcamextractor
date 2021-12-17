@@ -9,6 +9,7 @@ readgcam(
   gcamdata_folder = NULL,
   queryFile = NULL,
   dataProjFile = paste0(getwd(), "/dataProj.proj"),
+  maxMemory = "4g",
   scenOrigNames = "All",
   scenNewNames = NULL,
   reReadData = T,
@@ -27,6 +28,8 @@ readgcam(
 \item{queryFile}{Defualt = NULL. When NULL gcamextractor loads pre-saved xml file gcamextractor::queries}
 
 \item{dataProjFile}{Default = NULL. Optional. A default 'dataProj.proj' is produced if no .Proj file is specified.}
+
+\item{maxMemory}{Default = "4g". Set the maxMemory. Sometimes need to increase this for very large data.}
 
 \item{scenOrigNames}{Default = "All". Original Scenarios names in GCAM database in a string vector.
 For example c('scenario1','scenario2).}

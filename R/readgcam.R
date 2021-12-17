@@ -8,6 +8,7 @@
 #' @param gcamdatabase Default = NULL. Full path to GCAM database folder.
 #' @param queryFile Defualt = NULL. When NULL gcamextractor loads pre-saved xml file gcamextractor::queries
 #' @param dataProjFile Default = NULL. Optional. A default 'dataProj.proj' is produced if no .Proj file is specified.
+#' @param maxMemory Default = "4g". Set the maxMemory. Sometimes need to increase this for very large data.
 #' @param scenOrigNames Default = "All". Original Scenarios names in GCAM database in a string vector.
 #' For example c('scenario1','scenario2).
 #' @param scenNewNames New Names which may be shorter and more useful for figures etc.
@@ -82,6 +83,7 @@ readgcam <- function(gcamdatabase = NULL,
                      gcamdata_folder = NULL,
                      queryFile = NULL,
                      dataProjFile = paste0(getwd(),"/dataProj.proj"),
+                     maxMemory = "4g",
                      scenOrigNames = "All",
                      scenNewNames = NULL,
                      reReadData = T,
@@ -365,7 +367,7 @@ readgcam <- function(gcamdatabase = NULL,
     }
 
     # Get names of scenarios in database
-    x <- utils::capture.output(rgcam::localDBConn(gcamdatabasePath,gcamdatabaseName), type="message")
+    x <- utils::capture.output(rgcam::localDBConn(gcamdatabasePath,gcamdatabaseName,maxMemory=maxmemory), type="message")
     x <- gsub(", ",",",gsub(": ","",gsub("Database scenarios:  ","",x)));x
     scenarios <- as.vector(unlist(strsplit(gsub("Database scenarios: ","",x),",")))
     print(scenarios)
@@ -401,7 +403,7 @@ readgcam <- function(gcamdatabase = NULL,
     }
 
     for (scenario_i in scenOrigNames) {
-       dataProj.proj <- rgcam::addScenario(conn = rgcam::localDBConn(gcamdatabasePath, gcamdatabaseName),
+       dataProj.proj <- rgcam::addScenario(conn = rgcam::localDBConn(gcamdatabasePath, gcamdatabaseName,maxMemory=maxmemory),
                                            proj = gsub("//","/",paste(dataProjPath, "/", dataProj, sep = "")),
                                            scenario = scenario_i,
                                            queryFile = gsub("//","/",paste(queryPath, "/subSetQueries.xml", sep = "")))  # Check your queries file
