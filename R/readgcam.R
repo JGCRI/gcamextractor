@@ -367,7 +367,7 @@ readgcam <- function(gcamdatabase = NULL,
     }
 
     # Get names of scenarios in database
-    x <- utils::capture.output(rgcam::localDBConn(gcamdatabasePath,gcamdatabaseName,maxMemory=maxmemory), type="message")
+    x <- utils::capture.output(rgcam::localDBConn(gcamdatabasePath,gcamdatabaseName,maxMemory=maxMemory), type="message")
     x <- gsub(", ",",",gsub(": ","",gsub("Database scenarios:  ","",x)));x
     scenarios <- as.vector(unlist(strsplit(gsub("Database scenarios: ","",x),",")))
     print(scenarios)
@@ -403,7 +403,7 @@ readgcam <- function(gcamdatabase = NULL,
     }
 
     for (scenario_i in scenOrigNames) {
-       dataProj.proj <- rgcam::addScenario(conn = rgcam::localDBConn(gcamdatabasePath, gcamdatabaseName,maxMemory=maxmemory),
+       dataProj.proj <- rgcam::addScenario(conn = rgcam::localDBConn(gcamdatabasePath, gcamdatabaseName,maxMemory=maxMemory),
                                            proj = gsub("//","/",paste(dataProjPath, "/", dataProj, sep = "")),
                                            scenario = scenario_i,
                                            queryFile = gsub("//","/",paste(queryPath, "/subSetQueries.xml", sep = "")))  # Check your queries file
