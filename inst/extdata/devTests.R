@@ -66,7 +66,7 @@ params <- gcamextractor::data_params; params
 gcamdatabase_i = "C:/Z/models/GCAMVersions/gcam-usa-im3/output/database_SSP5"
 rgcam::localDBConn("C:/Z/models/GCAMVersions/gcam-usa-im3/output","database_SSP5")
 reReadData_i = T
-dataProjFile_i = "dataProj_testNonCO2.proj"
+dataProjFile_i = "dataProj_testNonCO2"
 regionsSelect_i = NULL
 paramsSelect_i = "emissNonCO2BySector"
 folder_i="testNonCO2"
@@ -101,7 +101,7 @@ dataProjLoaded <- rgcam::loadProject(gsub("//","/",paste(getwd(), "/", "dataProj
 rgcam::localDBConn( "/pic/projects/im3/gcamusa/gcam-usa-im3/output/",
                     "database_Ref_RCP8p5_NORESM_5trail_delta_applied2015",
                    migabble = T,
-                   maxMemory = "12g")
+                   maxMemory = "8g")
 
 dataProj.proj <- rgcam::addScenario(conn = rgcam::localDBConn("/pic/projects/im3/gcamusa/gcam-usa-im3/output/",
                                                               "database_Ref_RCP8p5_NORESM_5trail_delta_applied2015",
