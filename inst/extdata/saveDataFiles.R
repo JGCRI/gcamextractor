@@ -546,11 +546,13 @@ convert <- list(
   conv_GW_to_kW = 1e6,
   conv_MWh_to_MBTU = 3.412e+6,
   conv_BTU_per_kWh = 3412,
+  conv_GJ_to_MBTU = 0.947804, # Assuming MBTU = 10e6 BTU
   conv_1975USDperGJ_to_2017USDperMWh =  gdp_deflator(year=2017,base_year=1975)/0.2777778,
-  conv_1975USDperGJ_to_2017USDperMBTU =  gdp_deflator(year=2017,base_year=1975)/0.947,
+  conv_1975USDperGJ_to_2017USDperMBTU =  gdp_deflator(year=2017,base_year=1975)/0.947804,
   conv_USD_1975_2010	= gdp_deflator(year=2010,base_year=1975),
   conv_USD_1975_2015	= gdp_deflator(year=2015,base_year=1975),
   conv_C_CO2 = 44/12,
+  conv_kg_Ton = 1e-3,
   conv_MT_GT = 1e-3); convert
 
 use_data(convert, version=3, overwrite=T)

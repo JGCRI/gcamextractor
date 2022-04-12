@@ -114,3 +114,21 @@ dataProj.proj <- rgcam::addScenario(conn = rgcam::localDBConn("/pic/projects/im3
 
 dataProjLoaded <- rgcam::loadProject(gsub("//","/",paste(getwd(), "/", "dataProj.proj", sep = "")))
 
+# Check for Yang Ou db
+library(gcamextractor)
+gcamdatabase_i = "C:/Z/models/tests/database_basexdb"
+rgcam::localDBConn("C:/Z/models/tests","database_basexdb")
+reReadData_i = T
+dataProjFile_i = "dataProj_yang_test.proj"
+regionsSelect_i = NULL
+paramsSelect_i = c("electricity")
+folder_i="yang_test"
+
+dataGCAM <- readgcam(reReadData = reReadData_i,
+                     gcamdatabase = gcamdatabase_i,
+                     dataProjFile = dataProjFile_i,
+                     regionsSelect = regionsSelect_i,
+                     paramsSelect = paramsSelect_i,
+                     folder = folder_i)
+
+

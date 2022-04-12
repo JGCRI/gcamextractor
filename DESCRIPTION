@@ -36,6 +36,6 @@ Suggests:
     testthat,
 Remotes: 
 	github::JGCRI/rgcam,
-	github::JGCRI/rpackageutils	
+	github::JGCRI/rpackageutils
 VignetteBuilder: 
     knitr
