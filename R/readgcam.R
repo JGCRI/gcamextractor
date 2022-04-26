@@ -459,7 +459,7 @@ readgcam <- function(gcamdatabase = NULL,
       # Read in each file needed and assign to list and rename the list item
       gcamdata_files <- list()
       for(i in 1:length(gcamdata_filenames)){
-        gcamdata_file_i <-  tibble::as_tibble(utils::read.csv(paste0(gcamdata_folder, "/outputs/", gsub(".csv","",gcamdata_filenames[[i]]), ".csv"), comment.char = "#"))
+        gcamdata_file_i <-  tibble::as_tibble(utils::read.csv(paste0(gcamdata_folder, gsub(".csv","",gcamdata_filenames[[i]]), ".csv"), comment.char = "#"))
         gcamdata_files[[i]] <- gcamdata_file_i
         names(gcamdata_files)[[i]] <- gcamdata_filenames[[i]]
       }
@@ -650,7 +650,7 @@ readgcam <- function(gcamdatabase = NULL,
     }}
 
   # Variable OnM escalation rate costs electricity generation
-  paramx<-"elec_variable_om_escl_rate_2015USDperMWh"
+  paramx<-"elec_variable_om_escl_rate_fraction"
   if(paramx %in% paramsSelectx){
     print(paste0("Running param: ", paramx,"..."))
 
@@ -733,14 +733,52 @@ readgcam <- function(gcamdatabase = NULL,
                         origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
         dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
+
+
+      # Expand fuel price out to related techs
+      # Check if all required files are present
+      (paramQueryMap %>%
+          dplyr::filter(param %in% paramx))$gcamdata %>%
+        unlist() %>%
+        unique() -> gcamdata_files_needed
+
+      if(!is.null(gcamdata_folder)){
+        if(dir.exists(gcamdata_folder)){
+          for(file_i in gcamdata_files_needed){
+            file_ix <- paste0(gcamdata_folder, file_i, ".csv")
+            if(!file.exists(file_ix)){
+              print(paste0("File needed does not exist: ", file_ix))
+              print("Some results may be missing.")
+            }
+          }
+        }
+      }
+
+      # Read in additional files
+      add_techs <- tibble::as_tibble(gcamdata_files[["/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa"]]) %>%
+        dplyr::select(class1 = minicam.energy.input,
+                      class2a = technology) %>%
+        dplyr::left_join(tibble::as_tibble(gcamdata_files[["/inst/extdata/gcam-usa/A23.elec_tech_mapping_cool"]]) %>%
+                           dplyr::select(class2a=technology,
+                                         class2 = to.technology)) %>%
+        dplyr::select(class1,class2) %>%
+        dplyr::filter(class1!=""); add_techs
+
+      tbl_comb <- tbl_comb %>%
+        dplyr::select(-class2)%>%
+        dplyr::left_join(add_techs) %>%
+        dplyr::mutate(classLabel1="fuel",
+                      classLabel2="technology")
+
       tbl_fuel_price <- tbl_comb
       datax <- dplyr::bind_rows(datax, tbl_comb)
+
     } else {
       # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   # Fuel price escalation rate
-  paramx<-"elec_fuel_price_escl_rate_2015USDperMBTU"
+  paramx<-"elec_fuel_price_escl_rate_fraction"
   if(paramx %in% paramsSelectx){
     print(paste0("Running param: ", paramx,"..."))
 
@@ -828,7 +866,7 @@ readgcam <- function(gcamdatabase = NULL,
     if(!is.null(gcamdata_folder)){
     if(dir.exists(gcamdata_folder)){
       for(file_i in gcamdata_files_needed){
-        file_ix <- paste0(gcamdata_folder, "/outputs/", file_i, ".csv")
+        file_ix <- paste0(gcamdata_folder, file_i, ".csv")
       if(!file.exists(file_ix)){
         print(paste0("File needed does not exist: ", file_ix))
         print("Some results may be missing.")
@@ -838,7 +876,7 @@ readgcam <- function(gcamdatabase = NULL,
       }
 
     # US S-Curve
-    tibble::as_tibble(gcamdata_files[["L2244.TechSCurve_nuc_gen2_USA"]]) %>%
+    tibble::as_tibble(gcamdata_files[["/outputs/L2244.TechSCurve_nuc_gen2_USA"]]) %>%
       dplyr::select(subRegion = "region",
                     class1 = "subsector",
                     class2 = "technology",
@@ -847,7 +885,7 @@ readgcam <- function(gcamdatabase = NULL,
                     classLabel2 = "technology",
                     param = paramx,
                     region = "USA") %>%
-      dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["L223.TechSCurve_Dispatch"]]) %>%
+      dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["/outputs/L223.TechSCurve_Dispatch"]]) %>%
                   dplyr::select(subRegion = "region",
                                 class1 = "subsector",
                                 class2 = "technology",
@@ -856,7 +894,7 @@ readgcam <- function(gcamdatabase = NULL,
                                 classLabel2 = "technology",
                                 param = paramx,
                                 region = "USA")) %>%
-      dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["L2241.TechSCurve_coalret_vintage_dispatch_gcamusa"]]) %>%
+      dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["/outputs/L2241.TechSCurve_coalret_vintage_dispatch_gcamusa"]]) %>%
                   dplyr::select(subRegion = "region",
                                 class1 = "subsector",
                                 class2 = "technology",
@@ -867,7 +905,7 @@ readgcam <- function(gcamdatabase = NULL,
                                 region = "USA")) -> elec_lifetime_scurve_us
 
     # Global S-Curve
-    tibble::as_tibble(gcamdata_files[["L2233.GlobalTechSCurve_elec_cool"]]) %>%
+    tibble::as_tibble(gcamdata_files[["/outputs/L2233.GlobalTechSCurve_elec_cool"]]) %>%
       dplyr::select(class1 = "subsector.name",
                     class2 = "technology",
                     year,lifetime, steepness, half.life) %>%
@@ -934,7 +972,7 @@ readgcam <- function(gcamdatabase = NULL,
 
     if(dir.exists(gcamdata_folder)){
       for(file_i in gcamdata_files_needed){
-        file_ix <- paste0(gcamdata_folder, "/outputs/", file_i, ".csv")
+        file_ix <- paste0(gcamdata_folder, file_i, ".csv")
         if(!file.exists(file_ix)){
           print(paste0("File needed does not exist: ", file_ix))
           print("Some results may be missing.")
@@ -943,7 +981,7 @@ readgcam <- function(gcamdatabase = NULL,
     }
 
     # US S-Curve
-    tibble::as_tibble(gcamdata_files[["L223.TechLifetime_Dispatch"]]) %>%
+    tibble::as_tibble(gcamdata_files[["/outputs/L223.TechLifetime_Dispatch"]]) %>%
       dplyr::select(subRegion = "region",
                     class1 = "subsector",
                     class2 = "technology",
@@ -952,7 +990,7 @@ readgcam <- function(gcamdatabase = NULL,
                     classLabel2 = "technology",
                     param = paramx,
                     region = "USA") %>%
-      dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["L2242.TechLifetime_hydro"]]) %>%
+      dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["/outputs/L2242.TechLifetime_hydro"]]) %>%
                   dplyr::select(subRegion = "region",
                                 class1 = "subsector",
                                 class2 = "technology",
@@ -963,7 +1001,7 @@ readgcam <- function(gcamdatabase = NULL,
                                 region = "USA")) -> elec_lifetime_us
 
     # Global S-Curve
-    tibble::as_tibble(gcamdata_files[["L2233.GlobalTechLifetime_elec_cool"]]) %>%
+    tibble::as_tibble(gcamdata_files[["/outputs/L2233.GlobalTechLifetime_elec_cool"]]) %>%
       dplyr::select(class1 = "subsector.name",
                     class2 = "technology",
                     year,lifetime) %>%
@@ -972,7 +1010,7 @@ readgcam <- function(gcamdatabase = NULL,
                     param = paramx,
                     region = "Global",
                     subRegion = "Global") %>%
-      dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["L2233.GlobalIntTechLifetime_elec_cool"]]) %>%
+      dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["/outputs/L2233.GlobalIntTechLifetime_elec_cool"]]) %>%
                           dplyr::select(class1 = "subsector.name",
                                         class2 = "technology",
                                         year,lifetime) %>%
@@ -1030,7 +1068,7 @@ readgcam <- function(gcamdatabase = NULL,
 
       if(dir.exists(gcamdata_folder)){
         for(file_i in gcamdata_files_needed){
-          file_ix <- paste0(gcamdata_folder, "/outputs/", file_i, ".csv")
+          file_ix <- paste0(gcamdata_folder, file_i, ".csv")
           if(!file.exists(file_ix)){
             print(paste0("File needed does not exist: ", file_ix))
             print("Some results may be missing.")
@@ -1039,7 +1077,7 @@ readgcam <- function(gcamdatabase = NULL,
       }
 
       # Global CO2 content
-      tibble::as_tibble(gcamdata_files[["L202.CarbonCoef"]]) %>%
+      tibble::as_tibble(gcamdata_files[["/outputs/L202.CarbonCoef"]]) %>%
         dplyr::select(region,
                       class1 = PrimaryFuelCO2Coef.name,
                       origValue = PrimaryFuelCO2Coef) %>%
@@ -1049,7 +1087,7 @@ readgcam <- function(gcamdatabase = NULL,
                       subRegion = region,
                       origUnits = "kg C per GJ") %>%
         # US CO2 content
-        dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["L222.CarbonCoef_en_USA"]]) %>%
+        dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["/outputs/L222.CarbonCoef_en_USA"]]) %>%
                            dplyr::select(region,
                                          class1 = PrimaryFuelCO2Coef.name,
                                          origValue = PrimaryFuelCO2Coef) %>%
@@ -1060,7 +1098,7 @@ readgcam <- function(gcamdatabase = NULL,
                                          region = "USA",
                                          origUnits = "kg C per GJ")) %>%
         # US CO2 carbon content
-        dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["L2261.CarbonCoef_bio_USA"]]) %>%
+        dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["/outputs/L2261.CarbonCoef_bio_USA"]]) %>%
                            dplyr::select(region,
                                          class1 = PrimaryFuelCO2Coef.name,
                                          origValue = PrimaryFuelCO2Coef) %>%
@@ -1097,6 +1135,25 @@ readgcam <- function(gcamdatabase = NULL,
                         origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
         dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
+
+
+      # Read in additional files
+      add_techs <- tibble::as_tibble(gcamdata_files[["/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa"]]) %>%
+        dplyr::select(class1 = minicam.energy.input,
+                      class2a = technology) %>%
+        dplyr::left_join(tibble::as_tibble(gcamdata_files[["/inst/extdata/gcam-usa/A23.elec_tech_mapping_cool"]]) %>%
+                           dplyr::select(class2a=technology,
+                                         class2 = to.technology)) %>%
+        dplyr::select(class1,class2) %>%
+        dplyr::filter(class1!=""); add_techs
+
+      tbl <- tbl %>%
+        dplyr::select(-class2)%>%
+        dplyr::left_join(add_techs) %>%
+        dplyr::mutate(classLabel1="fuel",
+                      classLabel2="technology")%>%
+        dplyr::mutate(class2 = dplyr::if_else(is.na(class2),"class2",class2))
+
       datax <- dplyr::bind_rows(datax, tbl)
     }
   }
@@ -1116,7 +1173,7 @@ readgcam <- function(gcamdatabase = NULL,
 
       if(dir.exists(gcamdata_folder)){
         for(file_i in gcamdata_files_needed){
-          file_ix <- paste0(gcamdata_folder, "/outputs/", file_i, ".csv")
+          file_ix <- paste0(gcamdata_folder, file_i, ".csv")
           if(!file.exists(file_ix)){
             print(paste0("File needed does not exist: ", file_ix))
             print("Some results may be missing.")
@@ -1125,7 +1182,7 @@ readgcam <- function(gcamdatabase = NULL,
       }
 
       # US carbon capture
-      tibble::as_tibble(gcamdata_files[["L223.TechCarbonCapture_Dispatch"]]) %>%
+      tibble::as_tibble(gcamdata_files[["/outputs/L223.TechCarbonCapture_Dispatch"]]) %>%
         dplyr::select(subRegion = region,
                       class1 = subsector,
                       class2 = technology,
@@ -1137,7 +1194,7 @@ readgcam <- function(gcamdatabase = NULL,
                       origUnits = "Carbon Capture Rate (fraction)",
                       region = "USA") %>%
         # US CO2 content
-        dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["L2233.GlobalTechCapture_elec_cool"]]) %>%
+        dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["/outputs/L2233.GlobalTechCapture_elec_cool"]]) %>%
                            dplyr::select(class1 = subsector.name,
                                          class2 = technology,
                                          origValue = remove.fraction,

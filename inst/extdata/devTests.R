@@ -30,6 +30,8 @@ regionsSelect = regionsSelect_i
 paramsSelect = paramsSelect_i
 folder = folder_i
 queryFile=NULL
+scenOrigNames = "All"
+scenNewNames = NULL
 
 
 # List of params in gcamextractor for GO
