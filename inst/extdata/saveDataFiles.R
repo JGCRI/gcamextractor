@@ -30,7 +30,7 @@ map_param_query <- tibble::tribble(
   "cerf","elec_fuel_price_2015USDperMBTU","prices by sector","pal_hot","no",
   "cerf","elec_fuel_price_escl_rate_fraction","prices by sector","pal_hot","no",
   "cerf","elec_cap_usa_GW","elec capacity by tech and vintage","pal_hot","no",
-  "cerf","energy_fuel_co2_content_tonsperMBTU",NA,"pal_hot",c("/outputs/L2261.CarbonCoef_bio_USA",
+  "cerf","elec_fuel_co2_content_tonsperMBTU",NA,"pal_hot",c("/outputs/L2261.CarbonCoef_bio_USA",
                                                       "/outputs/L202.CarbonCoef",
                                                       "/outputs/L222.CarbonCoef_en_USA",
                                                       "/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa",
@@ -767,4 +767,23 @@ regions_gcam_basins <- c( "Adriatic_Sea_Greece_Black_Sea_Coast","Africa_East_Cen
                   "Ziya_He_Interior")
 
 use_data(regions_gcam_basins, version=3, overwrite=T)
+
+
+# Test Data
+library(gcamextractor)
+library(dplyr)
+
+# Tests using .proj file =======================================================
+# Test arguments
+paramsSelect_i = (map_param_query$group%>%unique())[!(map_param_query$group%>%unique()) %in% c("cerf","go")]
+
+gcamData <- gcamextractor::readgcam(queryFile = NULL,
+                                    dataProjFile = gcamextractor::example_gcamv54_argentina_colombia_2025_proj,
+                                    scenOrigNames = 'Reference',
+                                    scenNewNames = 'Ref',
+                                    paramsSelect = paramsSelect_i,
+                                    regionsSelect = 'Colombia')
+
+gcamextractor_test_data <- gcamData$data
+use_data(gcamextractor_test_data, version=3, overwrite=T)
 

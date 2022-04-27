@@ -1055,7 +1055,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   # Fuel CO2 Content
   if(!is.null(gcamdata_folder)){
-    paramx<-"energy_fuel_co2_content_tonsperMBTU"
+    paramx<-"elec_fuel_co2_content_tonsperMBTU"
     if(paramx %in% paramsSelectx){
 
       print(paste0("Running param: ", paramx,"..."))
@@ -1152,7 +1152,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::left_join(add_techs) %>%
         dplyr::mutate(classLabel1="fuel",
                       classLabel2="technology")%>%
-        dplyr::mutate(class2 = dplyr::if_else(is.na(class2),"class2",class2))
+        dplyr::filter(!is.na(class2))
 
       datax <- dplyr::bind_rows(datax, tbl)
     }
@@ -5425,7 +5425,7 @@ readgcam <- function(gcamdatabase = NULL,
   print("Outputs returned as list containing data, scenarios and queries.")
   print("For example if df <- readgcam(dataProjFile = gcamextractor::example_GCAMv52_2050_proj)")
   print("Then you can view the outputs as df$data, df$dataAggClass1, df$dataAggClass2, df$dataAggParam, df$scenarios, df$queries.")
-  print(gsub("//","/",paste("All outputs in : ",folder, "/readGCAM/",sep="")))
+  print(gsub("//","/",paste("All outputs in : ",folder,sep="")))
   print("readgcam run completed.")
 
   return(list(dataAll = datax,

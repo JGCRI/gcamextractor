@@ -5,55 +5,25 @@ library(rprojroot)
 library(rgcam)
 library(dplyr)
 
-# testthat::skip_on_cran()
-# testthat::skip_on_travis()
-
-# Default arguments
-# gcamdatabase = NULL
-# queryFile = NULL
-# dataProjFile = paste(getwd(), "/outputs/dataProj.proj", sep = "")
-# scenOrigNames = "All"
-# scenNewNames = NULL
-# reReadData = T
-# dirOutputs = paste(getwd(), "/outputs", sep = "")
-# regionsSelect = NULL
-# paramsSelect = "All"
-# folderName = NULL
-# nameAppend = ""
-# saveData = T
-
-
-# Tests using .proj file =======================================================
-# Test arguments
-paramsSelect_i = (map_param_query$group%>%unique())[!(map_param_query$group%>%unique()) %in% c("cerf","go")]
-
-gcamData <- gcamextractor::readgcam(queryFile = NULL,
-                                    dataProjFile = gcamextractor::example_gcamv54_argentina_colombia_2025_proj,
-                                    scenOrigNames = 'Reference',
-                                    scenNewNames = 'Ref',
-                                    paramsSelect = paramsSelect_i,
-                                    regionsSelect = 'Colombia')
-
-
 test_that("data exists", {
-  test <- nrow(gcamData$data)
+  test <- nrow(gcamextractor::gcamextractor_test_data)
   testthat::expect_gt(test, 0)
 })
 
 
 test_that("scenario is selected and new name is applied", {
-  test <- unique((gcamData$data%>%dplyr::filter(param=="pop"))$scenario)
+  test <- unique((gcamextractor::gcamextractor_test_data%>%dplyr::filter(param=="pop"))$scenario)
   testthat::expect_equal(test, 'Ref')
 })
 
 test_that("region is selected", {
-  test <- unique((gcamData$data%>%dplyr::filter(param=="pop"))$region)
+  test <- unique((gcamextractor::gcamextractor_test_data%>%dplyr::filter(param=="pop"))$region)
   testthat::expect_equal(test, 'Colombia')
 })
 
 
 test_that("parameter is selected", {
-  test <- sort(unique(gcamData$data$param))
+  test <- sort(unique(gcamextractor::gcamextractor_test_data$data$param))
   testthat::expect_true(all(test %in% gcamextractor::data_params))
 })
 
