@@ -30,7 +30,8 @@ Imports:
 	markdown,
 	rprojroot,
 	pander,
-	kableExtra
+	kableExtra,
+	rlang
 Suggests: 
     rmarkdown,
     testthat,

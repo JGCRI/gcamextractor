@@ -133,4 +133,27 @@ dataGCAM <- readgcam(reReadData = reReadData_i,
                      paramsSelect = paramsSelect_i,
                      folder = folder_i)
 
+# Check for Yang Ou db
+library(gcamextractor); library(dplyr)
+gcamdatabase_i = "database_rcp85hotter_ssp5_runoff"
+rgcam::localDBConn("C:/Z/models/gcamextractor","database_rcp85hotter_ssp5_runoff")
+reReadData_i = T
+dataProjFile_i = "dataProj_test.proj"
+regionsSelect_i = NULL
+paramsSelect_i = c("pop")
+folder_i="testx"
+
+dataGCAM <- readgcam(reReadData = reReadData_i,
+                     gcamdatabase = gcamdatabase_i,
+                     dataProjFile = dataProjFile_i,
+                     regionsSelect = regionsSelect_i,
+                     paramsSelect = paramsSelect_i,
+                     folder = folder_i)
+
+reReadData = reReadData_i
+gcamdatabase = gcamdatabase_i
+dataProjFile = dataProjFile_i
+regionsSelect = regionsSelect_i
+paramsSelect = paramsSelect_i
+folder = folder_i
 

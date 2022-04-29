@@ -28,3 +28,4 @@ rmapCheatsheet.pdf
 ^\.github$
 ^_config.yml$
 ^articles$
+^CITATION.md$

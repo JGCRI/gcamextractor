@@ -78,6 +78,17 @@
 #' }
 "map_param_query"
 
+#' map_state_to_gridregion
+#'
+#' @source gcamextractor
+#' @format tibble
+#' @examples
+#' \dontrun{
+#'  library(gcamextractor);
+#'  gcamextractor::map_state_to_gridregion
+#' }
+"map_state_to_gridregion"
+
 
 #-------------------
 # Conversions
@@ -202,6 +213,18 @@
 #'  gcamextractor::regions_gcam_basins
 #' }
 "regions_gcam_basins"
+
+#' gcamextractor_test_data
+#' Data for testing
+#'
+#' @source gcamextractor_test_data
+#' @format tibble
+#' @examples
+#' \dontrun{
+#'  library(gcamextractor);
+#'  gcamextractor::gcamextractor_test_data
+#' }
+"gcamextractor_test_data"
 
 
 

@@ -96,6 +96,8 @@ readgcam <- function(gcamdatabase = NULL,
 
 
   # gcamdatabase = NULL
+  # gcamdata_folder = NULL
+  # maxMemory = "4g"
   # queryFile = NULL
   # scenOrigNames = "All"
   # scenNewNames = NULL
@@ -118,8 +120,15 @@ readgcam <- function(gcamdatabase = NULL,
     class_temp -> resource -> subRegAreaSum -> subsector->tblFinalNrgIntlAvShipMod -> 'transportation' ->
     'International Aviation' -> 'International Ship' -> 'International Aviation oil' -> 'a oil' ->
     'International Ship oil' -> 'International Aviation liquids' -> liquids -> 'International Ship liquids'->crop->
-    paramsSelectAll -> tblFinalNrgIntlAvShip->datax->group->basin->subRegion->query->subresource-> transport ->
-    gcamdata -> half.life -> lifetime -> read.csv -> sector_1 -> steepness
+    paramsSelectAll -> tblFinalNrgIntlAvShip -> datax -> group -> basin -> subRegion -> query -> subresource ->
+    transport -> gcamdata -> half.life -> lifetime -> read.csv -> sector_1 -> steepness -> PrimaryFuelCO2Coef ->
+    PrimaryFuelCO2Coef.name -> country -> grid_region -> 'io-coefficient' -> 'minicam.energy.input' ->
+    'remove.fraction' ->  state ->  subsector.name -> 'to.technology' -> coefficient
+
+  basedir <- getwd()
+
+  # Normalzie path to gcamdatabase
+  gcamdatabase <- normalizePath(gcamdatabase)
 
   if(!is.null(regionsSelect)){
     if(any(grepl("$all^", regionsSelect, ignore.case = T))){
@@ -129,8 +138,8 @@ readgcam <- function(gcamdatabase = NULL,
 
   if(!is.null(gcamdata_folder)){
     if(!dir.exists(gcamdata_folder)){
-      print(paste0("gcamdata_folder provided : ", gcamdata_folder, "does not exist."))
-      print(paste0("Will skip parameters that require gcamdata folder."))
+      rlang::inform(paste0("gcamdata_folder provided : ", gcamdata_folder, "does not exist."))
+      rlang::inform(paste0("Will skip parameters that require gcamdata folder."))
     }
   }
 
@@ -150,19 +159,18 @@ readgcam <- function(gcamdatabase = NULL,
   if(!any(c("all","All","ALL") %in% paramsSelect)){
   if(any(paramsSelect %in% unique(paramQueryMap$group))){
     queriesSelectx <- as.vector(unlist(unique((paramQueryMap%>%dplyr::filter(group %in% paramsSelect))$query)))
-    #print(paste("queriesSelect chosen include the following querySets: ",paste(paramsSelect,collapse=", "),".",sep=""))
-    #print(paste("Which include the following queries: ",paste(queriesSelectx,collapse=", "),".",sep=""))
-    #print(paste("Other queries not run include: ",paste(as.vector(unlist(querySets))[!as.vector(unlist(querySets)) %in% queriesSelectx],collapse=", "),".",sep=""))
+    #rlang::inform(paste("queriesSelect chosen include the following querySets: ",paste(paramsSelect,collapse=", "),".",sep=""))
+    #rlang::inform(paste("Which include the following queries: ",paste(queriesSelectx,collapse=", "),".",sep=""))
+    #rlang::inform(paste("Other queries not run include: ",paste(as.vector(unlist(querySets))[!as.vector(unlist(querySets)) %in% queriesSelectx],collapse=", "),".",sep=""))
   }else{
     if(any(paramsSelect %in% as.vector(unique(paramQueryMap$param)))){
       queriesSelectx<- as.vector(unlist(unique((paramQueryMap%>%dplyr::filter(param %in% paramsSelect))$query)))
-      #print(paste("queriesSelect chosen include the following queries: ",paste(queriesSelectx,collapse=", "),".",sep=""))
-     # print(paste("Other queries not run include: ",paste(as.vector(unlist(querySets))[!as.vector(unlist(querySets)) %in% queriesSelectx],collapse=", "),".",sep=""))
+      #rlang::inform(paste("queriesSelect chosen include the following queries: ",paste(queriesSelectx,collapse=", "),".",sep=""))
+     # rlang::inform(paste("Other queries not run include: ",paste(as.vector(unlist(querySets))[!as.vector(unlist(querySets)) %in% queriesSelectx],collapse=", "),".",sep=""))
     }else {
       queriesSelectx <-  NULL
-      print(paste("Params in queries.xml include: ",paste(as.vector(unlist(unique(paramQueryMap$param))),collapse=", "),".",sep=""))
-      print("")
-      print(paste("None of the chosen paramsSelect are available in gcamextractor params: ",paste(paramsSelect,collapse=", "),".",sep=""))
+      rlang::inform(paste("Params in queries.xml include: ",paste(as.vector(unlist(unique(paramQueryMap$param))),collapse=", "),".",sep=""))
+      rlang::inform(paste("None of the chosen paramsSelect are available in gcamextractor params: ",paste(paramsSelect,collapse=", "),".",sep=""))
       stop("None of the params chosen are available.")
       }
   }}else{
@@ -188,12 +196,12 @@ readgcam <- function(gcamdatabase = NULL,
   }else{
     if(is.character(gcamdatabase)){
       if(dir.exists(gcamdatabase)){
-        gcamdatabasePath <- gsub("/$","",gsub("[^/]+$","",gcamdatabase)); gcamdatabasePath
+        gcamdatabasePath <- dirname(gcamdatabase); gcamdatabasePath
         gcamdatabaseName <- basename(gcamdatabase); gcamdatabaseName
-        print(paste("Connecting to GCAM database provided ",gcamdatabase,"...",sep=""))
+        rlang::inform(paste("Connecting to GCAM database provided ",gcamdatabase,"...",sep=""))
       }else{stop(paste("The GCAM database path provided dos not exist: ", gcamdatabase, sep=""))}
     }else{
-      print(paste("gcamdatabase provided is not a character string to the GCAM database path. Please check your entry."))
+      rlang::inform(paste("gcamdatabase provided is not a character string to the GCAM database path. Please check your entry."))
     }
   }
 
@@ -208,10 +216,10 @@ readgcam <- function(gcamdatabase = NULL,
       if(file.exists(queryFile)){
         queryPath <- gsub("[^/]+$","",queryFile)
         queryxml <- basename(queryFile)
-        print(paste("Connecting to the queryFile provided ",queryFile,"...",sep=""))
-      }else{print(paste("The queryFile path provided dos not exist: ", queryFile, sep=""))}
+        rlang::inform(paste("Connecting to the queryFile provided ",queryFile,"...",sep=""))
+      }else{rlang::inform(paste("The queryFile path provided dos not exist: ", queryFile, sep=""))}
     }else{
-      print(paste("The queryFile path provided is not a character string to the query file. Please check your entry."))
+      rlang::inform(paste("The queryFile path provided is not a character string to the query file. Please check your entry."))
     }
   }
 
@@ -228,20 +236,20 @@ readgcam <- function(gcamdatabase = NULL,
         if(file.exists(dataProjFile)){
         dataProjPath <- gsub("[^/]+$","",dataProjFile)
         dataProj <- basename(dataProjFile)
-        print(paste("Connecting to the dataProjFile provided ",dataProjFile,"...",sep=""))}else{
+        rlang::inform(paste("Connecting to the dataProjFile provided ",dataProjFile,"...",sep=""))}else{
           dataProjPath <- gsub("[^/]+$","",dataProjFile)
           dataProj <- basename(dataProjFile)
-          print(paste0("Creating folder for dataProjFile: ", dataProjFile))
+          rlang::inform(paste0("Creating folder for dataProjFile: ", dataProjFile))
           if(!dir.exists(dataProjPath)){dir.create(dataProjPath)}
-          print(gsub("//","/",paste("Will save GCAM data to ",dataProjPath,"/",dataProjFile,"...",sep="")))
+          rlang::inform(paste0(gsub("//","/",paste("Will save GCAM data to ",dataProjPath,"/",dataProjFile,"...",sep=""))))
         }
       }else{
         dataProjPath <- gsub("//","/",paste(folder,"/", sep = ""))
         dataProj <- dataProjFile
-        print(paste("Will save data to: ", dataProjPath,"/",dataProjFile, sep=""))
+        rlang::inform(paste("Will save data to: ", dataProjPath,"/",dataProjFile, sep=""))
       }
     }else{
-      print(paste("The dataProjFile path provided is not a character string to the query file. Please check your entry."))
+      rlang::inform(paste("The dataProjFile path provided is not a character string to the query file. Please check your entry."))
     }
     }
   }
@@ -249,14 +257,10 @@ readgcam <- function(gcamdatabase = NULL,
   # Set new scenario names if provided
   if (is.null(scenOrigNames)) {
     scenNewNames <- NULL
-    #print("scenOrigNames is NULL so cannot assign scenNewNames.")
-    #print("To set new names for scenarios please enter original names in scenOrigNames and then corresponding new names in scenNewNames.")
-  } else {
+    } else {
     if(any(c("all","All","ALL") %in% scenOrigNames)){
       scenNewNames <- NULL
-      #print("scenOrigNames is All so cannot assign scenNewNames.")
-      #print("To set new names for scenarios please enter original names in scenOrigNames and then corresponding new names in scenNewNames.")
-    }
+      }
     }
 
 #.............................................
@@ -268,11 +272,9 @@ readgcam <- function(gcamdatabase = NULL,
      reReadData==T){
     if(is.list(dataProjFile)){
       reReadData=F
-      #print("Setting reReadData to F because no gcamdatabase is provided but a valid dataProjFile provided.")
-    }
+      }
     if(file.exists(paste(dataProjPath,"/",dataProj,sep=""))){
     reReadData=F
-    #print("Setting reReadData to F because no gcamdatabase is provided but a valid dataProjFile provided.")
     }
   }
 
@@ -300,25 +302,25 @@ readgcam <- function(gcamdatabase = NULL,
       # Select Scenarios
       if(is.null(scenOrigNames)){
         scenOrigNames <- scenarios[1]
-        print(paste("scenOrigNames set to NULL so using only first scenario: ",scenarios[1],sep=""))
-        print(paste("from all available scenarios: ",paste(scenarios,collapse=", "),sep=""))
-        print("To run all scenarios please set scenOrigNames to 'All' or")
-        print(paste("you can choose a subset of scenarios by setting the scenOrigNames input (eg. scenOrigNames = c('scen1','scen2'))" ,sep=""))
+        rlang::inform(paste("scenOrigNames set to NULL so using only first scenario: ",scenarios[1],sep=""))
+        rlang::inform(paste("from all available scenarios: ",paste(scenarios,collapse=", "),sep=""))
+        rlang::inform(paste0("To run all scenarios please set scenOrigNames to 'All' or"))
+        rlang::inform(paste("you can choose a subset of scenarios by setting the scenOrigNames input (eg. scenOrigNames = c('scen1','scen2'))" ,sep=""))
       } else {
         if(any(c("all","All","ALL") %in% scenOrigNames)){
           scenOrigNames <- scenarios
-          print(paste("scenOrigNames set to 'All' (Default) so using all available scenarios: ",paste(scenarios,collapse=", "),sep=""))
-          print(paste("You can choose a subset of scenarios by setting the scenOrigNames input (eg. scenOrigNames = c('scen1','scen2'))" ,sep=""))
+          rlang::inform(paste("scenOrigNames set to 'All' (Default) so using all available scenarios: ",paste(scenarios,collapse=", "),sep=""))
+          rlang::inform(paste("You can choose a subset of scenarios by setting the scenOrigNames input (eg. scenOrigNames = c('scen1','scen2'))" ,sep=""))
         } else {
           if(any(scenOrigNames %in% scenarios)){
-            print(paste("scenOrigNames available in scenarios are :",paste(scenOrigNames[scenOrigNames %in% scenarios],collapse=", "),sep=""))
+            rlang::inform(paste("scenOrigNames available in scenarios are :",paste(scenOrigNames[scenOrigNames %in% scenarios],collapse=", "),sep=""))
             if(length(scenOrigNames[!scenOrigNames %in% scenarios])>0){
-              print(paste("scenOrigNames not available in scenarios are :",paste(scenOrigNames[!scenOrigNames %in% scenarios],collapse=", "),sep=""))}
+              rlang::inform(paste("scenOrigNames not available in scenarios are :",paste(scenOrigNames[!scenOrigNames %in% scenarios],collapse=", "),sep=""))}
             if(length(scenarios[!scenarios %in% scenOrigNames])>0){
-              print(paste("Other scenarios not selected are :",paste(scenarios[!scenarios %in% scenOrigNames],collapse=", "),sep=""))}
+              rlang::inform(paste("Other scenarios not selected are :",paste(scenarios[!scenarios %in% scenOrigNames],collapse=", "),sep=""))}
           } else {
-            print(paste("None of the scenOrigNames : ",paste(scenOrigNames,collapse=", "),sep=""))
-            print(paste("are in the available scenarios : ",paste(scenarios,collapse=", "),sep=""))
+            rlang::inform(paste("None of the scenOrigNames : ",paste(scenOrigNames,collapse=", "),sep=""))
+            rlang::inform(paste("are in the available scenarios : ",paste(scenarios,collapse=", "),sep=""))
           }
         }
       }
@@ -347,7 +349,7 @@ readgcam <- function(gcamdatabase = NULL,
     }
     XML::saveXML(top, file=gsub("//","/",paste(queryPath, "/subSetQueries.xml", sep = "")))
     } else {
-      print(paste("paramsSelect includes 'All' so running all available queries: ",paste(queriesSelectx,collapse=", "),".",sep=""))
+      rlang::inform(paste("paramsSelect includes 'All' so running all available queries: ",paste(queriesSelectx,collapse=", "),".",sep=""))
       file.copy(from=gsub("//","/",paste(queryPath, "/", queryxml, sep = "")),
                 to=gsub("//","/",paste(queryPath, "/subSetQueries.xml", sep = "")))
     }
@@ -355,7 +357,7 @@ readgcam <- function(gcamdatabase = NULL,
     if(!file.exists(gsub("//","/",paste(queryPath, "/subSetQueries.xml", sep = "")))){
       stop(gsub("//","/",paste("query file: ", queryPath,"/subSetQueries.xml is incorrect or doesn't exist.",sep="")))}else{
         xfun::gsub_file(paste(queryPath, "/subSetQueries.xml", sep = ""),"&apos;","'")
-        print(gsub("//","/",paste("Reading queries from queryFile created: ", queryPath,"/subSetQueries.xml.",sep="")))
+        rlang::inform(paste0(gsub("//","/",paste("Reading queries from queryFile created: ", queryPath,"/subSetQueries.xml.",sep=""))))
       }
 
     # Check for gcamdatbasePath and gcamdatabasename
@@ -367,11 +369,17 @@ readgcam <- function(gcamdatabase = NULL,
     }
 
     # Get names of scenarios in database
+    # Change directory to avoid rgcam error when gcamdatabase is in the same folder as gcamextractor
+    temp_folder <- paste0(getwd(),"/temp_dir")
+    dir.create(temp_folder)
+    setwd(temp_folder)
     x <- utils::capture.output(rgcam::localDBConn(gcamdatabasePath,gcamdatabaseName,maxMemory=maxMemory), type="message")
+    # Reset dir
+    setwd(basedir)
+    unlink(temp_folder, force=T, recursive=T)
     x <- gsub(", ",",",gsub(": ","",gsub("Database scenarios:  ","",x)));x
     scenarios <- as.vector(unlist(strsplit(gsub("Database scenarios: ","",x),",")))
-    print(scenarios)
-    print(paste("All scenarios in data available: ", paste(scenarios,collapse=", "), sep=""))
+    rlang::inform(paste("All scenarios in data available: ", paste(scenarios,collapse=", "), sep=""))
 
 
     if(file.exists(gsub("//","/",paste(dataProjPath, "/", dataProj, sep = "")))){
@@ -380,35 +388,45 @@ readgcam <- function(gcamdatabase = NULL,
     # Select Scenarios
     if(is.null(scenOrigNames)){
       scenOrigNames <- scenarios[1]
-      print(paste("scenOrigNames set to NULL so using only first scenario: ",scenarios[1],sep=""))
-      print(paste("from all available scenarios: ",paste(scenarios,collapse=", "),sep=""))
-      print("To run all scenarios please set scenOrigNames to 'All'")
+      rlang::inform(paste("scenOrigNames set to NULL so using only first scenario: ",scenarios[1],sep=""))
+      rlang::inform(paste("from all available scenarios: ",paste(scenarios,collapse=", "),sep=""))
+      rlang::inform(paste0("To run all scenarios please set scenOrigNames to 'All'"))
     } else {
         if(any(c("all","All","ALL") %in% scenOrigNames)){
           scenOrigNames <- scenarios
-          print(paste("scenOrigNames set to 'All' so using all available scenarios: ",paste(scenarios,collapse=", "),sep=""))
+          rlang::inform(paste("scenOrigNames set to 'All' so using all available scenarios: ",paste(scenarios,collapse=", "),sep=""))
         } else {
           if(any(scenOrigNames %in% scenarios)){
-            print(paste("scenOrigNames available in scenarios are : ",paste(scenOrigNames[scenOrigNames %in% scenarios],collapse=", "),sep=""))
+            rlang::inform(paste("scenOrigNames available in scenarios are : ",paste(scenOrigNames[scenOrigNames %in% scenarios],collapse=", "),sep=""))
             if(length(scenOrigNames[!scenOrigNames %in% scenarios])>0){
-            print(paste("scenOrigNames not available in scenarios are :",paste(scenOrigNames[!scenOrigNames %in% scenarios],collapse=", "),sep=""))}
+            rlang::inform(paste("scenOrigNames not available in scenarios are :",paste(scenOrigNames[!scenOrigNames %in% scenarios],collapse=", "),sep=""))}
             if(length(scenarios[!scenarios %in% scenOrigNames])>0){
-            print(paste("Other scenarios not selected are :",paste(scenarios[!scenarios %in% scenOrigNames],collapse=", "),sep=""))}
+            rlang::inform(paste("Other scenarios not selected are :",paste(scenarios[!scenarios %in% scenOrigNames],collapse=", "),sep=""))}
           } else {
-            print(paste("None of the scenOrigNames : ",paste(scenOrigNames,collapse=", "),sep=""))
-            print(paste("are in the available scenarios : ",paste(scenarios,collapse=", "),sep=""))
+            rlang::inform(paste("None of the scenOrigNames : ",paste(scenOrigNames,collapse=", "),sep=""))
+            rlang::inform(paste("are in the available scenarios : ",paste(scenarios,collapse=", "),sep=""))
             stop("Please check scenOrigNames and rerun.")
           }
         }
     }
 
     for (scenario_i in scenOrigNames) {
-       dataProj.proj <- rgcam::addScenario(conn = rgcam::localDBConn(gcamdatabasePath, gcamdatabaseName,maxMemory=maxMemory),
-                                           proj = gsub("//","/",paste(dataProjPath, "/", dataProj, sep = "")),
-                                           scenario = scenario_i,
-                                           queryFile = gsub("//","/",paste(queryPath, "/subSetQueries.xml", sep = "")))  # Check your queries file
-      }
 
+        # Fix paths
+        projPath_i = suppressWarnings(normalizePath(paste0(dataProjPath, "/", dataProj))); projPath_i
+        queryPath_i = normalizePath(paste0(queryPath, "/subSetQueries.xml")); queryPath_i
+        # Change directory to avoid rgcam error when gcamdatabase is in the same folder as gcamextractor
+        temp_folder <- paste0(getwd(),"/temp_dir")
+        dir.create(temp_folder)
+        setwd(temp_folder)
+       dataProj.proj <- rgcam::addScenario(conn = rgcam::localDBConn(gcamdatabasePath, gcamdatabaseName,maxMemory=maxMemory),
+                                           proj = projPath_i,
+                                           scenario = scenario_i,
+                                           queryFile = queryPath_i)  # Check your queries file
+      }
+       # Reset dir
+       setwd(basedir)
+       unlink(temp_folder, force=T, recursive=T)
     dataProjLoaded <- rgcam::loadProject(gsub("//","/",paste(dataProjPath, "/", dataProj, sep = "")))
 
     # Save list of scenarios and queries
@@ -486,7 +504,7 @@ readgcam <- function(gcamdatabase = NULL,
   # elec_heat_rate_BTUperkWh
   paramx<-"elec_heat_rate_BTUperkWh"
   if(any(c(paramx,"elec_heat_rate_MBTUperMWh") %in% paramsSelectx)){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "elec coeff"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -531,14 +549,14 @@ readgcam <- function(gcamdatabase = NULL,
       tbl_heat_rate_BTUperkWh <- tbl
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }
   }
 
   # elec_heat_rate_BTUperkWh
   paramx<-"elec_heat_rate_MBTUperMWh"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "elec coeff"
     if (T) {
       tbl <- tbl_heat_rate_BTUperkWh %>%
@@ -547,7 +565,7 @@ readgcam <- function(gcamdatabase = NULL,
                       units = "Heat Rate (MBTU per MWh)")
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }
   }
 
@@ -555,7 +573,7 @@ readgcam <- function(gcamdatabase = NULL,
   # Elec capacity by tech and vintage
   paramx<-"elec_cap_usa_GW"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "elec capacity by tech and vintage"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -597,14 +615,14 @@ readgcam <- function(gcamdatabase = NULL,
       tbl_var_om <- tbl
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
 
   # Variable OnM costs electricity generation
   paramx<-"elec_variable_om_2015USDperMWh"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "elec operating costs by tech and vintage"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -646,13 +664,13 @@ readgcam <- function(gcamdatabase = NULL,
       tbl_var_om <- tbl
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   # Variable OnM escalation rate costs electricity generation
   paramx<-"elec_variable_om_escl_rate_fraction"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
 
     tbl <- tbl_var_om %>%
       dplyr::group_by(scenario, region, subRegion, param, sources, class1, class2, xLabel,units,
@@ -677,7 +695,7 @@ readgcam <- function(gcamdatabase = NULL,
   # Fuel price
   paramx<-"elec_fuel_price_2015USDperMBTU"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "prices by sector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -747,8 +765,8 @@ readgcam <- function(gcamdatabase = NULL,
           for(file_i in gcamdata_files_needed){
             file_ix <- paste0(gcamdata_folder, file_i, ".csv")
             if(!file.exists(file_ix)){
-              print(paste0("File needed does not exist: ", file_ix))
-              print("Some results may be missing.")
+              rlang::inform(paste0("File needed does not exist: ", file_ix))
+              rlang::inform(paste0("Some results may be missing."))
             }
           }
         }
@@ -774,13 +792,13 @@ readgcam <- function(gcamdatabase = NULL,
       datax <- dplyr::bind_rows(datax, tbl_comb)
 
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   # Fuel price escalation rate
   paramx<-"elec_fuel_price_escl_rate_fraction"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
 
     tbl <- tbl_fuel_price %>%
       dplyr::group_by(scenario, region, subRegion, param, sources, class1, class2, xLabel,units,
@@ -801,13 +819,13 @@ readgcam <- function(gcamdatabase = NULL,
       dplyr::filter(!is.na(value))
     datax <- dplyr::bind_rows(datax, tbl)
   } else {
-    # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+    # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
   }
 
   # Capacity Factor USA Input
   paramx<-"elec_capacity_factor_usa_in"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "elec investment capacity factor"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -847,7 +865,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   # Lifetime S Curve Parameters
@@ -855,7 +873,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"elec_lifetime_scurve_yr"
   if(paramx %in% paramsSelectx){
 
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
 
     # Check if all required files are present
     (paramQueryMap %>%
@@ -868,8 +886,8 @@ readgcam <- function(gcamdatabase = NULL,
       for(file_i in gcamdata_files_needed){
         file_ix <- paste0(gcamdata_folder, file_i, ".csv")
       if(!file.exists(file_ix)){
-        print(paste0("File needed does not exist: ", file_ix))
-        print("Some results may be missing.")
+        rlang::inform(paste0("File needed does not exist: ", file_ix))
+        rlang::inform(paste0("Some results may be missing."))
        }
       }
     }
@@ -962,7 +980,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"elec_lifetime_yr"
   if(paramx %in% paramsSelectx){
 
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
 
     # Check if all required files are present
     (paramQueryMap %>%
@@ -974,8 +992,8 @@ readgcam <- function(gcamdatabase = NULL,
       for(file_i in gcamdata_files_needed){
         file_ix <- paste0(gcamdata_folder, file_i, ".csv")
         if(!file.exists(file_ix)){
-          print(paste0("File needed does not exist: ", file_ix))
-          print("Some results may be missing.")
+          rlang::inform(paste0("File needed does not exist: ", file_ix))
+          rlang::inform(paste0("Some results may be missing."))
         }
       }
     }
@@ -1058,7 +1076,7 @@ readgcam <- function(gcamdatabase = NULL,
     paramx<-"elec_fuel_co2_content_tonsperMBTU"
     if(paramx %in% paramsSelectx){
 
-      print(paste0("Running param: ", paramx,"..."))
+      rlang::inform(paste0("Running param: ", paramx,"..."))
 
       # Check if all required files are present
       (paramQueryMap %>%
@@ -1070,8 +1088,8 @@ readgcam <- function(gcamdatabase = NULL,
         for(file_i in gcamdata_files_needed){
           file_ix <- paste0(gcamdata_folder, file_i, ".csv")
           if(!file.exists(file_ix)){
-            print(paste0("File needed does not exist: ", file_ix))
-            print("Some results may be missing.")
+            rlang::inform(paste0("File needed does not exist: ", file_ix))
+            rlang::inform(paste0("Some results may be missing."))
           }
         }
       }
@@ -1163,7 +1181,7 @@ readgcam <- function(gcamdatabase = NULL,
     paramx<-"elec_carbon_capture_rate_fraction"
     if(paramx %in% paramsSelectx){
 
-      print(paste0("Running param: ", paramx,"..."))
+      rlang::inform(paste0("Running param: ", paramx,"..."))
 
       # Check if all required files are present
       (paramQueryMap %>%
@@ -1175,8 +1193,8 @@ readgcam <- function(gcamdatabase = NULL,
         for(file_i in gcamdata_files_needed){
           file_ix <- paste0(gcamdata_folder, file_i, ".csv")
           if(!file.exists(file_ix)){
-            print(paste0("File needed does not exist: ", file_ix))
-            print("Some results may be missing.")
+            rlang::inform(paste0("File needed does not exist: ", file_ix))
+            rlang::inform(paste0("Some results may be missing."))
           }
         }
       }
@@ -1238,7 +1256,7 @@ readgcam <- function(gcamdatabase = NULL,
   # Carbon Capture Escalaction Rate Fraction
   paramx<-"elec_carbon_capture_escl_rate_fraction"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
 
     tbl <- tbl_carbon_capture_rate %>%
       dplyr::group_by(scenario, region, subRegion, param, sources, class1, class2, xLabel,units,
@@ -1263,7 +1281,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"energyFinalConsumByIntlShpAvEJ"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "transport final energy by mode and fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -1304,13 +1322,13 @@ readgcam <- function(gcamdatabase = NULL,
       tblFinalNrgIntlAvShip <- tbl
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx<-"energyFinalConsumBySecEJ"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "total final energy by aggregate sector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -1388,7 +1406,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::bind_rows(tblSepTransportIntlAvShip) # Remove Transport sector from Original tbl
 
       } else {
-        # print(paste("tblFinalNrgIntlAvShip does not exist so skipping subset of final energy to remove intl. shipping and aviation."))
+        # rlang::inform(paste("tblFinalNrgIntlAvShip does not exist so skipping subset of final energy to remove intl. shipping and aviation."))
         tblMod <- tbl
         }
 
@@ -1407,13 +1425,13 @@ readgcam <- function(gcamdatabase = NULL,
 
       datax <- dplyr::bind_rows(datax, tblMod)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx<-"energyFinalSubsecBySectorBuildEJ"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "building final energy by subsector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -1458,13 +1476,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx<-"energyFinalByFuelBySectorEJ"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "Final energy by detailed end-use sector and fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -1533,13 +1551,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx<-"energyFinalSubsecByFuelBuildEJ"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "building final energy by fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -1583,13 +1601,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx<-"energyFinalSubsecByFuelIndusEJ"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "industry final energy by fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -1634,13 +1652,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx<-"elecFinalBySecTWh"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "inputs by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -1730,13 +1748,13 @@ readgcam <- function(gcamdatabase = NULL,
 
       datax <- dplyr::bind_rows(datax, tblUSA,tblCORE)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx<-"elecFinalByFuelTWh"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "Final energy by detailed end-use sector and fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -1789,13 +1807,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx<-"energyPrimaryByFuelEJ"
   # primary energy consumption by region (direct equivalent)
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "primary energy consumption by region (direct equivalent)"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -1871,7 +1889,7 @@ readgcam <- function(gcamdatabase = NULL,
           dplyr::bind_rows(tblSepPrimaryIntlAvShip) # Remove Transport sector from Original tbl
 
       } else {
-        print(paste("tblFinalNrgIntlAvShip does not exist so skipping subset of final energy to remove intl. shipping and aviation."))
+        rlang::inform(paste("tblFinalNrgIntlAvShip does not exist so skipping subset of final energy to remove intl. shipping and aviation."))
         tblMod <- tbl
       }
 
@@ -1887,12 +1905,12 @@ readgcam <- function(gcamdatabase = NULL,
       datax <- dplyr::bind_rows(datax, tblMod)
 
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "elecByTechTWh"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     tbl<-tibble::tibble()
     tblUSA<-tibble::tibble()
     tblUSACogen<-tibble::tibble()
@@ -2011,7 +2029,7 @@ readgcam <- function(gcamdatabase = NULL,
                         classLabel2 = "Technology",
                         classPalette2 = "pal_all")
       }else {
-        # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+        # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
       }
 
     if(nrow(tblUSA)>0 | nrow(tblUSACogen)>0 | nrow(tblGCAMReg)>0){
@@ -2050,7 +2068,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"elecCapByFuel"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
   if(!is.null(tblelecByTechTWh)){
     capfactors <- gcamextractor::data_capfactors
     capfactors
@@ -2077,7 +2095,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   } else {
   if("elec gen by gen tech and cooling tech" %in% queriesSelectx){
-    #print(paste("elecByTechTWh did not run so skipping param elecCapByFuel."))
+    #rlang::inform(paste("elecByTechTWh did not run so skipping param elecCapByFuel."))
     }
   }}
 
@@ -2086,7 +2104,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "watConsumBySec"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # water consumption by sector
     queryx <- "water consumption by state, sector, basin (includes desal)"
     if (queryx %in% queriesx) {
@@ -2141,13 +2159,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
 
   paramx<- "watWithdrawBySec"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # water consumption by sector
     queryx <- "water withdrawals by state, sector, basin (includes desal)"
     if (queryx %in% queriesx) {
@@ -2202,13 +2220,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
 
   paramx <- "watWithdrawByCrop"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # water withdrawals by sector
     queryx <- "water withdrawals by crop"
     if (queryx %in% queriesx) {
@@ -2264,12 +2282,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "watBioPhysCons"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # biophysical water demand by crop type and land region
     queryx <- "biophysical water demand by crop type and land region"
     if (queryx %in% queriesx) {
@@ -2309,12 +2327,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "watIrrWithdrawBasin"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # water withdrawals by water mapping source
     queryx <- "water withdrawals by water mapping source"
     if (queryx %in% queriesx) {
@@ -2357,13 +2375,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
 
   paramx <- "watIrrConsBasin"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # water consumption by water mapping source
     queryx <- "water consumption by water mapping source"
     if (queryx %in% queriesx) {
@@ -2406,13 +2424,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
 
   paramx <- "watSupRunoffBasin"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # water consumption by water mapping source
     queryx <- "Basin level available runoff"
     if (queryx %in% queriesx) {
@@ -2454,13 +2472,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
 
   paramx <- "waterWithdrawROGW"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # water consumption by water mapping source
     queryx <- "Water withdrawals by water source (runoff vs. groundwater)"
     if (queryx %in% queriesx) {
@@ -2506,12 +2524,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "gdpPerCapita"
   if(paramx  %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # GDP MER per Capita MER by region
     queryx <- "GDP per capita MER by region"
     if (queryx %in% queriesx) {
@@ -2551,12 +2569,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "gdp"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # GDP MER by region
     queryx <- "GDP MER by region"
     if (queryx %in% queriesx) {
@@ -2597,12 +2615,12 @@ readgcam <- function(gcamdatabase = NULL,
       datax <- dplyr::bind_rows(datax, tbl)
       tblgdp<-tbl
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "gdpGrowthRate"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # GDP Growth Rate by region
     queryx <- "GDP Growth Rate (Percent)"
     if ("GDP MER by region" %in% queriesx) {
@@ -2632,12 +2650,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-     # print(paste("Paramater 'GDP MER by region' not found in database, so cannot calculate" ,queryx, sep = ""))
+     # rlang::inform(paste("Paramater 'GDP MER by region' not found in database, so cannot calculate" ,queryx, sep = ""))
     }}
 
   paramx <- "livestock_MeatDairybyTechMixed"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # Population
     queryx <- "meat and dairy production by tech"
     if (queryx %in% queriesx) {
@@ -2678,13 +2696,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
 
   paramx <- "livestock_MeatDairybySubsector"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # Population
     queryx <- "meat and dairy production by tech"
     if (queryx %in% queriesx) {
@@ -2724,14 +2742,14 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
 
 
   paramx <- "livestock_MeatDairybyTechPastoral"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # Population
     queryx <- "meat and dairy production by tech"
     if (queryx %in% queriesx) {
@@ -2772,12 +2790,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "livestock_MeatDairybyTechImports"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # Population
     queryx <- "meat and dairy production by tech"
     if (queryx %in% queriesx) {
@@ -2818,12 +2836,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "pop"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # Population
     queryx <- "Population by region"
     if (queryx %in% queriesx) {
@@ -2863,12 +2881,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "agProdbyIrrRfd"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # Ag production by tech
     queryx <- "ag production by tech"
     if (queryx %in% queriesx) {
@@ -2917,12 +2935,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "agProdBiomass"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # Ag Production by Crop Type Biomass EJ
     queryx <- "ag production by tech"
     if (queryx %in% queriesx) {
@@ -2964,12 +2982,12 @@ readgcam <- function(gcamdatabase = NULL,
                       class2, classLabel2, classPalette2)%>%dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "agProdForest"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # Ag Production by Crop Type Forest
     queryx <- "ag production by tech"
     if (queryx %in% queriesx) {
@@ -3010,12 +3028,12 @@ readgcam <- function(gcamdatabase = NULL,
                       class2, classLabel2, classPalette2)%>%dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "agProdByCrop"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # Ag Production by Crop Type
     queryx <- "ag production by tech"
     if (queryx %in% queriesx) {
@@ -3058,12 +3076,12 @@ readgcam <- function(gcamdatabase = NULL,
                       class2, classLabel2, classPalette2)%>%dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "landIrrRfd"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # land allocation by crop and water source
     queryx <- "land allocation by crop and water source"
     if (queryx %in% queriesx) {
@@ -3104,12 +3122,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "landIrrCrop"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # land allocation by crop and water source
     queryx <- "land allocation by crop and water source"
     if (queryx %in% queriesx) {
@@ -3150,12 +3168,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "landRfdCrop"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # land allocation by crop and water source
     queryx <- "land allocation by crop and water source"
     if (queryx %in% queriesx) {
@@ -3196,12 +3214,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "landAlloc"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # aggregated land allocation
     queryx <- "aggregated land allocation"
     if (queryx %in% queriesx) {
@@ -3252,12 +3270,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "inputs"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "inputs by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -3298,12 +3316,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "outputs"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "outputs by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -3344,13 +3362,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
 
   paramx <- "landAllocDetail"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # aggregated land allocation
     queryx <- "detailed land allocation"
     if (queryx %in% queriesx) {
@@ -3393,13 +3411,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
 
   paramx <- "landAllocByCrop"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # aggregated land allocation
     queryx <- "land allocation by crop"
     if (queryx %in% queriesx) {
@@ -3457,12 +3475,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "emissLUC"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # Land Use Change Emission (future)
     queryx <- "Land Use Change Emission (future)"
     if (queryx %in% queriesx) {
@@ -3507,13 +3525,13 @@ readgcam <- function(gcamdatabase = NULL,
       tblLUEmiss<-tbl
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
 
   paramx <- "emissCO2BySectorNoBio"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "CO2 emissions by sector (no bio)"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -3572,7 +3590,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "emissNonCO2BySectorGWPAR5"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
 
     # GHG emissions (non CO2) by subsector, using AR5 GWP values
     queryx <- "nonCO2 emissions by sector"
@@ -3645,7 +3663,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
     } else {
       tblCore <- tibble::tibble()
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }
 
     # GHG emissions (non CO2) by subsector, using AR5 GWP values USA
@@ -3721,7 +3739,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
     } else {
       tblUSA <- tibble::tibble()
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }
 
     # Combine Core and USA
@@ -3739,7 +3757,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "emissNonCO2BySector"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
 
     # GHG emissions (non CO2) by subsector values
     queryx <- "nonCO2 emissions by sector"
@@ -3778,7 +3796,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
     } else {
       tblCore <- tibble::tibble()
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }
 
     # GHG emissions (non CO2) by subsector values USA
@@ -3818,7 +3836,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
     } else {
       tblUSA <- tibble::tibble()
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }
 
     # GHG emissions (non CO2) by subsector values USA
@@ -3858,7 +3876,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
     } else {
       tblUSAnonUS <- tibble::tibble()
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }
 
     # Combine Core and USA
@@ -4042,7 +4060,7 @@ readgcam <- function(gcamdatabase = NULL,
 
       datax <- dplyr::bind_rows(datax, tblx, tblxexpandcum2010to2100, rcpranges)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }
 
 
@@ -4051,7 +4069,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "emissMethaneBySourceGWPAR5"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # GHG emissions (non CO2) by subsector, using AR5 GWP values
     queryx <- "nonCO2 emissions by sector"
     if (queryx %in% queriesx) {
@@ -4108,12 +4126,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "emissNonCO2ByResProdGWPAR5"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # GHG emissions by resource production, using AR5 GWP values
     queryx <- "nonCO2 emissions by resource production"
     if (queryx %in% queriesx) {
@@ -4184,7 +4202,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
 # Emissions Fossil FUels and Industry (FFI) basically everything but LUC GWP AR5
@@ -4192,7 +4210,7 @@ readgcam <- function(gcamdatabase = NULL,
 
     paramx <- "emissBySectorGWPAR5FFI"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # GHG emissions by resource production, using AR5 GWP values
     totalFFINonCO2 <- datax %>% dplyr::filter(param %in% c("emissNonCO2ByResProdGWPAR5", "emissNonCO2BySectorGWPAR5")) %>%
       dplyr::filter(!class1=='CO2')
@@ -4223,7 +4241,7 @@ readgcam <- function(gcamdatabase = NULL,
     datax <- rbind(datax, totalFFICO2Eq)
   }} else {
     if(any(c("nonCO2 emissions by resource production","nonCO2 emissions by sector") %in% queriesSelectx)){
-      #print(paste("totalFFINonCO2 did not run so skipping param emissBySectorGWPAR5FFI",sep=""))
+      #rlang::inform(paste("totalFFINonCO2 did not run so skipping param emissBySectorGWPAR5FFI",sep=""))
       }
   }
 
@@ -4231,7 +4249,7 @@ readgcam <- function(gcamdatabase = NULL,
   if(any(c("emissNonCO2ByResProdGWPAR5", "emissNonCO2BySectorGWPAR5") %in% unique(datax$param))){
   paramx <- "emissBySectorGWPAR5LUC"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # Same as FFI Emiss by Sec, except we are now adding LUC. So really it is the whole emissions picture (or close to it)
     totalFFINonCO2 <- datax %>% dplyr::filter(param %in% c("emissNonCO2ByResProdGWPAR5", "emissNonCO2BySectorGWPAR5")) %>%
       dplyr::filter(!class1=='CO2')
@@ -4263,7 +4281,7 @@ readgcam <- function(gcamdatabase = NULL,
     datax <- rbind(datax, totalFFICO2Eq)
   }} else {
     if(any(c("nonCO2 emissions by resource production","nonCO2 emissions by sector") %in% queriesSelectx)){
-    #print(paste("totalFFINonCO2 did not run so skipping param emissBySectorGWPAR5LUC",sep=""))
+    #rlang::inform(paste("totalFFINonCO2 did not run so skipping param emissBySectorGWPAR5LUC",sep=""))
       }
     }
 
@@ -4271,7 +4289,7 @@ readgcam <- function(gcamdatabase = NULL,
   if(any(c("emissNonCO2ByResProdGWPAR5", "emissNonCO2BySectorGWPAR5") %in% unique(datax$param))){
     paramx <- "emissByGasGWPAR5FFI"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # GHG emissions by resource production, using AR5 GWP values
     totalFFINonCO2 <- datax %>% dplyr::filter(param %in% c("emissNonCO2ByResProdGWPAR5", "emissNonCO2BySectorGWPAR5")) %>%
       dplyr::filter(!class1=='CO2')
@@ -4298,7 +4316,7 @@ readgcam <- function(gcamdatabase = NULL,
   }
     } else {
     if(any(c("nonCO2 emissions by resource production","nonCO2 emissions by sector") %in% queriesSelectx)){
-    #print(paste("totalFFINonCO2 did not run so skipping param emissByGasGWPAR5FFI",sep=""))
+    #rlang::inform(paste("totalFFINonCO2 did not run so skipping param emissByGasGWPAR5FFI",sep=""))
       }
     }
 
@@ -4308,7 +4326,7 @@ readgcam <- function(gcamdatabase = NULL,
            "emissLUC","emissCO2BySectorNoBio") %in% unique(datax$param))){
     paramx <- "emissByGasGWPAR5LUC"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
 
     totalFFICO2 <- datax %>% dplyr::filter(param %in% c("emissCO2BySectorNoBio")) %>%
       dplyr::mutate(class1=dplyr::if_else(class1=="LUC", "CO2 LUC", "CO2"))
@@ -4341,7 +4359,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   } else {
     if(any(c("nonCO2 emissions by resource production","nonCO2 emissions by sector") %in% queriesSelectx)){
-      #print(paste("totalFFINonCO2 did not run so skipping param emissByGasGWPAR5LUC",sep=""))
+      #rlang::inform(paste("totalFFINonCO2 did not run so skipping param emissByGasGWPAR5LUC",sep=""))
       }
   }
 
@@ -4352,7 +4370,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "emissNonCO2BySectorGTPAR5"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # GHG emissions by subsector
     queryx <- "nonCO2 emissions by sector"
     if (queryx %in% queriesx) {
@@ -4421,12 +4439,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "emissMethaneBySourceGTPAR5"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # GHG emissions (non CO2) by subsector, using AR5 GTP values
     queryx <- "nonCO2 emissions by sector"
     if (queryx %in% queriesx) {
@@ -4485,12 +4503,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx <- "emissNonCO2ByResProdGTPAR5"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # GHG emissions by resource production, using AR5 GTP values
     queryx <- "nonCO2 emissions by resource production"
     if (queryx %in% queriesx) {
@@ -4563,14 +4581,14 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   # Emissions Fossil FUels and Industry (FFI) basically everything but LUC GTP AR5
   if(any(c("emissNonCO2ByResProdGTPAR5", "emissNonCO2BySectorGTPAR5") %in% unique(datax$param))){
     paramx <- "emissBySectorGTPAR5FFI"
     if(paramx %in% paramsSelectx){
-      print(paste0("Running param: ", paramx,"..."))
+      rlang::inform(paste0("Running param: ", paramx,"..."))
       # GHG emissions by resource production, using AR5 GTP values
       totalFFINonCO2 <- datax %>% dplyr::filter(param %in% c("emissNonCO2ByResProdGTPAR5", "emissNonCO2BySectorGTPAR5")) %>%
         dplyr::filter(!class1=='CO2')
@@ -4601,7 +4619,7 @@ readgcam <- function(gcamdatabase = NULL,
       datax <- rbind(datax, totalFFICO2Eq)
     }} else {
       if(any(c("nonCO2 emissions by resource production","nonCO2 emissions by sector") %in% queriesSelectx)){
-        #print(paste("totalFFINonCO2 did not run so skipping paramemissBySectorGTPAR5FFI",sep=""))
+        #rlang::inform(paste("totalFFINonCO2 did not run so skipping paramemissBySectorGTPAR5FFI",sep=""))
         }
     }
 
@@ -4609,7 +4627,7 @@ readgcam <- function(gcamdatabase = NULL,
   if(any(c("emissNonCO2ByResProdGTPAR5", "emissNonCO2BySectorGTPAR5") %in% unique(datax$param))){
     paramx <- "emissBySectorGTPAR5LUC"
     if(paramx %in% paramsSelectx){
-      print(paste0("Running param: ", paramx,"..."))
+      rlang::inform(paste0("Running param: ", paramx,"..."))
       # Same as FFI Emiss by Sec, except we are now adding LUC. So really it is the whole emissions picture (or close to it)
       totalFFINonCO2 <- datax %>% dplyr::filter(param %in% c("emissNonCO2ByResProdGTPAR5", "emissNonCO2BySectorGTPAR5")) %>%
         dplyr::filter(!class1=='CO2')
@@ -4641,7 +4659,7 @@ readgcam <- function(gcamdatabase = NULL,
       datax <- rbind(datax, totalFFICO2Eq)
     }} else {
       if(any(c("nonCO2 emissions by resource production","nonCO2 emissions by sector") %in% queriesSelectx)){
-        #print(paste("totalFFINonCO2 did not run so skipping param emissBySectorGTPAR5LUC",sep=""))
+        #rlang::inform(paste("totalFFINonCO2 did not run so skipping param emissBySectorGTPAR5LUC",sep=""))
         }
     }
 
@@ -4649,7 +4667,7 @@ readgcam <- function(gcamdatabase = NULL,
   if(any(c("emissNonCO2ByResProdGTPAR5", "emissNonCO2BySectorGTPAR5") %in% unique(datax$param))){
     paramx <- "emissByGasGTPAR5FFI"
     if(paramx %in% paramsSelectx){
-      print(paste0("Running param: ", paramx,"..."))
+      rlang::inform(paste0("Running param: ", paramx,"..."))
       # GHG emissions by resource production, using AR5 GTP values
       totalFFINonCO2 <- datax %>% dplyr::filter(param %in% c("emissNonCO2ByResProdGTPAR5", "emissNonCO2BySectorGTPAR5")) %>%
         dplyr::filter(!class1=='CO2')
@@ -4676,7 +4694,7 @@ readgcam <- function(gcamdatabase = NULL,
     }
   } else {
     if(any(c("nonCO2 emissions by resource production","nonCO2 emissions by sector") %in% queriesSelectx)){
-      #print(paste("totalFFINonCO2 did not run so skipping param emissByGasGTPAR5FFI",sep=""))
+      #rlang::inform(paste("totalFFINonCO2 did not run so skipping param emissByGasGTPAR5FFI",sep=""))
       }
   }
 
@@ -4686,7 +4704,7 @@ readgcam <- function(gcamdatabase = NULL,
            "emissLUC","emissCO2BySectorNoBio") %in% unique(datax$param))){
     paramx <- "emissByGasGTPAR5LUC"
     if(paramx %in% paramsSelectx){
-      print(paste0("Running param: ", paramx,"..."))
+      rlang::inform(paste0("Running param: ", paramx,"..."))
 
       totalFFICO2 <- datax %>% dplyr::filter(param %in% c("emissCO2BySectorNoBio"))%>%dplyr::mutate(class1="CO2")
       # GHG emissions by resource production, using AR5 GTP values
@@ -4717,7 +4735,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   } else {
     if(any(c("nonCO2 emissions by resource production","nonCO2 emissions by sector") %in% queriesSelectx)){
-      #print(paste("totalFFINonCO2 did not run so skipping param emissByGasGTPAR5LUC",sep=""))
+      #rlang::inform(paste("totalFFINonCO2 did not run so skipping param emissByGasGTPAR5LUC",sep=""))
       }
   }
 
@@ -4726,7 +4744,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   paramx <- "emissNonCO2BySectorOrigUnits"
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     # GHG emissions by subsector
     queryx <- "nonCO2 emissions by sector"
     if (queryx %in% queriesx) {
@@ -4793,13 +4811,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx<-"transportPassengerVMTByMode"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "transport service output by mode"
     vmt_array <- c("trn_aviation_intl", "trn_pass", "trn_pass_road", "trn_pass_road_LDV",
                    "trn_pass_road_LDV_2W", "trn_pass_road_LDV_4W")
@@ -4852,13 +4870,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx<-"transportFreightVMTByMode"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "transport service output by mode"
     vmt_array <- c("trn_freight", "trn_freight_road")
     if (queryx %in% queriesx) {
@@ -4904,13 +4922,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx<-"energyPrimaryRefLiqProdEJ"
   # Freight VMT (services) by fuel
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "refined liquids production by subsector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -4969,13 +4987,13 @@ readgcam <- function(gcamdatabase = NULL,
 
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx<-"transportPassengerVMTByFuel"
   # Passenger VMT (services) by fuel
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "transport service output by tech (new)"
     vmt_array <- c("trn_aviation_intl", "trn_pass", "trn_pass_road", "trn_pass_road_LDV",
                    "trn_pass_road_LDV_2W", "trn_pass_road_LDV_4W")
@@ -5039,13 +5057,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx<-"transportFreightVMTByFuel"
   # Freight VMT (services) by fuel
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "transport service output by tech (new)"
     vmt_array <- c("trn_freight", "trn_freight_road")
     if (queryx %in% queriesx) {
@@ -5105,13 +5123,13 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   paramx<-"energyFinalSubsecByFuelTranspEJ"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
-    print(paste0("Running param: ", paramx,"..."))
+    rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "transport final energy by fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -5207,7 +5225,7 @@ readgcam <- function(gcamdatabase = NULL,
           dplyr::bind_rows(tblSepTransportFinalIntlAvShip) # Remove Transport sector from Original tbl
 
       } else {
-        print(paste("tblFinalNrgIntlAvShip does not exist so skipping subset of final energy to remove intl. shipping and aviation."))
+        rlang::inform(paste("tblFinalNrgIntlAvShip does not exist so skipping subset of final energy to remove intl. shipping and aviation."))
         tblMod <- tbl
       }
 
@@ -5222,7 +5240,7 @@ readgcam <- function(gcamdatabase = NULL,
 
       datax <- dplyr::bind_rows(datax, tblMod)
     } else {
-      # if(queryx %in% queriesSelectx){print(paste("Query '", queryx, "' not found in database", sep = ""))}
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
   } # Close datax assignments
@@ -5305,8 +5323,8 @@ readgcam <- function(gcamdatabase = NULL,
   datax <- datax  %>% unique()
 
   if(!all(regionsSelect %in% unique(datax$region))){
-    print(paste("Regions not available in data: ", paste(regionsSelect[!(regionsSelect %in% unique(datax$region))],collapse=", "), sep=""))
-    print(paste("Running remaining regions: ",  paste(regionsSelect[(regionsSelect %in% unique(datax$region))],collapse=", "), sep=""))
+    rlang::inform(paste("Regions not available in data: ", paste(regionsSelect[!(regionsSelect %in% unique(datax$region))],collapse=", "), sep=""))
+    rlang::inform(paste("Running remaining regions: ",  paste(regionsSelect[(regionsSelect %in% unique(datax$region))],collapse=", "), sep=""))
   }
 
   if(saveData){
@@ -5314,14 +5332,14 @@ readgcam <- function(gcamdatabase = NULL,
     # All Data
     utils::write.csv(datax,
                      file = paste(folder, "/gcamDataTable_Extended",nameAppend, ".csv", sep = ""), row.names = F)
-    print(paste("GCAM data table saved to: ",
+    rlang::inform(paste("GCAM data table saved to: ",
                 gsub("//","/",paste(folder, "/gcamDataTable_Extended",nameAppend,".csv", sep = ""))))
 
      # Data
     utils::write.csv(datax %>% dplyr::select("scenario","region","subRegion","param","classLabel1","class1","classLabel2","class2",
                                              "xLabel","x","vintage","units","value"),
                      file = paste(folder, "/gcamDataTable",nameAppend, ".csv", sep = ""), row.names = F)
-    print(paste("GCAM data table saved to: ",
+    rlang::inform(paste("GCAM data table saved to: ",
                 gsub("//","/",paste(folder, "/gcamDataTable",nameAppend,".csv", sep = ""))))
      }
 
@@ -5351,7 +5369,7 @@ readgcam <- function(gcamdatabase = NULL,
                                                   "/gcamDataTable_aggClass2",
                                                   nameAppend,".csv", sep = "")),row.names = F)
 
-      print(paste("GCAM data aggregated to class 2 saved to: ",gsub("//","/",paste(folder,
+      rlang::inform(paste("GCAM data aggregated to class 2 saved to: ",gsub("//","/",paste(folder,
                                 "/gcamDataTable_aggClass2",
                                 nameAppend,".csv", sep = "")),sep=""))
 
@@ -5382,7 +5400,7 @@ readgcam <- function(gcamdatabase = NULL,
                                                 "/gcamDataTable_aggClass1",
                                                 nameAppend,".csv", sep = "")),row.names = F)
 
-    print(paste("GCAM data aggregated to class 1 saved to: ",gsub("//","/",paste(folder,
+    rlang::inform(paste("GCAM data aggregated to class 1 saved to: ",gsub("//","/",paste(folder,
                                                                                    "/gcamDataTable_aggClass1",
                                                                                    nameAppend,".csv", sep = "")),sep=""))
 
@@ -5412,21 +5430,21 @@ readgcam <- function(gcamdatabase = NULL,
                                                 nameAppend,".csv", sep = "")),row.names = F)
 
 
-    print(paste("GCAM data aggregated to param saved to: ",gsub("//","/",paste(folder,
+    rlang::inform(paste("GCAM data aggregated to param saved to: ",gsub("//","/",paste(folder,
                                                                                    "/gcamDataTable_aggParam",
                                                                                    nameAppend,".csv", sep = "")),sep=""))
     }
 
-  }else{print("No data for any of the regions, params or queries selected")} # Close datax nrow check
+  }else{rlang::inform(paste0("No data for any of the regions, params or queries selected"))} # Close datax nrow check
 
   }else{ # CLose Param Check
-    print(paste("None of the parameters in paramsSelect: ", paste(paramsSelect,collapse=",")," are available."))}
+    rlang::inform(paste("None of the parameters in paramsSelect: ", paste(paramsSelect,collapse=",")," are available."))}
 
-  print("Outputs returned as list containing data, scenarios and queries.")
-  print("For example if df <- readgcam(dataProjFile = gcamextractor::example_GCAMv52_2050_proj)")
-  print("Then you can view the outputs as df$data, df$dataAggClass1, df$dataAggClass2, df$dataAggParam, df$scenarios, df$queries.")
-  print(gsub("//","/",paste("All outputs in : ",folder,sep="")))
-  print("readgcam run completed.")
+  rlang::inform(paste0("Outputs returned as list containing data, scenarios and queries."))
+  rlang::inform(paste0("For example if df <- readgcam(dataProjFile = gcamextractor::example_GCAMv52_2050_proj)"))
+  rlang::inform(paste0("Then you can view the outputs as df$data, df$dataAggClass1, df$dataAggClass2, df$dataAggParam, df$scenarios, df$queries."))
+  rlang::inform((gsub("//","/",paste("All outputs in : ",normalizePath(folder),sep=""))))
+  rlang::inform(paste0("readgcam run completed."))
 
   return(list(dataAll = datax,
               data = datax %>% dplyr::select("scenario","region","subRegion","param","classLabel1","class1","classLabel2","class2",
