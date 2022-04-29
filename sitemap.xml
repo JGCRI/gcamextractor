@@ -49,6 +49,9 @@
     <loc>/reference/gcamextractor.html</loc>
   </url>
   <url>
+    <loc>/reference/gcamextractor_test_data.html</loc>
+  </url>
+  <url>
     <loc>/reference/gdp_deflator.html</loc>
   </url>
   <url>
@@ -59,6 +62,9 @@
   </url>
   <url>
     <loc>/reference/map_param_query.html</loc>
+  </url>
+  <url>
+    <loc>/reference/map_state_to_gridregion.html</loc>
   </url>
   <url>
     <loc>/reference/queries.html</loc>
