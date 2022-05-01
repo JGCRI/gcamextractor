@@ -133,14 +133,14 @@ dataGCAM <- readgcam(reReadData = reReadData_i,
                      paramsSelect = paramsSelect_i,
                      folder = folder_i)
 
-# Check for Yang Ou db
+# Check for im3
 library(gcamextractor); library(dplyr)
-gcamdatabase_i = "database_rcp85hotter_ssp5_runoff"
+gcamdatabase_i = "C:/Z/projects/current/00_IM3/pic_checks/databases/database_rcp85hotter_ssp5_runoff"
 rgcam::localDBConn("C:/Z/models/gcamextractor","database_rcp85hotter_ssp5_runoff")
 reReadData_i = T
 dataProjFile_i = "dataProj_test.proj"
 regionsSelect_i = NULL
-paramsSelect_i = c("pop")
+paramsSelect_i = c("elecFinalBySecTWh")
 folder_i="testx"
 
 dataGCAM <- readgcam(reReadData = reReadData_i,
@@ -149,6 +149,10 @@ dataGCAM <- readgcam(reReadData = reReadData_i,
                      regionsSelect = regionsSelect_i,
                      paramsSelect = paramsSelect_i,
                      folder = folder_i)
+
+datax <- dataGCAM$data; head(datax)
+datax$class1%>%unique(); datax$class2%>%unique();
+datax%>%filter(class2=="building") %>% as.data.frame()
 
 reReadData = reReadData_i
 gcamdatabase = gcamdatabase_i

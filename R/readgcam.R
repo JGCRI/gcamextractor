@@ -370,13 +370,13 @@ readgcam <- function(gcamdatabase = NULL,
 
     # Get names of scenarios in database
     # Change directory to avoid rgcam error when gcamdatabase is in the same folder as gcamextractor
-    temp_folder <- paste0(getwd(),"/temp_dir")
-    dir.create(temp_folder)
-    setwd(temp_folder)
+    # temp_folder <- paste0(getwd(),"/temp_dir")
+    # dir.create(temp_folder)
+    # setwd(temp_folder)
     x <- utils::capture.output(rgcam::localDBConn(gcamdatabasePath,gcamdatabaseName,maxMemory=maxMemory), type="message")
     # Reset dir
-    setwd(basedir)
-    unlink(temp_folder, force=T, recursive=T)
+    # setwd(basedir)
+    # unlink(temp_folder, force=T, recursive=T)
     x <- gsub(", ",",",gsub(": ","",gsub("Database scenarios:  ","",x)));x
     scenarios <- as.vector(unlist(strsplit(gsub("Database scenarios: ","",x),",")))
     rlang::inform(paste("All scenarios in data available: ", paste(scenarios,collapse=", "), sep=""))
@@ -416,17 +416,17 @@ readgcam <- function(gcamdatabase = NULL,
         projPath_i = suppressWarnings(normalizePath(paste0(dataProjPath, "/", dataProj))); projPath_i
         queryPath_i = normalizePath(paste0(queryPath, "/subSetQueries.xml")); queryPath_i
         # Change directory to avoid rgcam error when gcamdatabase is in the same folder as gcamextractor
-        temp_folder <- paste0(getwd(),"/temp_dir")
-        dir.create(temp_folder)
-        setwd(temp_folder)
+        # temp_folder <- paste0(getwd(),"/temp_dir")
+        # dir.create(temp_folder)
+        # setwd(temp_folder)
        dataProj.proj <- rgcam::addScenario(conn = rgcam::localDBConn(gcamdatabasePath, gcamdatabaseName,maxMemory=maxMemory),
                                            proj = projPath_i,
                                            scenario = scenario_i,
                                            queryFile = queryPath_i)  # Check your queries file
       }
        # Reset dir
-       setwd(basedir)
-       unlink(temp_folder, force=T, recursive=T)
+       # setwd(basedir)
+       # unlink(temp_folder, force=T, recursive=T)
     dataProjLoaded <- rgcam::loadProject(gsub("//","/",paste(dataProjPath, "/", dataProj, sep = "")))
 
     # Save list of scenarios and queries
