@@ -134,6 +134,9 @@ readgcam <- function(gcamdatabase = NULL,
     if(any(grepl("$all^", regionsSelect, ignore.case = T))){
       regionsSelect <- NULL
     }
+
+    regionsSelect <- gsub("^United States$", "USA", regionsSelect, ignore.case=T)
+
     }
 
   if(!is.null(gcamdata_folder)){
@@ -476,10 +479,12 @@ readgcam <- function(gcamdatabase = NULL,
 
       # Read in each file needed and assign to list and rename the list item
       gcamdata_files <- list()
+      if(!is.null(gcamdata_filenames)){
       for(i in 1:length(gcamdata_filenames)){
         gcamdata_file_i <-  tibble::as_tibble(utils::read.csv(paste0(gcamdata_folder, gsub(".csv","",gcamdata_filenames[[i]]), ".csv"), comment.char = "#"))
         gcamdata_files[[i]] <- gcamdata_file_i
         names(gcamdata_files)[[i]] <- gcamdata_filenames[[i]]
+      }
       }
       names(gcamdata_files)
     }
