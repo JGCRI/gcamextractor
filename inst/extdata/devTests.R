@@ -4,8 +4,9 @@ library(gcamextractor); library(dplyr)
 params <- gcamextractor::data_params; params
 
 gcamdatabase_i = "C:/Z/projects/current/00_IM3/pic_checks/databases/database_rcp85hotter_ssp5_runoff"
+#gcamdatabase_i = "C:/Z/models/gcamextractor/database_rcp85hotter_ssp5_runoff"
 gcamdata_folder_i = "C:/gcam/gcam-usa-im3/input/gcamdata"
-rgcam::localDBConn("C:/Z/projects/current/00_IM3/pic_checks/databases/","database_rcp85hotter_ssp5_runoff")
+rgcam::localDBConn("C:/Z/projects/current/00_IM3/pic_checks/databases/","database_rcp85hotter_ssp5_runoffx")
 reReadData_i = T
 dataProjFile_i = "dataProj_cerf.proj"
 regionsSelect_i = "United States"

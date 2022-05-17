@@ -82,7 +82,7 @@
 readgcam <- function(gcamdatabase = NULL,
                      gcamdata_folder = NULL,
                      queryFile = NULL,
-                     dataProjFile = paste0(getwd(),"/dataProj.proj"),
+                     dataProjFile = "dataProj.proj",
                      maxMemory = "4g",
                      scenOrigNames = "All",
                      scenNewNames = NULL,
@@ -141,8 +141,8 @@ readgcam <- function(gcamdatabase = NULL,
 
   if(!is.null(gcamdata_folder)){
     if(!dir.exists(gcamdata_folder)){
-      rlang::inform(paste0("gcamdata_folder provided : ", gcamdata_folder, "does not exist."))
-      rlang::inform(paste0("Will skip parameters that require gcamdata folder."))
+      rlang::warn(paste0("gcamdata_folder provided : ", gcamdata_folder, "does not exist."))
+      rlang::warn(paste0("Skipped parameters that require gcamdata folder."))
     }
   }
 
@@ -373,13 +373,15 @@ readgcam <- function(gcamdatabase = NULL,
 
     # Get names of scenarios in database
     # Change directory to avoid rgcam error when gcamdatabase is in the same folder as gcamextractor
-    # temp_folder <- paste0(getwd(),"/temp_dir")
-    # dir.create(temp_folder)
-    # setwd(temp_folder)
+    rlang::inform("Switching folder because database is in same folder as current working directory which does not work with rgcam.")
+    temp_folder <- paste0(getwd(),"/temp_dir")
+    dir.create(temp_folder)
+    setwd(temp_folder)
     x <- utils::capture.output(rgcam::localDBConn(gcamdatabasePath,gcamdatabaseName,maxMemory=maxMemory), type="message")
     # Reset dir
-    # setwd(basedir)
-    # unlink(temp_folder, force=T, recursive=T)
+    setwd(basedir)
+    unlink(temp_folder, force=T, recursive=T)
+    rlang::inform("Back to original working directory.")
     x <- gsub(", ",",",gsub(": ","",gsub("Database scenarios:  ","",x)));x
     scenarios <- as.vector(unlist(strsplit(gsub("Database scenarios: ","",x),",")))
     rlang::inform(paste("All scenarios in data available: ", paste(scenarios,collapse=", "), sep=""))
@@ -419,17 +421,19 @@ readgcam <- function(gcamdatabase = NULL,
         projPath_i = suppressWarnings(normalizePath(paste0(dataProjPath, "/", dataProj))); projPath_i
         queryPath_i = normalizePath(paste0(queryPath, "/subSetQueries.xml")); queryPath_i
         # Change directory to avoid rgcam error when gcamdatabase is in the same folder as gcamextractor
-        # temp_folder <- paste0(getwd(),"/temp_dir")
-        # dir.create(temp_folder)
-        # setwd(temp_folder)
+        rlang::inform("Switching folder because database is in same folder as current working directory which does not work with rgcam.")
+        temp_folder <- paste0(getwd(),"/temp_dir")
+        dir.create(temp_folder)
+        setwd(temp_folder)
        dataProj.proj <- rgcam::addScenario(conn = rgcam::localDBConn(gcamdatabasePath, gcamdatabaseName,maxMemory=maxMemory),
                                            proj = projPath_i,
                                            scenario = scenario_i,
                                            queryFile = queryPath_i)  # Check your queries file
       }
        # Reset dir
-       # setwd(basedir)
-       # unlink(temp_folder, force=T, recursive=T)
+       setwd(basedir)
+       unlink(temp_folder, force=T, recursive=T)
+       rlang::inform("Back to original working directory.")
     dataProjLoaded <- rgcam::loadProject(gsub("//","/",paste(dataProjPath, "/", dataProj, sep = "")))
 
     # Save list of scenarios and queries
@@ -480,10 +484,21 @@ readgcam <- function(gcamdatabase = NULL,
       # Read in each file needed and assign to list and rename the list item
       gcamdata_files <- list()
       if(!is.null(gcamdata_filenames)){
+        count = 1
       for(i in 1:length(gcamdata_filenames)){
+        if(!file.exists(paste0(gcamdata_folder, gsub(".csv","",gcamdata_filenames[[i]]), ".csv"))){
+          params_remove <- (paramQueryMap %>% filter(grepl(gcamdata_filenames[[i]], gcamdata)))$param
+          rlang::warn(paste0("File: ", gcamdata_filenames[[i]],
+                               " does not exist so skipping file and related param ",
+                               (paramQueryMap %>% filter(grepl(gcamdata_filenames[[i]], gcamdata)))$param,
+                               "."))
+          paramsSelectx <- paramsSelectx[!paramsSelectx %in% params_remove]
+        } else {
         gcamdata_file_i <-  tibble::as_tibble(utils::read.csv(paste0(gcamdata_folder, gsub(".csv","",gcamdata_filenames[[i]]), ".csv"), comment.char = "#"))
-        gcamdata_files[[i]] <- gcamdata_file_i
-        names(gcamdata_files)[[i]] <- gcamdata_filenames[[i]]
+        gcamdata_files[[count]] <- gcamdata_file_i
+        names(gcamdata_files)[[count]] <- gcamdata_filenames[[i]]
+        count = count + 1
+        }
       }
       }
       names(gcamdata_files)
@@ -765,10 +780,12 @@ readgcam <- function(gcamdatabase = NULL,
         unlist() %>%
         unique() -> gcamdata_files_needed
 
+      gcamdata_files_needed <- gcamdata_files_needed[!gcamdata_files_needed %in% "no"]
+
       if(!is.null(gcamdata_folder)){
         if(dir.exists(gcamdata_folder)){
           for(file_i in gcamdata_files_needed){
-            file_ix <- paste0(gcamdata_folder, file_i, ".csv")
+             file_ix <- paste0(gcamdata_folder, "/", file_i, ".csv")
             if(!file.exists(file_ix)){
               rlang::inform(paste0("File needed does not exist: ", file_ix))
               rlang::inform(paste0("Some results may be missing."))
@@ -886,10 +903,12 @@ readgcam <- function(gcamdatabase = NULL,
       unlist() %>%
       unique() -> gcamdata_files_needed
 
+    gcamdata_files_needed <- gcamdata_files_needed[!gcamdata_files_needed %in% "no"]
+
     if(!is.null(gcamdata_folder)){
     if(dir.exists(gcamdata_folder)){
       for(file_i in gcamdata_files_needed){
-        file_ix <- paste0(gcamdata_folder, file_i, ".csv")
+         file_ix <- paste0(gcamdata_folder, "/", file_i, ".csv")
       if(!file.exists(file_ix)){
         rlang::inform(paste0("File needed does not exist: ", file_ix))
         rlang::inform(paste0("Some results may be missing."))
@@ -993,9 +1012,11 @@ readgcam <- function(gcamdatabase = NULL,
       unlist() %>%
       unique() -> gcamdata_files_needed
 
+    gcamdata_files_needed <- gcamdata_files_needed[!gcamdata_files_needed %in% "no"]
+
     if(dir.exists(gcamdata_folder)){
       for(file_i in gcamdata_files_needed){
-        file_ix <- paste0(gcamdata_folder, file_i, ".csv")
+         file_ix <- paste0(gcamdata_folder, "/", file_i, ".csv")
         if(!file.exists(file_ix)){
           rlang::inform(paste0("File needed does not exist: ", file_ix))
           rlang::inform(paste0("Some results may be missing."))
@@ -1089,9 +1110,11 @@ readgcam <- function(gcamdatabase = NULL,
         unlist() %>%
         unique() -> gcamdata_files_needed
 
+      gcamdata_files_needed <- gcamdata_files_needed[!gcamdata_files_needed %in% "no"]
+
       if(dir.exists(gcamdata_folder)){
         for(file_i in gcamdata_files_needed){
-          file_ix <- paste0(gcamdata_folder, file_i, ".csv")
+           file_ix <- paste0(gcamdata_folder, "/", file_i, ".csv")
           if(!file.exists(file_ix)){
             rlang::inform(paste0("File needed does not exist: ", file_ix))
             rlang::inform(paste0("Some results may be missing."))
@@ -1194,9 +1217,11 @@ readgcam <- function(gcamdatabase = NULL,
         unlist() %>%
         unique() -> gcamdata_files_needed
 
+      gcamdata_files_needed <- gcamdata_files_needed[!gcamdata_files_needed %in% "no"]
+
       if(dir.exists(gcamdata_folder)){
         for(file_i in gcamdata_files_needed){
-          file_ix <- paste0(gcamdata_folder, file_i, ".csv")
+           file_ix <- paste0(gcamdata_folder, "/", file_i, ".csv")
           if(!file.exists(file_ix)){
             rlang::inform(paste0("File needed does not exist: ", file_ix))
             rlang::inform(paste0("Some results may be missing."))

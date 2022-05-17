@@ -8,7 +8,7 @@ readgcam(
   gcamdatabase = NULL,
   gcamdata_folder = NULL,
   queryFile = NULL,
-  dataProjFile = paste0(getwd(), "/dataProj.proj"),
+  dataProjFile = "dataProj.proj",
   maxMemory = "4g",
   scenOrigNames = "All",
   scenNewNames = NULL,
