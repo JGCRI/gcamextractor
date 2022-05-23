@@ -135,6 +135,7 @@
 <li>queries: A list of the queries used to extract the data</li>
 </ul>
 <p>The figure below shows the workflow of how <code>gcamextractor</code> connects to a GCAM database and its outputs.</p>
+<p><br></p>
 <p align="center">
 <img src="vignetteFigs/gcamextractor%20-%20Workflow.jpg" width="1400"></p>
 <!-------------------------->
@@ -201,7 +202,7 @@
 <!-------------------------->
 <p align="center">
 <img src="vignetteFigs/divider.png" width="1400"></p>
-<p>Users can get a list of all available params and queries as shown below. The parameters page lists details on each parameter, how it was calculated and cites any sources when available. <code><a href="../reference/map_param_query.html">gcamextractor::map_param_query</a></code> gives a list of all parameters and the corresponding queries used to extract that data from GCAM. Additionally, <code><a href="../reference/map_param_query.html">gcamextractor::map_param_query</a></code> also groups the various parameters into higher level groups which can then be called in the <code>paramSelect</code> argument of <code>gcamextractor</code> to extractor all the params in those groups. The groups also include curated parameters for particular models such as <code>CERF</code> and <code>GO</code>.</p>
+<p>Users can get a list of all available params and queries as shown below. The <a href="https://jgcri.github.io/gcamextractor/articles/vignette_parameters.html" class="external-link">parameters</a> page lists details on each parameter, how it was calculated and cites any sources when available. <code><a href="../reference/map_param_query.html">gcamextractor::map_param_query</a></code> gives a list of all parameters and the corresponding queries used to extract that data from GCAM. Additionally, <code><a href="../reference/map_param_query.html">gcamextractor::map_param_query</a></code> also groups the various parameters into higher level groups which can then be called in the <code>paramSelect</code> argument of <code>gcamextractor</code> to extractor all the params in those groups. The groups also include curated parameters for particular models such as <code>CERF</code> and <code>GO</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JGCRI/gcamextractor" class="external-link">gcamextractor</a></span><span class="op">)</span>
 
