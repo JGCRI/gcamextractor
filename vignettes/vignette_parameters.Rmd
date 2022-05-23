@@ -2,7 +2,7 @@
 title: "Parameters"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{User Guide}
+  %\VignetteIndexEntry{Parameters}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 resource_files:
