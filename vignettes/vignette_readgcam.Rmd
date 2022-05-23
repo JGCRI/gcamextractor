@@ -31,6 +31,8 @@ resource_files:
 
 The figure below shows the workflow of how `gcamextractor` connects to a GCAM database and its outputs.
 
+<br>
+
 <p align="center"> <img src="vignetteFigs/gcamextractor - Workflow.jpg" width="1400"></p>
 
 
@@ -99,7 +101,7 @@ The following figure shows the column headers of the `dataAll` outputs from gcam
 <!-------------------------->
 <p align="center"> <img src="vignetteFigs/divider.png" width="1400"></p>
 
-Users can get a list of all available params and queries as shown below. The parameters page lists details on each parameter, how it was calculated and cites any sources when available. `gcamextractor::map_param_query` gives a list of all parameters and the corresponding queries used to extract that data from GCAM. Additionally, `gcamextractor::map_param_query` also groups the various parameters into higher level groups which can then be called in the `paramSelect` argument of `gcamextractor` to extractor all the params in those groups. The groups also include curated parameters for particular models such as `CERF` and `GO`.
+Users can get a list of all available params and queries as shown below. The [parameters](https://jgcri.github.io/gcamextractor/articles/vignette_parameters.html) page lists details on each parameter, how it was calculated and cites any sources when available. `gcamextractor::map_param_query` gives a list of all parameters and the corresponding queries used to extract that data from GCAM. Additionally, `gcamextractor::map_param_query` also groups the various parameters into higher level groups which can then be called in the `paramSelect` argument of `gcamextractor` to extractor all the params in those groups. The groups also include curated parameters for particular models such as `CERF` and `GO`.
 
 ```{r, eval=F}
 library(gcamextractor)
