@@ -128,7 +128,7 @@ readgcam <- function(gcamdatabase = NULL,
   basedir <- getwd()
 
   # Normalzie path to gcamdatabase
-  gcamdatabase <- normalizePath(gcamdatabase)
+  if(!is.null(gcamdatabase)){gcamdatabase <- normalizePath(gcamdatabase)}
 
   if(!is.null(regionsSelect)){
     if(any(grepl("$all^", regionsSelect, ignore.case = T))){
@@ -373,6 +373,7 @@ readgcam <- function(gcamdatabase = NULL,
 
     # Get names of scenarios in database
     # Change directory to avoid rgcam error when gcamdatabase is in the same folder as gcamextractor
+    if(gcamdatabasePath == getwd()){
     rlang::inform("Switching folder because database is in same folder as current working directory which does not work with rgcam.")
     temp_folder <- paste0(getwd(),"/temp_dir")
     dir.create(temp_folder)
@@ -381,7 +382,9 @@ readgcam <- function(gcamdatabase = NULL,
     # Reset dir
     setwd(basedir)
     unlink(temp_folder, force=T, recursive=T)
-    rlang::inform("Back to original working directory.")
+    rlang::inform("Back to original working directory.")} else {
+      x <- utils::capture.output(rgcam::localDBConn(gcamdatabasePath,gcamdatabaseName,maxMemory=maxMemory), type="message")
+    }
     x <- gsub(", ",",",gsub(": ","",gsub("Database scenarios:  ","",x)));x
     scenarios <- as.vector(unlist(strsplit(gsub("Database scenarios: ","",x),",")))
     rlang::inform(paste("All scenarios in data available: ", paste(scenarios,collapse=", "), sep=""))
@@ -420,6 +423,7 @@ readgcam <- function(gcamdatabase = NULL,
         # Fix paths
         projPath_i = suppressWarnings(normalizePath(paste0(dataProjPath, "/", dataProj))); projPath_i
         queryPath_i = normalizePath(paste0(queryPath, "/subSetQueries.xml")); queryPath_i
+        if(gcamdatabasePath == getwd()){
         # Change directory to avoid rgcam error when gcamdatabase is in the same folder as gcamextractor
         rlang::inform("Switching folder because database is in same folder as current working directory which does not work with rgcam.")
         temp_folder <- paste0(getwd(),"/temp_dir")
@@ -429,11 +433,17 @@ readgcam <- function(gcamdatabase = NULL,
                                            proj = projPath_i,
                                            scenario = scenario_i,
                                            queryFile = queryPath_i)  # Check your queries file
-      }
        # Reset dir
        setwd(basedir)
        unlink(temp_folder, force=T, recursive=T)
        rlang::inform("Back to original working directory.")
+        } else {
+          dataProj.proj <- rgcam::addScenario(conn = rgcam::localDBConn(gcamdatabasePath, gcamdatabaseName,maxMemory=maxMemory),
+                                              proj = projPath_i,
+                                              scenario = scenario_i,
+                                              queryFile = queryPath_i)  # Check your queries file
+        }
+      }
     dataProjLoaded <- rgcam::loadProject(gsub("//","/",paste(dataProjPath, "/", dataProj, sep = "")))
 
     # Save list of scenarios and queries
@@ -578,7 +588,7 @@ readgcam <- function(gcamdatabase = NULL,
   if(paramx %in% paramsSelectx){
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "elec coeff"
-    if (T) {
+    if (queryx %in% queriesx) {
       tbl <- tbl_heat_rate_BTUperkWh %>%
         dplyr::mutate(param = paramx,
                       value = value/1000,
@@ -691,7 +701,8 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"elec_variable_om_escl_rate_fraction"
   if(paramx %in% paramsSelectx){
     rlang::inform(paste0("Running param: ", paramx,"..."))
-
+    queryx <- "elec operating costs by tech and vintage"
+    if (queryx %in% queriesx) {
     tbl <- tbl_var_om %>%
       dplyr::group_by(scenario, region, subRegion, param, sources, class1, class2, xLabel,units,
                       aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
@@ -710,6 +721,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
+    }
     }
 
   # Fuel price
@@ -814,14 +826,14 @@ readgcam <- function(gcamdatabase = NULL,
       datax <- dplyr::bind_rows(datax, tbl_comb)
 
     } else {
-      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+      tbl_fuel_price <- NULL
     }}
 
   # Fuel price escalation rate
   paramx<-"elec_fuel_price_escl_rate_fraction"
   if(paramx %in% paramsSelectx){
     rlang::inform(paste0("Running param: ", paramx,"..."))
-
+    if(!is.null(tbl_fuel_price )){
     tbl <- tbl_fuel_price %>%
       dplyr::group_by(scenario, region, subRegion, param, sources, class1, class2, xLabel,units,
                       aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
@@ -840,6 +852,7 @@ readgcam <- function(gcamdatabase = NULL,
       dplyr::ungroup()%>%
       dplyr::filter(!is.na(value))
     datax <- dplyr::bind_rows(datax, tbl)
+    }
   } else {
     # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
   }
@@ -1280,6 +1293,8 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       tbl_carbon_capture_rate <- tbl
       datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      tbl_carbon_capture_rate <- NULL
     }
   }
 
@@ -1287,7 +1302,7 @@ readgcam <- function(gcamdatabase = NULL,
   paramx<-"elec_carbon_capture_escl_rate_fraction"
   if(paramx %in% paramsSelectx){
     rlang::inform(paste0("Running param: ", paramx,"..."))
-
+    if(!is.null(tbl_carbon_capture_rate)){
     tbl <- tbl_carbon_capture_rate %>%
       dplyr::group_by(scenario, region, subRegion, param, sources, class1, class2, xLabel,units,
                       aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
@@ -1306,6 +1321,7 @@ readgcam <- function(gcamdatabase = NULL,
       dplyr::ungroup()%>%
       dplyr::filter(!is.na(value))
     datax <- dplyr::bind_rows(datax, tbl)
+    }
   }
 
   paramx<-"energyFinalConsumByIntlShpAvEJ"
@@ -5476,6 +5492,7 @@ readgcam <- function(gcamdatabase = NULL,
   rlang::inform((gsub("//","/",paste("All outputs in : ",normalizePath(folder),sep=""))))
   rlang::inform(paste0("readgcam run completed."))
 
+  if(nrow(datax)>0){
   return(list(dataAll = datax,
               data = datax %>% dplyr::select("scenario","region","subRegion","param","classLabel1","class1","classLabel2","class2",
                                              "xLabel","x","vintage","units","value"),
@@ -5485,6 +5502,8 @@ readgcam <- function(gcamdatabase = NULL,
                                                                "xLabel","x","vintage","units","value"),
               dataAggParam = dataAggParam %>% dplyr::select("scenario","region","subRegion","param","xLabel","x","vintage","units","value"),
               scenarios = scenarios,
-              queries = queries))
+              queries = queries))} else {
+                rlang::warn("No data extracted for chosen arguments.")
+              }
 
     }

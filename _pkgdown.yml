@@ -12,6 +12,9 @@ navbar:
     - icon: fas fa-book
       text: "User Guide"
       href: articles/vignette_readgcam.html
+    - icon: fas fa-list
+      text: "Parameters"
+      href: articles/vignette_parameters.html
     - icon: fa-file-code-o
       text: "Reference"
       href: reference/index.html
@@ -23,6 +26,6 @@ navbar:
     - icon: fas fa-quote-left
       text: Citation
       href: CITATION.html
-      
+
 toc:
   depth: 2
