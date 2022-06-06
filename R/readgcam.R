@@ -123,12 +123,16 @@ readgcam <- function(gcamdatabase = NULL,
     paramsSelectAll -> tblFinalNrgIntlAvShip -> datax -> group -> basin -> subRegion -> query -> subresource ->
     transport -> gcamdata -> half.life -> lifetime -> read.csv -> sector_1 -> steepness -> PrimaryFuelCO2Coef ->
     PrimaryFuelCO2Coef.name -> country -> grid_region -> 'io-coefficient' -> 'minicam.energy.input' ->
-    'remove.fraction' ->  state ->  subsector.name -> 'to.technology' -> coefficient
+    'remove.fraction' ->  state ->  subsector.name -> 'to.technology' -> coefficient -> tbl_carbon_capture_rate
 
   basedir <- getwd()
 
   # Normalzie path to gcamdatabase
   if(!is.null(gcamdatabase)){gcamdatabase <- normalizePath(gcamdatabase)}
+
+  # if(paramsSelect=="cerf" & is.null(regionsSelect)){
+  #   regionsSelect <-
+  # }
 
   if(!is.null(regionsSelect)){
     if(any(grepl("$all^", regionsSelect, ignore.case = T))){
@@ -497,10 +501,10 @@ readgcam <- function(gcamdatabase = NULL,
         count = 1
       for(i in 1:length(gcamdata_filenames)){
         if(!file.exists(paste0(gcamdata_folder, gsub(".csv","",gcamdata_filenames[[i]]), ".csv"))){
-          params_remove <- (paramQueryMap %>% filter(grepl(gcamdata_filenames[[i]], gcamdata)))$param
+          params_remove <- (paramQueryMap %>% dplyr::filter(grepl(gcamdata_filenames[[i]], gcamdata)))$param
           rlang::warn(paste0("File: ", gcamdata_filenames[[i]],
                                " does not exist so skipping file and related param ",
-                               (paramQueryMap %>% filter(grepl(gcamdata_filenames[[i]], gcamdata)))$param,
+                               (paramQueryMap %>% dplyr::filter(grepl(gcamdata_filenames[[i]], gcamdata)))$param,
                                "."))
           paramsSelectx <- paramsSelectx[!paramsSelectx %in% params_remove]
         } else {
@@ -1135,7 +1139,7 @@ readgcam <- function(gcamdatabase = NULL,
         }
       }
 
-      # Global CO2 content
+      # Global CO2 content/National for US
       tibble::as_tibble(gcamdata_files[["/outputs/L202.CarbonCoef"]]) %>%
         dplyr::select(region,
                       class1 = PrimaryFuelCO2Coef.name,
@@ -1293,8 +1297,6 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       tbl_carbon_capture_rate <- tbl
       datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      tbl_carbon_capture_rate <- NULL
     }
   }
 
@@ -2052,7 +2054,8 @@ readgcam <- function(gcamdatabase = NULL,
             dplyr::filter(!region %in% gcamextractor::regions_US52)
         }
         tblGCAMReg <- tbl %>%
-          dplyr::filter(scenario %in% scenOrigNames)%>%
+          dplyr::filter(scenario %in% scenOrigNames,
+                        Units == "EJ")%>%
           dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
           dplyr::mutate(param = "elecByTechTWh",
                         sources = "Sources",

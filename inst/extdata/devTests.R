@@ -50,8 +50,8 @@ gcamdata_folder_i = "C:/gcam/gcam-usa-im3/input/gcamdata"
 rgcam::localDBConn("C:/Z/projects/current/00_IM3/pic_checks/databases/","database_rcp85hotter_ssp5_runoff")
 reReadData_i = T
 dataProjFile_i = "dataProj_cerf.proj"
-regionsSelect_i = "United States"
-paramsSelect_i = c("elecByTechTWh")
+regionsSelect_i = NULL
+paramsSelect_i = c("cerf")
 folder_i="cerf_test"
 
 dataGCAM <- readgcam(reReadData = reReadData_i,
@@ -78,9 +78,23 @@ dataGCAM <- readgcam(reReadData = reReadData_i,
 # Test Proj file
 #----------------------
 
-df <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_gcamv54_argentina_colombia_2025_proj,
-                              paramSelect = c("pop","elecByTechTWh"))
+library(gcamextractor); library(rmap); library(rchart)
+df <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_gcamv54_argentina_colombia_2025_proj)
 
+
+#----------------------
+# Test Proj file
+#----------------------
+library(gcamextractor); library(rmap); library(rchart)
+
+data <- readgcam(gcamdatabase = "C:/gcam/gcam-v5.4-Windows-Release-Package/output/database_basexdb",
+                 paramsSelect = c("pop","elecByTechTWh"),
+                 folder = "example_gcam_annual_2022")
+
+data_map <- data$dataAggClass1 %>%
+  dplyr::filter(x %in% c(2015))
+
+maps <- rmap::map(data_map%>%filter(param=="elecByTechTWh"))
 
 
 

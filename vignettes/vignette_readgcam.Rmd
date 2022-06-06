@@ -33,7 +33,7 @@ The figure below shows the workflow of how `gcamextractor` connects to a GCAM da
 
 <br>
 
-<p align="center"> <img src="vignetteFigs/gcamextractor - Workflow.jpg" width="1400"></p>
+<p align="center"> <img src="vignetteFigs/gcamextractor_workflow.jpg" width="1400"></p>
 
 
 <!-------------------------->
