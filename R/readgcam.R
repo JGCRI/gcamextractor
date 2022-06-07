@@ -541,7 +541,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "elec coeff"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
@@ -610,7 +610,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "elec capacity by tech and vintage"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
@@ -659,7 +659,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "elec operating costs by tech and vintage"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
@@ -734,7 +734,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "prices by sector"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
@@ -867,7 +867,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "elec investment capacity factor"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
@@ -1332,7 +1332,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "transport final energy by mode and fuel"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
@@ -1379,7 +1379,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "total final energy by aggregate sector"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -1468,7 +1468,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
 
       datax <- dplyr::bind_rows(datax, tblMod)
@@ -1482,7 +1483,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "building final energy by subsector"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -1533,7 +1534,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "Final energy by detailed end-use sector and fuel"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -1595,7 +1596,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -1608,7 +1610,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "building final energy by fuel"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -1645,7 +1647,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -1658,7 +1661,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "industry final energy by fuel"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -1696,7 +1699,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -1709,7 +1713,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "inputs by tech"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -1751,7 +1755,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
 
       # CORE
@@ -1791,7 +1796,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
 
       datax <- dplyr::bind_rows(datax, tblUSA,tblCORE)
@@ -1805,7 +1811,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "Final energy by detailed end-use sector and fuel"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -1851,7 +1857,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -1864,7 +1871,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "primary energy consumption by region (direct equivalent)"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -1897,7 +1904,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
 
       if(!is.null(tblFinalNrgIntlAvShip)){
@@ -1947,7 +1955,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
 
       datax <- dplyr::bind_rows(datax, tblMod)
@@ -1969,7 +1978,7 @@ readgcam <- function(gcamdatabase = NULL,
     #.............
     queryx <- "elec gen by gen tech USA"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>%
           dplyr::filter(region %in% regionsSelect)
@@ -2008,7 +2017,7 @@ readgcam <- function(gcamdatabase = NULL,
     #.............
     # queryx <- "elec gen by gen tech cogen USA"
     # if (queryx %in% queriesx) {
-    #   tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+    #   tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
     #   if (!is.null(regionsSelect)) {
     #     tbl <- tbl %>%
     #       dplyr::filter(region %in% regionsSelect)
@@ -2047,7 +2056,7 @@ readgcam <- function(gcamdatabase = NULL,
       #........................
       queryx <- "elec gen by gen tech and cooling tech"
       if (queryx %in% queriesx) {
-        tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+        tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
         if (!is.null(regionsSelect)) {
           tbl <- tbl %>%
             dplyr::filter(region %in% regionsSelect) %>%
@@ -2157,7 +2166,7 @@ readgcam <- function(gcamdatabase = NULL,
     # water consumption by sector
     queryx <- "water consumption by state, sector, basin (includes desal)"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if(nrow(tbl)>0){
         # If GCAM USA then remove "USA" region and use states
         # if(any(gcamextractor::regions_US52 %in% unique(tbl$region))){
@@ -2205,7 +2214,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -2219,7 +2229,7 @@ readgcam <- function(gcamdatabase = NULL,
     # water consumption by sector
     queryx <- "water withdrawals by state, sector, basin (includes desal)"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       # if(nrow(tbl)>0){
       #   # If GCAM USA then remove "USA" region and use states
       #   if(any(gcamextractor::regions_US52 %in% unique(tbl$region))){
@@ -2267,7 +2277,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -2281,7 +2292,7 @@ readgcam <- function(gcamdatabase = NULL,
     # water withdrawals by sector
     queryx <- "water withdrawals by crop"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       # Need to add in conveyance losses for USA when running GCAM USA
       # gcamusa.CONVEYANCE_LOSSES <- 0.829937455747218 from constants.R
       if(nrow(tbl)>0){
@@ -2329,7 +2340,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -2342,7 +2354,7 @@ readgcam <- function(gcamdatabase = NULL,
     # biophysical water demand by crop type and land region
     queryx <- "biophysical water demand by crop type and land region"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -2374,7 +2386,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -2387,7 +2400,7 @@ readgcam <- function(gcamdatabase = NULL,
     # water withdrawals by water mapping source
     queryx <- "water withdrawals by water mapping source"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -2422,7 +2435,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -2436,7 +2450,7 @@ readgcam <- function(gcamdatabase = NULL,
     # water consumption by water mapping source
     queryx <- "water consumption by water mapping source"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -2471,7 +2485,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -2485,7 +2500,7 @@ readgcam <- function(gcamdatabase = NULL,
     # water consumption by water mapping source
     queryx <- "Basin level available runoff"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -2519,7 +2534,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -2533,7 +2549,7 @@ readgcam <- function(gcamdatabase = NULL,
     # water consumption by water mapping source
     queryx <- "Water withdrawals by water source (runoff vs. groundwater)"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
@@ -2584,7 +2600,7 @@ readgcam <- function(gcamdatabase = NULL,
     # GDP MER per Capita MER by region
     queryx <- "GDP per capita MER by region"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -2629,7 +2645,7 @@ readgcam <- function(gcamdatabase = NULL,
     # GDP MER by region
     queryx <- "GDP MER by region"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -2710,7 +2726,7 @@ readgcam <- function(gcamdatabase = NULL,
     # Population
     queryx <- "meat and dairy production by tech"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -2757,7 +2773,7 @@ readgcam <- function(gcamdatabase = NULL,
     # Population
     queryx <- "meat and dairy production by tech"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -2804,7 +2820,7 @@ readgcam <- function(gcamdatabase = NULL,
     # Population
     queryx <- "meat and dairy production by tech"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -2850,7 +2866,7 @@ readgcam <- function(gcamdatabase = NULL,
     # Population
     queryx <- "meat and dairy production by tech"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -2896,7 +2912,7 @@ readgcam <- function(gcamdatabase = NULL,
     # Population
     queryx <- "Population by region"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -2941,7 +2957,7 @@ readgcam <- function(gcamdatabase = NULL,
     # Ag production by tech
     queryx <- "ag production by tech"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
@@ -2995,7 +3011,7 @@ readgcam <- function(gcamdatabase = NULL,
     # Ag Production by Crop Type Biomass EJ
     queryx <- "ag production by tech"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
@@ -3042,7 +3058,7 @@ readgcam <- function(gcamdatabase = NULL,
     # Ag Production by Crop Type Forest
     queryx <- "ag production by tech"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
@@ -3088,7 +3104,7 @@ readgcam <- function(gcamdatabase = NULL,
     # Ag Production by Crop Type
     queryx <- "ag production by tech"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
@@ -3136,7 +3152,7 @@ readgcam <- function(gcamdatabase = NULL,
     # land allocation by crop and water source
     queryx <- "land allocation by crop and water source"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -3182,7 +3198,7 @@ readgcam <- function(gcamdatabase = NULL,
     # land allocation by crop and water source
     queryx <- "land allocation by crop and water source"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -3228,7 +3244,7 @@ readgcam <- function(gcamdatabase = NULL,
     # land allocation by crop and water source
     queryx <- "land allocation by crop and water source"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -3274,7 +3290,7 @@ readgcam <- function(gcamdatabase = NULL,
     # aggregated land allocation
     queryx <- "aggregated land allocation"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -3329,7 +3345,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "inputs by tech"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -3375,7 +3391,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "outputs by tech"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -3423,7 +3439,7 @@ readgcam <- function(gcamdatabase = NULL,
     # aggregated land allocation
     queryx <- "detailed land allocation"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -3472,7 +3488,7 @@ readgcam <- function(gcamdatabase = NULL,
     # aggregated land allocation
     queryx <- "land allocation by crop"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -3535,7 +3551,7 @@ readgcam <- function(gcamdatabase = NULL,
     # Land Use Change Emission (future)
     queryx <- "Land Use Change Emission (future)"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -3585,7 +3601,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "CO2 emissions by sector (no bio)"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -3646,7 +3662,7 @@ readgcam <- function(gcamdatabase = NULL,
     # GHG emissions (non CO2) by subsector, using AR5 GWP values
     queryx <- "nonCO2 emissions by sector"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -3720,7 +3736,7 @@ readgcam <- function(gcamdatabase = NULL,
     # GHG emissions (non CO2) by subsector, using AR5 GWP values USA
     queryx <- "nonCO2 emissions by sector USA"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -3813,7 +3829,7 @@ readgcam <- function(gcamdatabase = NULL,
     # GHG emissions (non CO2) by subsector values
     queryx <- "nonCO2 emissions by sector"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       tblCore <- tbl %>%
         dplyr::filter(ghg!="CO2")%>%
         dplyr::filter(scenario %in% scenOrigNames)%>%
@@ -3853,7 +3869,7 @@ readgcam <- function(gcamdatabase = NULL,
     # GHG emissions (non CO2) by subsector values USA
     queryx <- "nonCO2 emissions by sector USA"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       tblUSA <- tbl %>%
         dplyr::filter(ghg!="CO2")%>%
         dplyr::filter(scenario %in% scenOrigNames)%>%
@@ -3893,7 +3909,7 @@ readgcam <- function(gcamdatabase = NULL,
     # GHG emissions (non CO2) by subsector values USA
     queryx <- "nonCO2 emissions by sector USA nonUS"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       tblUSAnonUS <- tbl %>%
         dplyr::filter(ghg!="CO2")%>%
         dplyr::filter(scenario %in% scenOrigNames)%>%
@@ -3952,7 +3968,7 @@ readgcam <- function(gcamdatabase = NULL,
     # GHG emissions (non CO2) by subsector, using AR5 GWP values
     queryx <- "CO2 emissions by sector"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       # if (!is.null(regionsSelect)) {
       #   tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       # }
@@ -4010,8 +4026,11 @@ readgcam <- function(gcamdatabase = NULL,
       # Expand data to include years
       tblxexpand <- tblx %>%
         dplyr::select(scenario,region,subRegion,units,x,value)%>%
-        dplyr::group_by(scenario,region,subRegion,units,x) %>% dplyr::summarize_at(dplyr::vars("value"),list(~sum(.,na.rm = T)))%>%
-        tidyr::complete(x=seq(max(2010,min(tblx$x)),max(tblx$x),1),tidyr::nesting(scenario,region,subRegion,units)) %>% dplyr::ungroup()%>%
+        dplyr::group_by(scenario,region,subRegion,units,x) %>%
+        dplyr::summarize_at(dplyr::vars("value"),list(~sum(.,na.rm = T))) %>%
+        tibble::as_tibble() %>%
+        tidyr::complete(x=seq(max(2010,min(tblx$x)),max(tblx$x),1),tidyr::nesting(scenario,region,subRegion,units)) %>%
+        dplyr::ungroup()%>%
         dplyr::mutate(value=zoo::na.approx(value,na.rm =FALSE)) %>%
         dplyr::arrange(x) %>%
         dplyr::filter(!is.na(value));  tblxexpand
@@ -4124,7 +4143,7 @@ readgcam <- function(gcamdatabase = NULL,
     # GHG emissions (non CO2) by subsector, using AR5 GWP values
     queryx <- "nonCO2 emissions by sector"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -4186,7 +4205,7 @@ readgcam <- function(gcamdatabase = NULL,
     # GHG emissions by resource production, using AR5 GWP values
     queryx <- "nonCO2 emissions by resource production"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -4425,7 +4444,7 @@ readgcam <- function(gcamdatabase = NULL,
     # GHG emissions by subsector
     queryx <- "nonCO2 emissions by sector"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -4499,7 +4518,7 @@ readgcam <- function(gcamdatabase = NULL,
     # GHG emissions (non CO2) by subsector, using AR5 GTP values
     queryx <- "nonCO2 emissions by sector"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -4563,7 +4582,7 @@ readgcam <- function(gcamdatabase = NULL,
     # GHG emissions by resource production, using AR5 GTP values
     queryx <- "nonCO2 emissions by resource production"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -4799,7 +4818,7 @@ readgcam <- function(gcamdatabase = NULL,
     # GHG emissions by subsector
     queryx <- "nonCO2 emissions by sector"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -4873,7 +4892,7 @@ readgcam <- function(gcamdatabase = NULL,
     vmt_array <- c("trn_aviation_intl", "trn_pass", "trn_pass_road", "trn_pass_road_LDV",
                    "trn_pass_road_LDV_2W", "trn_pass_road_LDV_4W")
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -4931,7 +4950,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "transport service output by mode"
     vmt_array <- c("trn_freight", "trn_freight_road")
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -4982,7 +5001,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "refined liquids production by subsector"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -5049,7 +5068,7 @@ readgcam <- function(gcamdatabase = NULL,
     vmt_array <- c("trn_aviation_intl", "trn_pass", "trn_pass_road", "trn_pass_road_LDV",
                    "trn_pass_road_LDV_2W", "trn_pass_road_LDV_4W")
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -5118,7 +5137,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "transport service output by tech (new)"
     vmt_array <- c("trn_freight", "trn_freight_road")
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -5183,7 +5202,7 @@ readgcam <- function(gcamdatabase = NULL,
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "transport final energy by fuel"
     if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx) %>% tibble::as_tibble()  # Tibble
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
@@ -5399,12 +5418,14 @@ readgcam <- function(gcamdatabase = NULL,
       dplyr::filter(aggregate=="sum")%>%
       dplyr::select(-c(class1,classLabel1,classPalette1))%>%
       dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
-      dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T)))
+      dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T))) %>%
+      dplyr::ungroup()
     dataxAggmeans<-datax%>%
       dplyr::filter(aggregate=="mean")%>%
       dplyr::select(-c(class1,classLabel1,classPalette1))%>%
       dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
-      dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))
+      dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))%>%
+      dplyr::ungroup()
     dataxAggClass<-dplyr::bind_rows(dataxAggsums,dataxAggmeans)%>%dplyr::ungroup()
 
     dataAggClass2 = dataxAggClass %>% dplyr::rename(class=class2,classLabel=classLabel2,classPalette=classPalette2) %>% unique()
@@ -5431,12 +5452,14 @@ readgcam <- function(gcamdatabase = NULL,
       dplyr::filter(aggregate=="sum")%>%
       dplyr::select(-c(class2,classLabel2,classPalette2))%>%
       dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
-      dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T)))
+      dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T)))%>%
+      dplyr::ungroup()
     dataxAggmeans<-datax%>%
       dplyr::filter(aggregate=="mean")%>%
       dplyr::select(-c(class2,classLabel2,classPalette2))%>%
       dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
-      dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))
+      dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))%>%
+      dplyr::ungroup()
     dataxAggClass<-dplyr::bind_rows(dataxAggsums,dataxAggmeans)%>%dplyr::ungroup()
 
     dataAggClass1 = dataxAggClass  %>% dplyr::rename(class=class1,classLabel=classLabel1,classPalette=classPalette1) %>% unique()
@@ -5462,12 +5485,14 @@ readgcam <- function(gcamdatabase = NULL,
       dplyr::filter(aggregate=="sum")%>%
       dplyr::select(-c(class2,classLabel2,classPalette2,class1,classLabel1))%>%
       dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
-      dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T)))
+      dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T)))%>%
+      dplyr::ungroup()
     dataxAggmeans<-datax%>%
       dplyr::filter(aggregate=="mean")%>%
       dplyr::select(-c(class2,classLabel2,classPalette2,class1,classLabel1))%>%
       dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
-      dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))
+      dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))%>%
+      dplyr::ungroup()
     dataxAggClass<-dplyr::bind_rows(dataxAggsums,dataxAggmeans)%>%dplyr::ungroup()
 
     dataAggParam = dataxAggClass %>% dplyr::rename(classPalette=classPalette1) %>% unique()
