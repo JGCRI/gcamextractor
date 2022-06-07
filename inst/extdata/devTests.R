@@ -88,9 +88,11 @@ df <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_gcamv54_arge
 library(gcamextractor); library(rmap); library(rchart)
 
 data <- readgcam(gcamdatabase = "C:/gcam/gcam-v5.4-Windows-Release-Package/output/database_basexdb",
-                 paramsSelect = c("pop","elecByTechTWh"),
+                 paramsSelect = c("watWithdrawBySec"),
                  folder = "example_gcam_annual_2022")
 
+
+data$dataAggClass1$class%>%unique()
 data_map <- data$dataAggClass1 %>%
   dplyr::filter(x %in% c(2015))
 
