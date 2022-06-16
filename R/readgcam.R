@@ -580,6 +580,11 @@ readgcam <- function(gcamdatabase = NULL,
                         origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
         dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
+
+      if(grepl("cerf",paramsSelect,ignore.case = T)){
+        tbl <- tbl %>%
+          dplyr::filter(grepl("^USA$",region,ignore.case = T))}
+
       tbl_heat_rate_BTUperkWh <- tbl
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -825,6 +830,10 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::left_join(add_techs) %>%
         dplyr::mutate(classLabel1="fuel",
                       classLabel2="technology")
+
+      if(grepl("cerf",paramsSelect,ignore.case = T)){
+        tbl_comb <- tbl_comb %>%
+          dplyr::filter(grepl("^USA$",region,ignore.case = T))}
 
       tbl_fuel_price <- tbl_comb
       datax <- dplyr::bind_rows(datax, tbl_comb)
@@ -1141,13 +1150,16 @@ readgcam <- function(gcamdatabase = NULL,
 
       # Global CO2 content/National for US
       tibble::as_tibble(gcamdata_files[["/outputs/L202.CarbonCoef"]]) %>%
+        unique() %>%
+        dplyr::left_join(gcamextractor::map_state_to_gridregion %>% dplyr::select(region=country,subRegion=state)) %>%
         dplyr::select(region,
                       class1 = PrimaryFuelCO2Coef.name,
-                      origValue = PrimaryFuelCO2Coef) %>%
+                      origValue = PrimaryFuelCO2Coef,
+                      subRegion) %>%
         dplyr::mutate(classLabel1 = "fuel",
                       classLabel2 = "class2",
                       param = paramx,
-                      subRegion = region,
+                      subRegion = dplyr::if_else(is.na(subRegion),region,subRegion),
                       origUnits = "kg C per GJ") %>%
         # US CO2 content
         dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["/outputs/L222.CarbonCoef_en_USA"]]) %>%
@@ -1162,6 +1174,7 @@ readgcam <- function(gcamdatabase = NULL,
                                          origUnits = "kg C per GJ")) %>%
         # US CO2 carbon content
         dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["/outputs/L2261.CarbonCoef_bio_USA"]]) %>%
+                           dplyr::filter(region!="USA") %>%
                            dplyr::select(region,
                                          class1 = PrimaryFuelCO2Coef.name,
                                          origValue = PrimaryFuelCO2Coef) %>%
@@ -1216,6 +1229,11 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::mutate(classLabel1="fuel",
                       classLabel2="technology")%>%
         dplyr::filter(!is.na(class2))
+
+      if(grepl("cerf",paramsSelect,ignore.case = T)){
+        tbl <- tbl %>%
+          dplyr::filter(grepl("^USA$",region,ignore.case = T))}
+
 
       datax <- dplyr::bind_rows(datax, tbl)
     }
