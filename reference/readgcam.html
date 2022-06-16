@@ -114,31 +114,49 @@ out results into a table ready for plotting.</p>
     <h2>Arguments</h2>
     <dl><dt>gcamdatabase</dt>
 <dd><p>Default = NULL. Full path to GCAM database folder.</p></dd>
+
+
 <dt>gcamdata_folder</dt>
 <dd><p>(OPTIONAL) Default=NULL. Full path to gcamdata folder. Required for some params.</p></dd>
+
+
 <dt>queryFile</dt>
 <dd><p>Defualt = NULL. When NULL gcamextractor loads pre-saved xml file gcamextractor::queries</p></dd>
+
+
 <dt>dataProjFile</dt>
 <dd><p>Default = NULL. Optional. A default 'dataProj.proj' is produced if no .Proj file is specified.</p></dd>
+
+
 <dt>maxMemory</dt>
 <dd><p>Default = "4g". Set the maxMemory. Sometimes need to increase this for very large data.</p></dd>
+
+
 <dt>scenOrigNames</dt>
 <dd><p>Default = "All". Original Scenarios names in GCAM database in a string vector.
 For example c('scenario1','scenario2).</p></dd>
+
+
 <dt>scenNewNames</dt>
 <dd><p>New Names which may be shorter and more useful for figures etc.
 Default will use Original Names. For example c('scenario1','scenario2)</p></dd>
+
+
 <dt>reReadData</dt>
 <dd><p>If TRUE will read the GCAM data base and create a queryData.proj file
 in the same folder as the GCAM database. If FALSE will load a '.proj' file if a file
 with full path is provided otherwise it will search for a dataProj.proj file in the existing
 folder which may have been created from an old run.</p></dd>
+
+
 <dt>regionsSelect</dt>
 <dd><p>Default = NULL. The regions to analyze in a vector. Example c('Colombia','Argentina'). Full list:
 USA, Africa_Eastern, Africa_Northern, Africa_Southern, Africa_Western, Australia_NZ, Brazil, Canada
 Central America and Caribbean, Central Asia, China, EU-12, EU-15, Europe_Eastern, Europe_Non_EU,
 European Free Trade Association, India, Indonesia, Japan, Mexico, Middle East, Pakistan, Russia,
 South Africa, South America_Northern, South America_Southern, South Asia, South Korea, Southeast Asia,</p></dd>
+
+
 <dt>paramsSelect</dt>
 <dd><p>Default = "All".</p>
 <p>Choose "All" or paramSet from "energy", "electricity", "transport",
@@ -176,16 +194,25 @@ South Africa, South America_Northern, South America_Southern, South Asia, South 
 "emissNonCO2ByResProdGTPAR5", "emissBySectorGTPAR5FFI","emissMethaneBySourceGTPAR5",
 "emissByGasGTPAR5FFI", "emissByGasGTPAR5LUC","emissBySectorGTPAR5LUC",
 "emissCO2BySectorNoBio"</p></dd>
+
+
 <dt>folder</dt>
 <dd><p>Default = getwd(). Path to directory for outputs</p></dd>
+
+
 <dt>nameAppend</dt>
 <dd><p>Default="". Name to append to saved files.</p></dd>
+
+
 <dt>saveData</dt>
 <dd><p>Default = "T". Set to F if do not want to save any data to file.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list with the scenarios in the gcam database, queries in the queryxml file and a
+    
+
+<p>A list with the scenarios in the gcam database, queries in the queryxml file and a
 tibble with gcam data formatted for gcamextractor charts aggregated to different categories.
 These include data, dataAggParam, dataAggClass1, dataAggClass2.</p>
     </div>
@@ -202,7 +229,7 @@ These include data, dataAggParam, dataAggClass1, dataAggClass2.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>
