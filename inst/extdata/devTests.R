@@ -1,7 +1,22 @@
-#----------------------
-# EXAMPLE FOR DOCS - gcamextractor - rchart - rmap
-#----------------------
+#..........................
+# Check with releases of GCAM
+#..........................
+library(gcamextractor);
 
+# List of params in gcamextractor
+params <- gcamextractor::data_params; params
+
+# GCAM 6.0
+data <- readgcam(gcamdatabase = "C:/gcam/gcam-v6.0-Windows-Release-Package/output/database_basexdb",
+                 folder = "test_gcamv6p0")
+
+# GCAM 5.4
+data <- readgcam(gcamdatabase = "C:/gcam/gcam-v5.4-Windows-Release-Package/output/database_basexdb",
+                 folder = "test_gcamv5p4")
+
+#..........................
+# EXAMPLE FOR DOCS - gcamextractor - rchart - rmap
+#..........................
 library(gcamextractor); library(rmap); library(rchart)
 
 # List of params in gcamextractor
@@ -78,7 +93,7 @@ regionsSelect_i = NULL
 folder_i="cerf_test"
 
 # Issue #20
-paramsSelect_i = c("cerf")
+paramsSelect_i = c("elec_heat_rate_BTUperkWh")
 
 dataGCAM <- readgcam(reReadData = reReadData_i,
                      gcamdatabase = gcamdatabase_i,

@@ -123,7 +123,8 @@ readgcam <- function(gcamdatabase = NULL,
     paramsSelectAll -> tblFinalNrgIntlAvShip -> datax -> group -> basin -> subRegion -> query -> subresource ->
     transport -> gcamdata -> half.life -> lifetime -> read.csv -> sector_1 -> steepness -> PrimaryFuelCO2Coef ->
     PrimaryFuelCO2Coef.name -> country -> grid_region -> 'io-coefficient' -> 'minicam.energy.input' ->
-    'remove.fraction' ->  state ->  subsector.name -> 'to.technology' -> coefficient -> tbl_carbon_capture_rate
+    'remove.fraction' ->  state ->  subsector.name -> 'to.technology' -> coefficient -> tbl_carbon_capture_rate ->
+    gcamdata_files
 
   basedir <- getwd()
 
@@ -815,6 +816,10 @@ readgcam <- function(gcamdatabase = NULL,
         }
       }
 
+      if(!is.null(gcamdata_files)){
+        if(
+          file.exists(gcamdata_files[["/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa"]]) &
+          file.exists(gcamdata_files[["/inst/extdata/gcam-usa/A23.elec_tech_mapping_cool"]])){
       # Read in additional files
       add_techs <- tibble::as_tibble(gcamdata_files[["/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa"]]) %>%
         dplyr::select(class1 = minicam.energy.input,
@@ -830,6 +835,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::left_join(add_techs) %>%
         dplyr::mutate(classLabel1="fuel",
                       classLabel2="technology")
+      }}
 
       if(grepl("cerf",paramsSelect,ignore.case = T)){
         tbl_comb <- tbl_comb %>%
@@ -1214,6 +1220,11 @@ readgcam <- function(gcamdatabase = NULL,
 
 
       # Read in additional files
+      if(!is.null(gcamdata_files)){
+        if(
+          file.exists(gcamdata_files[["/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa"]]) &
+          file.exists(gcamdata_files[["/inst/extdata/gcam-usa/A23.elec_tech_mapping_cool"]])){
+
       add_techs <- tibble::as_tibble(gcamdata_files[["/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa"]]) %>%
         dplyr::select(class1 = minicam.energy.input,
                       class2a = technology) %>%
@@ -1229,6 +1240,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::mutate(classLabel1="fuel",
                       classLabel2="technology")%>%
         dplyr::filter(!is.na(class2))
+      }}
 
       if(grepl("cerf",paramsSelect,ignore.case = T)){
         tbl <- tbl %>%
