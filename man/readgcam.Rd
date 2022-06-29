@@ -14,7 +14,7 @@ readgcam(
   scenNewNames = NULL,
   reReadData = T,
   regionsSelect = NULL,
-  paramsSelect = "All",
+  paramsSelect = "diagnostic",
   folder = getwd(),
   nameAppend = "",
   saveData = T
@@ -25,7 +25,7 @@ readgcam(
 
 \item{gcamdata_folder}{(OPTIONAL) Default=NULL. Full path to gcamdata folder. Required for some params.}
 
-\item{queryFile}{Defualt = NULL. When NULL gcamextractor loads pre-saved xml file gcamextractor::queries}
+\item{queryFile}{Defualt = NULL. When NULL gcamextractor loads pre-saved xml file gcamextractor::queries_xml}
 
 \item{dataProjFile}{Default = NULL. Optional. A default 'dataProj.proj' is produced if no .Proj file is specified.}
 
@@ -48,7 +48,7 @@ Central America and Caribbean, Central Asia, China, EU-12, EU-15, Europe_Eastern
 European Free Trade Association, India, Indonesia, Japan, Mexico, Middle East, Pakistan, Russia,
 South Africa, South America_Northern, South America_Southern, South Asia, South Korea, Southeast Asia,}
 
-\item{paramsSelect}{Default = "All".
+\item{paramsSelect}{Default = "diagnostic".
 
 Choose "All" or paramSet from "energy", "electricity", "transport",
 "water" , "socioecon" ,"ag" , "livestock" ,"land"  ,"emissions".

@@ -6,7 +6,7 @@
 #' @param nameAppend  Default="". Name to append to saved files.
 #' @param gcamdata_folder (OPTIONAL) Default=NULL. Full path to gcamdata folder. Required for some params.
 #' @param gcamdatabase Default = NULL. Full path to GCAM database folder.
-#' @param queryFile Defualt = NULL. When NULL gcamextractor loads pre-saved xml file gcamextractor::queries
+#' @param queryFile Defualt = NULL. When NULL gcamextractor loads pre-saved xml file gcamextractor::queries_xml
 #' @param dataProjFile Default = NULL. Optional. A default 'dataProj.proj' is produced if no .Proj file is specified.
 #' @param maxMemory Default = "4g". Set the maxMemory. Sometimes need to increase this for very large data.
 #' @param scenOrigNames Default = "All". Original Scenarios names in GCAM database in a string vector.
@@ -23,7 +23,7 @@
 #' European Free Trade Association, India, Indonesia, Japan, Mexico, Middle East, Pakistan, Russia,
 #' South Africa, South America_Northern, South America_Southern, South Asia, South Korea, Southeast Asia,
 # Taiwan, Argentina, Colombia, Uruguay)
-#' @param paramsSelect Default = "All".
+#' @param paramsSelect Default = "diagnostic".
 #'
 #' Choose "All" or paramSet from "energy", "electricity", "transport",
 #' "water" , "socioecon" ,"ag" , "livestock" ,"land"  ,"emissions".
@@ -88,7 +88,7 @@ readgcam <- function(gcamdatabase = NULL,
                      scenNewNames = NULL,
                      reReadData = T,
                      regionsSelect = NULL,
-                     paramsSelect = "All",
+                     paramsSelect = "diagnostic",
                      folder = getwd(),
                      nameAppend = "",
                      saveData = T
@@ -98,12 +98,13 @@ readgcam <- function(gcamdatabase = NULL,
   # gcamdatabase = NULL
   # gcamdata_folder = NULL
   # maxMemory = "4g"
+  # dataProjFile = "dataProj.proj"
   # queryFile = NULL
   # scenOrigNames = "All"
   # scenNewNames = NULL
   # reReadData = T
   # regionsSelect = NULL
-  # paramsSelect="All"
+  # paramsSelect="diagnostic"
   # folder=paste(getwd(), "/outputs", sep = "")
   # nameAppend=""
   # saveData = T
@@ -214,7 +215,7 @@ readgcam <- function(gcamdatabase = NULL,
   }
 
   if(is.null(queryFile)){
-    XML::saveXML(gcamextractor::queries, file=paste0(folder,"/queries.xml"))
+    XML::saveXML(gcamextractor::queries_xml, file=paste0(folder,"/queries.xml"))
     queryFile <- paste0(folder,"/queries.xml")
     xfun::gsub_file(queryFile,"&apos;","'")
     queryPath <- gsub("[^/]+$","",queryFile)
@@ -546,6 +547,11 @@ readgcam <- function(gcamdatabase = NULL,
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
+
+      if(any(grepl("sector...6", names(tbl)))){
+        tbl <- tbl%>%dplyr::rename("sector_1"="sector...6")
+      }
+
       tbl <- tbl %>%
         # remove secondary inputs
         dplyr::filter(!grepl("backup", input),
@@ -2158,7 +2164,7 @@ readgcam <- function(gcamdatabase = NULL,
   if(paramx %in% paramsSelectx){
     rlang::inform(paste0("Running param: ", paramx,"..."))
   if(!is.null(tblelecByTechTWh)){
-    capfactors <- gcamextractor::data_capfactors
+    capfactors <- gcamextractor::capfactors
     capfactors
         tbl <- tblelecByTechTWh  # Tibble
         #rm(tblelecByTechTWh)
@@ -3729,7 +3735,7 @@ readgcam <- function(gcamdatabase = NULL,
             grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
             grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
             TRUE~class2))%>%
-        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
+        dplyr::left_join(gcamextractor::GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
         dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         #dplyr::filter(!class1=='CO2') %>%
         dplyr::mutate(origValue=value,
@@ -3805,7 +3811,7 @@ readgcam <- function(gcamdatabase = NULL,
             grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
             grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
             TRUE~class2))%>%
-        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
+        dplyr::left_join(gcamextractor::GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
         dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         #dplyr::filter(!class1=='CO2') %>%
         dplyr::mutate(origValue=value,
@@ -4196,7 +4202,7 @@ readgcam <- function(gcamdatabase = NULL,
             grepl("Beef|Dairy|Pork|Poultry",class1,ignore.case=T)~"livestock",
             grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class1,ignore.case=T)~"crops",
             TRUE~class1))%>%
-        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class2=ghg),by="class2")%>%
+        dplyr::left_join(gcamextractor::GWP%>%dplyr::rename(class2=ghg),by="class2")%>%
         dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         dplyr::mutate(origValue=value,
                       value=value*GWPAR5*Convert,
@@ -4271,7 +4277,7 @@ readgcam <- function(gcamdatabase = NULL,
           grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
           grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
           TRUE~class2))%>%
-        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
+        dplyr::left_join(gcamextractor::GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
         dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         dplyr::filter(!class1=='CO2') %>%
         dplyr::mutate(origValue=value,
@@ -4508,7 +4514,7 @@ readgcam <- function(gcamdatabase = NULL,
           grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
           grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
           TRUE~class2))%>%
-        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
+        dplyr::left_join(gcamextractor::GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
         dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         dplyr::mutate(origValue=value,
                       value=dplyr::case_when(!is.na(GTPAR5) ~ value*GTPAR5*Convert,
@@ -4572,7 +4578,7 @@ readgcam <- function(gcamdatabase = NULL,
             grepl("Beef|Dairy|Pork|Poultry",class1,ignore.case=T)~"livestock",
             grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class1,ignore.case=T)~"crops",
             TRUE~class1))%>%
-        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class2=ghg),by="class2")%>%
+        dplyr::left_join(gcamextractor::GWP%>%dplyr::rename(class2=ghg),by="class2")%>%
         dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         dplyr::mutate(origValue=value,
                       value=dplyr::case_when(!is.na(GTPAR5) ~ value*GTPAR5*Convert,
@@ -4649,7 +4655,7 @@ readgcam <- function(gcamdatabase = NULL,
           grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
           grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
           TRUE~class2))%>%
-        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
+        dplyr::left_join(gcamextractor::GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
         dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         dplyr::filter(!class1=='CO2') %>%
         dplyr::mutate(origValue=value,

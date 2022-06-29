@@ -1,18 +1,27 @@
 #..........................
 # Check with releases of GCAM
 #..........................
-library(gcamextractor);
+library(gcamextractor);library(dplyr); library(rgcam)
 
 # List of params in gcamextractor
-params <- gcamextractor::data_params; params
+params <- gcamextractor::params; params
+
+# Check
+# rgcam::localDBConn("C:/gcam/gcam-v6.0-Windows-Release-Package/output/","database_basexdb")
+
+paramsSelect_i=(gcamextractor::map_param_query %>% dplyr::filter(group=="diagnostic"))$param; paramsSelect_i
+length(paramsSelect_i)
 
 # GCAM 6.0
 data <- readgcam(gcamdatabase = "C:/gcam/gcam-v6.0-Windows-Release-Package/output/database_basexdb",
-                 folder = "test_gcamv6p0")
-
+                 folder = "test_gcamv6p0",
+                 paramsSelect = "All",
+                 saveData = F)
 # GCAM 5.4
 data <- readgcam(gcamdatabase = "C:/gcam/gcam-v5.4-Windows-Release-Package/output/database_basexdb",
-                 folder = "test_gcamv5p4")
+                 folder = "test_gcamv5p4",
+                 paramsSelect = paramsSelect_i[23],
+                 saveData = F)
 
 #..........................
 # EXAMPLE FOR DOCS - gcamextractor - rchart - rmap
@@ -20,7 +29,7 @@ data <- readgcam(gcamdatabase = "C:/gcam/gcam-v5.4-Windows-Release-Package/outpu
 library(gcamextractor); library(rmap); library(rchart)
 
 # List of params in gcamextractor
-params <- gcamextractor::data_params; params
+params <- gcamextractor::params; params
 
 # Extract Data
 data <- readgcam(gcamdatabase = "C:/gcam/gcam_v5p3_seasia/output/database_basexdb_seasia_breakout_cities_OFF",
@@ -82,7 +91,7 @@ maps <- rmap::map(data_map%>%filter(param=="elecByTechTWh"))
 library(gcamextractor); library(dplyr)
 
 # List of params in gcamextractor
-params <- gcamextractor::data_params; params
+params <- gcamextractor::params; params
 
 gcamdatabase_i = "C:/Z/projects/current/00_IM3/pic_checks/databases/database_rcp85hotter_ssp5_runoff"
 gcamdata_folder_i = "C:/gcam/gcam-usa-im3/input/gcamdata"

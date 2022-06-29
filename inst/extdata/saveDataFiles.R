@@ -10,6 +10,35 @@ library(dplyr); library(assertthat)
 
 map_param_query <- tibble::tribble(
   ~group, ~param, ~query,~mapPalette,~gcamdata,
+  # Diagnsotics Selected
+  "diagnostic","energyPrimaryByFuelMTOE", "primary energy consumption by region (direct equivalent)","pal_hot","no",
+  "diagnostic","energyPrimaryRefLiqProdMTOE", "refined liquids production by subsector","pal_hot","no",
+  "diagnostic","energyFinalConsumBySecMTOE", "total final energy by aggregate sector","pal_hot","no",
+  "diagnostic","energyFinalByFuelBySectorMTOE", "Final energy by detailed end-use sector and fuel","pal_hot","no",
+  "diagnostic","elecByTechTWh", c("elec gen by gen tech cogen USA","elec gen by gen tech USA","elec gen by gen tech and cooling tech"),"pal_hot","no",
+  "diagnostic","elecCapByFuel", c("elec gen by gen tech cogen USA","elec gen by gen tech USA","elec gen by gen tech and cooling tech"),"pal_hot","no",
+  "diagnostic","elecFinalBySecTWh",  "inputs by tech","pal_hot","no",
+  "diagnostic","elecFinalByFuelTWh", "Final energy by detailed end-use sector and fuel","pal_hot","no",
+  "diagnostic","transportPassengerVMTByMode", "transport service output by mode","pal_hot","no",
+  "diagnostic","transportFreightVMTByMode", "transport service output by mode","pal_hot","no",
+  "diagnostic","transportPassengerVMTByFuel","transport service output by tech","pal_hot","no",
+  "diagnostic","transportFreightVMTByFuel", "transport service output by tech","pal_hot","no",
+  "diagnostic","watConsumBySec", "water consumption by state, sector, basin (includes desal)","pal_wet","no",
+  "diagnostic","watWithdrawBySec", "water withdrawals by state, sector, basin (includes desal)","pal_wet","no",
+  "diagnostic","watWithdrawByCrop", "water withdrawals by crop","pal_wet","no",
+  "diagnostic","watSupRunoffBasin", "Basin level available runoff","pal_wet","no",
+  "diagnostic","gdpPerCapita", "GDP per capita MER by region","pal_hot","no",
+  "diagnostic","gdp", "GDP MER by region","pal_hot","no",
+  "diagnostic","gdpGrowthRate", "GDP Growth Rate (Percent)","pal_hot","no",
+  "diagnostic","pop", "Population by region","pal_hot","no",
+  "diagnostic","agProdByCrop", "ag production by tech","pal_green","no",
+  "diagnostic","landAlloc", "aggregated land allocation","pal_green","no",
+  "diagnostic","landAllocByCrop", "land allocation by crop","pal_green","no",
+  "diagnostic","emissLUC", "Land Use Change Emission (future)","pal_hot","no",
+  "diagnostic","emissCO2BySector", "CO2 emissions by sector","pal_hot","no",
+  "diagnostic","emissNonCO2BySector", c("nonCO2 emissions by sector USA",
+                                       "nonCO2 emissions by sector USA nonUS",
+                                       "nonCO2 emissions by sector"),"pal_hot","no",
   # "cerf","gcam_to_cerf_tech_name_map",
   "cerf","elec_lifetime_scurve_yr",NA,"pal_hot",c("/outputs/L2244.TechSCurve_nuc_gen2_USA",
                                       "/outputs/L223.TechSCurve_Dispatch",
@@ -132,9 +161,9 @@ map_param_query <- tibble::tribble(
   "emissions","emissCO2BySector", "CO2 emissions by sector","pal_hot","no",
   "emissions","emissCO2CumGlobal2010to2100", "CO2 emissions by sector","pal_hot","no",
   "emissions","emissCO2CumGlobal2010to2100RCP", "CO2 emissions by sector","pal_hot","no",
-  "emissions","emissNonCO2BySector", "nonCO2 emissions by sector USA","pal_hot","no",
-  "emissions","emissNonCO2BySector", "nonCO2 emissions by sector USA nonUS","pal_hot","no",
-  "emissions","emissNonCO2BySector", "nonCO2 emissions by sector","pal_hot","no",
+  "emissions","emissNonCO2BySector", c("nonCO2 emissions by sector USA",
+                                       "nonCO2 emissions by sector USA nonUS",
+                                       "nonCO2 emissions by sector"),"pal_hot","no",
   "emissions","emissCO2BySectorNoBio", "CO2 emissions by sector (no bio)","pal_hot","no",
   "emissions","emissNonCO2ByResProdGWPAR5", "nonCO2 emissions by resource production","pal_hot","no",
   "emissions","emissMethaneBySourceGWPAR5", "nonCO2 emissions by sector","pal_hot","no",
@@ -164,19 +193,19 @@ top <- XML::xmlNode(XML::xmlName(xmltop))
 for(i in 1:length(xmltop)){
   top <- XML::addChildren(top, xmltop[[i]])
 }
-queries <- top
-use_data(queries, version=3, overwrite=T)
+queries_xml <- top
+use_data(queries_xml, version=3, overwrite=T)
 
 #-------------------
 # Data Files
 #-------------------
 
-data_capfactors <- data.table::fread(file=paste0(getwd(),"/inst/extdata/capacity_factor_by_elec_gen_subsector.csv"),skip=5,encoding="Latin-1")
-data_params <- unique(gcamextractor::map_param_query$param); data_params
-data_queries <- unlist(unique(gcamextractor::map_param_query$query)); data_queries
-use_data(data_capfactors, version=3, overwrite=T)
-use_data(data_params, version=3, overwrite=T)
-use_data(data_queries, version=3, overwrite=T)
+capfactors <- data.table::fread(file=paste0(getwd(),"/inst/extdata/capacity_factor_by_elec_gen_subsector.csv"),skip=5,encoding="Latin-1")
+params <- unique(gcamextractor::map_param_query$param); data_params
+queries <- unlist(unique(gcamextractor::map_param_query$query)); data_queries
+use_data(capfactors, version=3, overwrite=T)
+use_data(params, version=3, overwrite=T)
+use_data(queries, version=3, overwrite=T)
 
 #-------------------
 # Regional Mapping
@@ -570,7 +599,7 @@ use_data(convert, version=3, overwrite=T)
 # GTP AR5 Box 3.2 Table 1 https://www.ipcc.ch/site/assets/uploads/2018/02/SYR_AR5_FINAL_full.pdf
 #-------------------
 
-data_GWP<- tibble::tribble(
+GWP<- tibble::tribble(
   ~ghg, ~GWPSAR, ~GWPAR4,~GWPAR5,~GTPAR5,
   "CO2",44/12,44/12,44/12,44/12,
   "CH4",21,25,28,4,
@@ -594,7 +623,7 @@ data_GWP<- tibble::tribble(
   "HFCs", 3141, 3985, 3555,NA,
   "SF6",23900,22800,23500,NA)
 
-use_data(data_GWP, version=3, overwrite=T)
+use_data(GWP, version=3, overwrite=T)
 
 # https://nepis.epa.gov/Exe/ZyNET.exe/P1001YTS.txt?ZyActionD=ZyDocument&Client=EPA&Index=2000%20Thru%202005&Docs=&Query=&Time=&EndTime=&SearchMethod=1&TocRestrict=n&Toc=&TocEntry=&QField=&QFieldYear=&QFieldMonth=&QFieldDay=&UseQField=&IntQFieldOp=0&ExtQFieldOp=0&XmlQuery=&File=D%3A%5CZYFILES%5CINDEX%20DATA%5C00THRU05%5CTXT%5C00000017%5CP1001YTS.txt&User=ANONYMOUS&Password=anonymous&SortMethod=h%7C-&MaximumDocuments=1&FuzzyDegree=0&ImageQuality=r75g8/r75g8/x150y150g16/i425&Display=hpfr&DefSeekPage=x&SearchBack=ZyActionL&Back=ZyActionS&BackDesc=Results%20page&MaximumPages=1&ZyEntry=3
 # https://www.firescience.gov/projects/09-2-01-9/supdocs/09-2-01-9_Appendix_C_-_Unit_Conversion_and_Other_Tables.pdf

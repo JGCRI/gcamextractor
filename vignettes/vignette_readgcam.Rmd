@@ -49,7 +49,7 @@ The figure below shows the workflow of how `gcamextractor` connects to a GCAM da
 library(gcamextractor)
 
 path_to_gcam_database <- "E:/gcamfolder/output/database_ref" # Change the path based on your GCAM database location
-gcamextractor::data_params # view available parameters
+gcamextractor::params # view available parameters
 dataGCAM <- gcamextractor::readgcam(gcamdatabase = path_to_gcam_database,
                                     regionsSelect = c("Colombia"), # Set to "All" to read in all available regions
                                     paramsSelect = "pop",
@@ -106,8 +106,8 @@ Users can get a list of all available params and queries as shown below. The [pa
 ```{r, eval=F}
 library(gcamextractor)
 
-gcamextractor::data_params # Get all params
-gcamextractor::data_queries # Get all queries used
+gcamextractor::params # Get all params
+gcamextractor::queries # Get all queries used
 gcamextractor::map_param_query # Get a table of params and the relevants queries used to extract and calculate them.
 
 ```

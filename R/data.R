@@ -9,23 +9,23 @@
 #' @examples
 #' \dontrun{
 #'  library(gcamextractor); library(XML)
-#'  gcamextractor::queries
+#'  gcamextractor::queries_xml
 #'  # Can save xml
-#'  XML::saveXML(gcamextractor::queries, file=paste(getwd(), "/queries.xml", sep = ""))
+#'  XML::saveXML(gcamextractor::queries_xml, file=paste(getwd(), "/queries.xml", sep = ""))
 #' }
-"queries"
+"queries_xml"
 
 
-#' data_capfactors
+#' capfactors
 #'
 #' @source paste(getwd(),"/dataFiles/gcam/capacity_factor_by_elec_gen_subsector.csv",sep="")
 #' @format .csv
 #' @examples
 #' \dontrun{
 #'  library(gcamextractor);
-#'  gcamextractor::data_capfactors
+#'  gcamextractor::capfactors
 #' }
-"data_capfactors"
+"capfactors"
 
 
 #' example_gcamv54_argentina_colombia_2025_proj
@@ -46,9 +46,9 @@
 #' @examples
 #' \dontrun{
 #'  library(gcamextractor);
-#'  gcamextractor::data_params
+#'  gcamextractor::params
 #' }
-"data_params"
+"params"
 
 #' gcamextractor queries
 #'
@@ -57,9 +57,9 @@
 #' @examples
 #' \dontrun{
 #'  library(gcamextractor);
-#'  gcamextractor::data_queries
+#'  gcamextractor::queries
 #' }
-"data_queries"
+"queries"
 
 
 
@@ -110,7 +110,7 @@
 # Global Warming Potentials
 #-------------------
 
-#' data_GWP
+#' GWP
 #'
 #' Emissions Conversion to CO2eq
 #' GWP conversions - uses 100-yr GWPs from IPPC AR4 and AR5
@@ -124,9 +124,9 @@
 #' @examples
 #' \dontrun{
 #'  library(gcamextractor);
-#'  gcamextractor::data_GWP
+#'  gcamextractor::GWP
 #' }
-"data_GWP"
+"GWP"
 
 
 #' conv_GgTg_to_MTC
