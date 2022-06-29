@@ -93,21 +93,21 @@ out results into a table ready for plotting.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">readgcam</span><span class="op">(</span>
-  gcamdatabase <span class="op">=</span> <span class="cn">NULL</span>,
-  gcamdata_folder <span class="op">=</span> <span class="cn">NULL</span>,
-  queryFile <span class="op">=</span> <span class="cn">NULL</span>,
-  dataProjFile <span class="op">=</span> <span class="st">"dataProj.proj"</span>,
-  maxMemory <span class="op">=</span> <span class="st">"4g"</span>,
-  scenOrigNames <span class="op">=</span> <span class="st">"All"</span>,
-  scenNewNames <span class="op">=</span> <span class="cn">NULL</span>,
-  reReadData <span class="op">=</span> <span class="cn">T</span>,
-  regionsSelect <span class="op">=</span> <span class="cn">NULL</span>,
-  paramsSelect <span class="op">=</span> <span class="st">"All"</span>,
-  folder <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>,
-  nameAppend <span class="op">=</span> <span class="st">""</span>,
-  saveData <span class="op">=</span> <span class="cn">T</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">readgcam</span><span class="op">(</span></span>
+<span>  gcamdatabase <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  gcamdata_folder <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  queryFile <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dataProjFile <span class="op">=</span> <span class="st">"dataProj.proj"</span>,</span>
+<span>  maxMemory <span class="op">=</span> <span class="st">"4g"</span>,</span>
+<span>  scenOrigNames <span class="op">=</span> <span class="st">"All"</span>,</span>
+<span>  scenNewNames <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reReadData <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>  regionsSelect <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  paramsSelect <span class="op">=</span> <span class="st">"diagnostic"</span>,</span>
+<span>  folder <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  nameAppend <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  saveData <span class="op">=</span> <span class="cn">T</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -121,7 +121,7 @@ out results into a table ready for plotting.</p>
 
 
 <dt>queryFile</dt>
-<dd><p>Defualt = NULL. When NULL gcamextractor loads pre-saved xml file gcamextractor::queries</p></dd>
+<dd><p>Defualt = NULL. When NULL gcamextractor loads pre-saved xml file gcamextractor::queries_xml</p></dd>
 
 
 <dt>dataProjFile</dt>
@@ -158,7 +158,7 @@ South Africa, South America_Northern, South America_Southern, South Asia, South 
 
 
 <dt>paramsSelect</dt>
-<dd><p>Default = "All".</p>
+<dd><p>Default = "diagnostic".</p>
 <p>Choose "All" or paramSet from "energy", "electricity", "transport",
 "water" , "socioecon" ,"ag" , "livestock" ,"land"  ,"emissions".</p>
 <p>Or pick an individual param from the list:</p>
@@ -229,7 +229,7 @@ These include data, dataAggParam, dataAggClass1, dataAggClass2.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

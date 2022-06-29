@@ -28,22 +28,16 @@
     <loc>/news/index.html</loc>
   </url>
   <url>
+    <loc>/reference/GWP.html</loc>
+  </url>
+  <url>
+    <loc>/reference/capfactors.html</loc>
+  </url>
+  <url>
     <loc>/reference/conv_GgTg_to_MTC.html</loc>
   </url>
   <url>
     <loc>/reference/convert.html</loc>
-  </url>
-  <url>
-    <loc>/reference/data_GWP.html</loc>
-  </url>
-  <url>
-    <loc>/reference/data_capfactors.html</loc>
-  </url>
-  <url>
-    <loc>/reference/data_params.html</loc>
-  </url>
-  <url>
-    <loc>/reference/data_queries.html</loc>
   </url>
   <url>
     <loc>/reference/example_gcamv54_argentina_colombia_2025_proj.html</loc>
@@ -70,7 +64,13 @@
     <loc>/reference/map_state_to_gridregion.html</loc>
   </url>
   <url>
+    <loc>/reference/params.html</loc>
+  </url>
+  <url>
     <loc>/reference/queries.html</loc>
+  </url>
+  <url>
+    <loc>/reference/queries_xml.html</loc>
   </url>
   <url>
     <loc>/reference/readgcam.html</loc>
