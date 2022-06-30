@@ -6,7 +6,7 @@
 #' @param nameAppend  Default="". Name to append to saved files.
 #' @param gcamdata_folder (OPTIONAL) Default=NULL. Full path to gcamdata folder. Required for some params.
 #' @param gcamdatabase Default = NULL. Full path to GCAM database folder.
-#' @param queryFile Defualt = NULL. When NULL gcamextractor loads pre-saved xml file gcamextractor::queries
+#' @param queryFile Defualt = NULL. When NULL gcamextractor loads pre-saved xml file gcamextractor::queries_xml
 #' @param dataProjFile Default = NULL. Optional. A default 'dataProj.proj' is produced if no .Proj file is specified.
 #' @param maxMemory Default = "4g". Set the maxMemory. Sometimes need to increase this for very large data.
 #' @param scenOrigNames Default = "All". Original Scenarios names in GCAM database in a string vector.
@@ -23,7 +23,7 @@
 #' European Free Trade Association, India, Indonesia, Japan, Mexico, Middle East, Pakistan, Russia,
 #' South Africa, South America_Northern, South America_Southern, South Asia, South Korea, Southeast Asia,
 # Taiwan, Argentina, Colombia, Uruguay)
-#' @param paramsSelect Default = "All".
+#' @param paramsSelect Default = "diagnostic".
 #'
 #' Choose "All" or paramSet from "energy", "electricity", "transport",
 #' "water" , "socioecon" ,"ag" , "livestock" ,"land"  ,"emissions".
@@ -88,7 +88,7 @@ readgcam <- function(gcamdatabase = NULL,
                      scenNewNames = NULL,
                      reReadData = T,
                      regionsSelect = NULL,
-                     paramsSelect = "All",
+                     paramsSelect = "diagnostic",
                      folder = getwd(),
                      nameAppend = "",
                      saveData = T
@@ -98,12 +98,13 @@ readgcam <- function(gcamdatabase = NULL,
   # gcamdatabase = NULL
   # gcamdata_folder = NULL
   # maxMemory = "4g"
+  # dataProjFile = "dataProj.proj"
   # queryFile = NULL
   # scenOrigNames = "All"
   # scenNewNames = NULL
   # reReadData = T
   # regionsSelect = NULL
-  # paramsSelect="All"
+  # paramsSelect="diagnostic"
   # folder=paste(getwd(), "/outputs", sep = "")
   # nameAppend=""
   # saveData = T
@@ -123,12 +124,17 @@ readgcam <- function(gcamdatabase = NULL,
     paramsSelectAll -> tblFinalNrgIntlAvShip -> datax -> group -> basin -> subRegion -> query -> subresource ->
     transport -> gcamdata -> half.life -> lifetime -> read.csv -> sector_1 -> steepness -> PrimaryFuelCO2Coef ->
     PrimaryFuelCO2Coef.name -> country -> grid_region -> 'io-coefficient' -> 'minicam.energy.input' ->
-    'remove.fraction' ->  state ->  subsector.name -> 'to.technology' -> coefficient
+    'remove.fraction' ->  state ->  subsector.name -> 'to.technology' -> coefficient -> tbl_carbon_capture_rate ->
+    gcamdata_files
 
   basedir <- getwd()
 
   # Normalzie path to gcamdatabase
   if(!is.null(gcamdatabase)){gcamdatabase <- normalizePath(gcamdatabase)}
+
+  # if(paramsSelect=="cerf" & is.null(regionsSelect)){
+  #   regionsSelect <-
+  # }
 
   if(!is.null(regionsSelect)){
     if(any(grepl("$all^", regionsSelect, ignore.case = T))){
@@ -209,7 +215,7 @@ readgcam <- function(gcamdatabase = NULL,
   }
 
   if(is.null(queryFile)){
-    XML::saveXML(gcamextractor::queries, file=paste0(folder,"/queries.xml"))
+    XML::saveXML(gcamextractor::queries_xml, file=paste0(folder,"/queries.xml"))
     queryFile <- paste0(folder,"/queries.xml")
     xfun::gsub_file(queryFile,"&apos;","'")
     queryPath <- gsub("[^/]+$","",queryFile)
@@ -497,10 +503,10 @@ readgcam <- function(gcamdatabase = NULL,
         count = 1
       for(i in 1:length(gcamdata_filenames)){
         if(!file.exists(paste0(gcamdata_folder, gsub(".csv","",gcamdata_filenames[[i]]), ".csv"))){
-          params_remove <- (paramQueryMap %>% filter(grepl(gcamdata_filenames[[i]], gcamdata)))$param
+          params_remove <- (paramQueryMap %>% dplyr::filter(grepl(gcamdata_filenames[[i]], gcamdata)))$param
           rlang::warn(paste0("File: ", gcamdata_filenames[[i]],
                                " does not exist so skipping file and related param ",
-                               (paramQueryMap %>% filter(grepl(gcamdata_filenames[[i]], gcamdata)))$param,
+                               (paramQueryMap %>% dplyr::filter(grepl(gcamdata_filenames[[i]], gcamdata)))$param,
                                "."))
           paramsSelectx <- paramsSelectx[!paramsSelectx %in% params_remove]
         } else {
@@ -541,6 +547,11 @@ readgcam <- function(gcamdatabase = NULL,
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
+
+      if(any(grepl("sector...6", names(tbl)))){
+        tbl <- tbl%>%dplyr::rename("sector_1"="sector...6")
+      }
+
       tbl <- tbl %>%
         # remove secondary inputs
         dplyr::filter(!grepl("backup", input),
@@ -576,6 +587,11 @@ readgcam <- function(gcamdatabase = NULL,
                         origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
         dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
+
+      if(grepl("cerf",paramsSelect,ignore.case = T)){
+        tbl <- tbl %>%
+          dplyr::filter(grepl("^USA$",region,ignore.case = T))}
+
       tbl_heat_rate_BTUperkWh <- tbl
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -806,6 +822,10 @@ readgcam <- function(gcamdatabase = NULL,
         }
       }
 
+      if(!is.null(gcamdata_files)){
+        if(
+          file.exists(gcamdata_files[["/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa"]]) &
+          file.exists(gcamdata_files[["/inst/extdata/gcam-usa/A23.elec_tech_mapping_cool"]])){
       # Read in additional files
       add_techs <- tibble::as_tibble(gcamdata_files[["/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa"]]) %>%
         dplyr::select(class1 = minicam.energy.input,
@@ -821,6 +841,11 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::left_join(add_techs) %>%
         dplyr::mutate(classLabel1="fuel",
                       classLabel2="technology")
+      }}
+
+      if(grepl("cerf",paramsSelect,ignore.case = T)){
+        tbl_comb <- tbl_comb %>%
+          dplyr::filter(grepl("^USA$",region,ignore.case = T))}
 
       tbl_fuel_price <- tbl_comb
       datax <- dplyr::bind_rows(datax, tbl_comb)
@@ -1135,15 +1160,18 @@ readgcam <- function(gcamdatabase = NULL,
         }
       }
 
-      # Global CO2 content
+      # Global CO2 content/National for US
       tibble::as_tibble(gcamdata_files[["/outputs/L202.CarbonCoef"]]) %>%
+        unique() %>%
+        dplyr::left_join(gcamextractor::map_state_to_gridregion %>% dplyr::select(region=country,subRegion=state)) %>%
         dplyr::select(region,
                       class1 = PrimaryFuelCO2Coef.name,
-                      origValue = PrimaryFuelCO2Coef) %>%
+                      origValue = PrimaryFuelCO2Coef,
+                      subRegion) %>%
         dplyr::mutate(classLabel1 = "fuel",
                       classLabel2 = "class2",
                       param = paramx,
-                      subRegion = region,
+                      subRegion = dplyr::if_else(is.na(subRegion),region,subRegion),
                       origUnits = "kg C per GJ") %>%
         # US CO2 content
         dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["/outputs/L222.CarbonCoef_en_USA"]]) %>%
@@ -1158,6 +1186,7 @@ readgcam <- function(gcamdatabase = NULL,
                                          origUnits = "kg C per GJ")) %>%
         # US CO2 carbon content
         dplyr::bind_rows(tibble::as_tibble(gcamdata_files[["/outputs/L2261.CarbonCoef_bio_USA"]]) %>%
+                           dplyr::filter(region!="USA") %>%
                            dplyr::select(region,
                                          class1 = PrimaryFuelCO2Coef.name,
                                          origValue = PrimaryFuelCO2Coef) %>%
@@ -1197,6 +1226,11 @@ readgcam <- function(gcamdatabase = NULL,
 
 
       # Read in additional files
+      if(!is.null(gcamdata_files)){
+        if(
+          file.exists(gcamdata_files[["/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa"]]) &
+          file.exists(gcamdata_files[["/inst/extdata/gcam-usa/A23.elec_tech_mapping_cool"]])){
+
       add_techs <- tibble::as_tibble(gcamdata_files[["/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa"]]) %>%
         dplyr::select(class1 = minicam.energy.input,
                       class2a = technology) %>%
@@ -1212,6 +1246,12 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::mutate(classLabel1="fuel",
                       classLabel2="technology")%>%
         dplyr::filter(!is.na(class2))
+      }}
+
+      if(grepl("cerf",paramsSelect,ignore.case = T)){
+        tbl <- tbl %>%
+          dplyr::filter(grepl("^USA$",region,ignore.case = T))}
+
 
       datax <- dplyr::bind_rows(datax, tbl)
     }
@@ -1293,8 +1333,6 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
       tbl_carbon_capture_rate <- tbl
       datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      tbl_carbon_capture_rate <- NULL
     }
   }
 
@@ -1466,7 +1504,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
 
       datax <- dplyr::bind_rows(datax, tblMod)
@@ -1593,7 +1632,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -1643,7 +1683,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -1694,7 +1735,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -1749,7 +1791,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
 
       # CORE
@@ -1789,7 +1832,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
 
       datax <- dplyr::bind_rows(datax, tblUSA,tblCORE)
@@ -1849,7 +1893,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -1895,7 +1940,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
 
       if(!is.null(tblFinalNrgIntlAvShip)){
@@ -1945,7 +1991,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
 
       datax <- dplyr::bind_rows(datax, tblMod)
@@ -2052,7 +2099,8 @@ readgcam <- function(gcamdatabase = NULL,
             dplyr::filter(!region %in% gcamextractor::regions_US52)
         }
         tblGCAMReg <- tbl %>%
-          dplyr::filter(scenario %in% scenOrigNames)%>%
+          dplyr::filter(scenario %in% scenOrigNames,
+                        Units == "EJ")%>%
           dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
           dplyr::mutate(param = "elecByTechTWh",
                         sources = "Sources",
@@ -2116,7 +2164,7 @@ readgcam <- function(gcamdatabase = NULL,
   if(paramx %in% paramsSelectx){
     rlang::inform(paste0("Running param: ", paramx,"..."))
   if(!is.null(tblelecByTechTWh)){
-    capfactors <- gcamextractor::data_capfactors
+    capfactors <- gcamextractor::capfactors
     capfactors
         tbl <- tblelecByTechTWh  # Tibble
         #rm(tblelecByTechTWh)
@@ -2171,6 +2219,7 @@ readgcam <- function(gcamdatabase = NULL,
           grepl("desalination",technology,ignore.case=T)~"desalination",
           sector=="water_td_an_C"~"animal",
           sector=="water_td_dom_C"~"domestic",
+          sector=="water_td_muni_C"~"domestic",
           sector=="water_td_elec_C"~"electric",
           sector=="water_td_ind_C"~"industry",
           sector=="water_td_pri_C"~"primary",
@@ -2201,7 +2250,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -2232,6 +2282,7 @@ readgcam <- function(gcamdatabase = NULL,
           grepl("desalination",technology,ignore.case=T)~"desalination",
           sector=="water_td_an_W"~"livestock",
           sector=="water_td_dom_W"~"municipal",
+          sector=="water_td_muni_W"~"municipal",
           sector=="water_td_elec_W"~"electricity",
           sector=="water_td_ind_W"~"industry",
           sector=="water_td_pri_W"~"mining",
@@ -2262,7 +2313,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -2324,7 +2376,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -2369,7 +2422,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -2417,7 +2471,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -2466,7 +2521,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -2514,7 +2570,8 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origValue, origUnits, origX)%>%
         dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       datax <- dplyr::bind_rows(datax, tbl)
     } else {
@@ -3678,7 +3735,7 @@ readgcam <- function(gcamdatabase = NULL,
             grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
             grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
             TRUE~class2))%>%
-        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
+        dplyr::left_join(gcamextractor::GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
         dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         #dplyr::filter(!class1=='CO2') %>%
         dplyr::mutate(origValue=value,
@@ -3754,7 +3811,7 @@ readgcam <- function(gcamdatabase = NULL,
             grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
             grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
             TRUE~class2))%>%
-        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
+        dplyr::left_join(gcamextractor::GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
         dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         #dplyr::filter(!class1=='CO2') %>%
         dplyr::mutate(origValue=value,
@@ -4005,8 +4062,11 @@ readgcam <- function(gcamdatabase = NULL,
       # Expand data to include years
       tblxexpand <- tblx %>%
         dplyr::select(scenario,region,subRegion,units,x,value)%>%
-        dplyr::group_by(scenario,region,subRegion,units,x) %>% dplyr::summarize_at(dplyr::vars("value"),list(~sum(.,na.rm = T)))%>%
-        tidyr::complete(x=seq(max(2010,min(tblx$x)),max(tblx$x),1),tidyr::nesting(scenario,region,subRegion,units)) %>% dplyr::ungroup()%>%
+        dplyr::group_by(scenario,region,subRegion,units,x) %>%
+        dplyr::summarize_at(dplyr::vars("value"),list(~sum(.,na.rm = T))) %>%
+        tibble::as_tibble() %>%
+        tidyr::complete(x=seq(max(2010,min(tblx$x)),max(tblx$x),1),tidyr::nesting(scenario,region,subRegion,units)) %>%
+        dplyr::ungroup()%>%
         dplyr::mutate(value=zoo::na.approx(value,na.rm =FALSE)) %>%
         dplyr::arrange(x) %>%
         dplyr::filter(!is.na(value));  tblxexpand
@@ -4142,7 +4202,7 @@ readgcam <- function(gcamdatabase = NULL,
             grepl("Beef|Dairy|Pork|Poultry",class1,ignore.case=T)~"livestock",
             grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class1,ignore.case=T)~"crops",
             TRUE~class1))%>%
-        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class2=ghg),by="class2")%>%
+        dplyr::left_join(gcamextractor::GWP%>%dplyr::rename(class2=ghg),by="class2")%>%
         dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         dplyr::mutate(origValue=value,
                       value=value*GWPAR5*Convert,
@@ -4217,7 +4277,7 @@ readgcam <- function(gcamdatabase = NULL,
           grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
           grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
           TRUE~class2))%>%
-        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
+        dplyr::left_join(gcamextractor::GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
         dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         dplyr::filter(!class1=='CO2') %>%
         dplyr::mutate(origValue=value,
@@ -4454,7 +4514,7 @@ readgcam <- function(gcamdatabase = NULL,
           grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
           grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
           TRUE~class2))%>%
-        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
+        dplyr::left_join(gcamextractor::GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
         dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         dplyr::mutate(origValue=value,
                       value=dplyr::case_when(!is.na(GTPAR5) ~ value*GTPAR5*Convert,
@@ -4518,7 +4578,7 @@ readgcam <- function(gcamdatabase = NULL,
             grepl("Beef|Dairy|Pork|Poultry",class1,ignore.case=T)~"livestock",
             grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class1,ignore.case=T)~"crops",
             TRUE~class1))%>%
-        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class2=ghg),by="class2")%>%
+        dplyr::left_join(gcamextractor::GWP%>%dplyr::rename(class2=ghg),by="class2")%>%
         dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         dplyr::mutate(origValue=value,
                       value=dplyr::case_when(!is.na(GTPAR5) ~ value*GTPAR5*Convert,
@@ -4595,7 +4655,7 @@ readgcam <- function(gcamdatabase = NULL,
           grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
           grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
           TRUE~class2))%>%
-        dplyr::left_join(gcamextractor::data_GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
+        dplyr::left_join(gcamextractor::GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
         dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
         dplyr::filter(!class1=='CO2') %>%
         dplyr::mutate(origValue=value,
@@ -5397,12 +5457,14 @@ readgcam <- function(gcamdatabase = NULL,
       dplyr::filter(aggregate=="sum")%>%
       dplyr::select(-c(class1,classLabel1,classPalette1))%>%
       dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
-      dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T)))
+      dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T))) %>%
+      dplyr::ungroup()
     dataxAggmeans<-datax%>%
       dplyr::filter(aggregate=="mean")%>%
       dplyr::select(-c(class1,classLabel1,classPalette1))%>%
       dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
-      dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))
+      dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))%>%
+      dplyr::ungroup()
     dataxAggClass<-dplyr::bind_rows(dataxAggsums,dataxAggmeans)%>%dplyr::ungroup()
 
     dataAggClass2 = dataxAggClass %>% dplyr::rename(class=class2,classLabel=classLabel2,classPalette=classPalette2) %>% unique()
@@ -5429,12 +5491,14 @@ readgcam <- function(gcamdatabase = NULL,
       dplyr::filter(aggregate=="sum")%>%
       dplyr::select(-c(class2,classLabel2,classPalette2))%>%
       dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
-      dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T)))
+      dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T)))%>%
+      dplyr::ungroup()
     dataxAggmeans<-datax%>%
       dplyr::filter(aggregate=="mean")%>%
       dplyr::select(-c(class2,classLabel2,classPalette2))%>%
       dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
-      dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))
+      dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))%>%
+      dplyr::ungroup()
     dataxAggClass<-dplyr::bind_rows(dataxAggsums,dataxAggmeans)%>%dplyr::ungroup()
 
     dataAggClass1 = dataxAggClass  %>% dplyr::rename(class=class1,classLabel=classLabel1,classPalette=classPalette1) %>% unique()
@@ -5460,12 +5524,14 @@ readgcam <- function(gcamdatabase = NULL,
       dplyr::filter(aggregate=="sum")%>%
       dplyr::select(-c(class2,classLabel2,classPalette2,class1,classLabel1))%>%
       dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
-      dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T)))
+      dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T)))%>%
+      dplyr::ungroup()
     dataxAggmeans<-datax%>%
       dplyr::filter(aggregate=="mean")%>%
       dplyr::select(-c(class2,classLabel2,classPalette2,class1,classLabel1))%>%
       dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
-      dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))
+      dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))%>%
+      dplyr::ungroup()
     dataxAggClass<-dplyr::bind_rows(dataxAggsums,dataxAggmeans)%>%dplyr::ungroup()
 
     dataAggParam = dataxAggClass %>% dplyr::rename(classPalette=classPalette1) %>% unique()

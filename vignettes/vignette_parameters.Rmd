@@ -21,8 +21,8 @@ Users can get a list of all available params and queries as shown below. The par
 ```{r, eval=F}
 library(gcamextractor)
 
-gcamextractor::data_params # Get all params
-gcamextractor::data_queries # Get all queries used
+gcamextractor::params # Get all params
+gcamextractor::queries # Get all queries used
 gcamextractor::map_param_query # Get a table of params and the relevants queries used to extract and calculate them.
 
 ```
@@ -528,7 +528,7 @@ library(gcamextractor)
 path_to_gcam_database <- "E:/gcamfolder/output/database_ref" # Change to your path.
 path_to_gcam_projfile <- "E:/my_proj_file.proj" # Change to your .proj file path.
 path_to_gcamdata_folder <- "E:/gcamfolder/input/gcamdata"
-gcamextractor::data_params # view available parameters
+gcamextractor::params # view available parameters
 dataGCAM <- gcamextractor::readgcam(gcamdatabase = path_to_gcam_database,
                                     dataProjFile = path_to_gcam_projfile # Optional. Or cerf_proj_file.proj
                                     gcamdata_folder = path_to_gcamdata_folder,
@@ -653,7 +653,7 @@ library(gcamextractor)
 
 path_to_gcam_database <- "E:/gcamfolder/output/database_ref" # Change to your path.
 path_to_gcam_projfile <- "E:/my_proj_file.proj" # (OPTIONAL) Change to your .proj file path. 
-gcamextractor::data_params # view available parameters
+gcamextractor::params # view available parameters
 dataGCAM <- gcamextractor::readgcam(gcamdatabase = path_to_gcam_database,
                                     dataProjFile = path_to_gcam_projfile # Optional. Or go_proj_file.proj
                                     paramsSelect = "go",

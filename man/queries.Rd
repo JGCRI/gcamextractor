@@ -3,25 +3,23 @@
 \docType{data}
 \name{queries}
 \alias{queries}
-\title{queries xml file}
+\title{gcamextractor queries}
 \format{
-.xml
+R table
 }
 \source{
-gcamextractor
+from gcamextractor::mappings()$mapParamQuery$query
 }
 \usage{
 queries
 }
 \description{
-queries xml file
+gcamextractor queries
 }
 \examples{
 \dontrun{
- library(gcamextractor); library(XML)
+ library(gcamextractor);
  gcamextractor::queries
- # Can save xml
- XML::saveXML(gcamextractor::queries, file=paste(getwd(), "/queries.xml", sep = ""))
 }
 }
 \keyword{datasets}
