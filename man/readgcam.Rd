@@ -14,6 +14,8 @@ readgcam(
   scenNewNames = NULL,
   reReadData = T,
   regionsSelect = NULL,
+  regionsAggregate = NULL,
+  regionsAggregateNames = NULL,
   paramsSelect = "diagnostic",
   folder = getwd(),
   nameAppend = "",
@@ -47,6 +49,13 @@ USA, Africa_Eastern, Africa_Northern, Africa_Southern, Africa_Western, Australia
 Central America and Caribbean, Central Asia, China, EU-12, EU-15, Europe_Eastern, Europe_Non_EU,
 European Free Trade Association, India, Indonesia, Japan, Mexico, Middle East, Pakistan, Russia,
 South Africa, South America_Northern, South America_Southern, South Asia, South Korea, Southeast Asia,}
+
+\item{regionsAggregate}{Default = NULL. Vector or list of vectors containing regions to aggregate into a new region.
+Example c('South America_Northern', 'South America_Southern') will add one aggregated region while
+list(c('South America_Northern', 'South America_Southern'), c('USA', 'Canada', 'Mexico')) will add two aggregated regions.}
+
+\item{regionsAggregateNames}{Default = NULL. Vector of names for aggregated regions. Length must be 1 if regionsAggregate
+is a vector or match the length of the list given by regionsAggregate. Example: c('South America', 'North America')}
 
 \item{paramsSelect}{Default = "diagnostic".
 

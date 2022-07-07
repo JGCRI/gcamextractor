@@ -23,6 +23,11 @@
 #' European Free Trade Association, India, Indonesia, Japan, Mexico, Middle East, Pakistan, Russia,
 #' South Africa, South America_Northern, South America_Southern, South Asia, South Korea, Southeast Asia,
 # Taiwan, Argentina, Colombia, Uruguay)
+#' @param regionsAggregate Default = NULL. Vector or list of vectors containing regions to aggregate into a new region.
+#' Example c('South America_Northern', 'South America_Southern') will add one aggregated region while
+#' list(c('South America_Northern', 'South America_Southern'), c('USA', 'Canada', 'Mexico')) will add two aggregated regions.
+#' @param regionsAggregateNames Default = NULL. Vector of names for aggregated regions. Length must be 1 if regionsAggregate
+#' is a vector or match the length of the list given by regionsAggregate. Example: c('South America', 'North America')
 #' @param paramsSelect Default = "diagnostic".
 #'
 #' Choose "All" or paramSet from "energy", "electricity", "transport",
@@ -88,6 +93,8 @@ readgcam <- function(gcamdatabase = NULL,
                      scenNewNames = NULL,
                      reReadData = T,
                      regionsSelect = NULL,
+                     regionsAggregate = NULL,
+                     regionsAggregateNames = NULL,
                      paramsSelect = "diagnostic",
                      folder = getwd(),
                      nameAppend = "",
@@ -5450,7 +5457,49 @@ readgcam <- function(gcamdatabase = NULL,
                      file = paste(folder, "/gcamDataTable",nameAppend, ".csv", sep = ""), row.names = F)
     rlang::inform(paste("GCAM data table saved to: ",
                 gsub("//","/",paste(folder, "/gcamDataTable",nameAppend,".csv", sep = ""))))
-     }
+  }
+
+  # aggregate regions
+  if(!is.null(regionsAggregate)){
+    # if regionsAggregate is a vector, convert to list
+    if(!is.list(regionsAggregate)){
+      regionsAggregate <- list(regionsAggregate)
+    }
+    useCustomName <- F
+    # check length of names vector matches length of groups list
+    if(!is.null(regionsAggregateNames)){
+      if(length(regionsAggregateNames) == length(regionsAggregate)){
+        useCustomName <- T
+      } else {rlang::inform("Number of aggregate region names does not match number of aggregate region groups. Using default aggregate names.")}
+    }
+    # perform aggregation for each group of regions
+    for(i in 1:length(regionsAggregate)){
+      group = regionsAggregate[[i]]
+      # assign custom region aggregate name if given
+      if(useCustomName){aggName = regionsAggregateNames[i]}
+      # generate default aggregated region name if not given
+      else {aggName = paste(group, collapse = "_")}
+      # perform aggregation for summed parameters
+      dataxAggRegionsSums <- datax %>%
+        dplyr::filter(aggregate=="sum",
+                      region %in% group) %>%
+        dplyr::group_by(dplyr::across(-c(region, subRegion, value, origValue))) %>%
+        dplyr::summarise(value=sum(value)) %>%
+        dplyr::mutate(region = aggName,
+                      subRegion = aggName)
+      # perform aggregation for averaged parameters
+      dataxAggRegionsMeans <- datax %>%
+        dplyr::filter(aggregate=="mean",
+                      region %in% group) %>%
+        dplyr::group_by(dplyr::across(-c(region, subRegion, value, origValue))) %>%
+        dplyr::summarise(value=mean(value)) %>%
+        dplyr::mutate(region = aggName,
+                      subRegion = aggName)
+      # combine aggregated data with original data
+      datax<-dplyr::bind_rows(datax, dataxAggRegionsSums, dataxAggRegionsMeans)%>%dplyr::ungroup()
+    }
+
+  }
 
     # Aggregate across Class 2
     dataxAggsums<-datax%>%
@@ -5560,6 +5609,7 @@ readgcam <- function(gcamdatabase = NULL,
   rlang::inform(paste0("Then you can view the outputs as df$data, df$dataAggClass1, df$dataAggClass2, df$dataAggParam, df$scenarios, df$queries."))
   rlang::inform((gsub("//","/",paste("All outputs in : ",normalizePath(folder),sep=""))))
   rlang::inform(paste0("readgcam run completed."))
+
 
   if(nrow(datax)>0){
   return(list(dataAll = datax,
