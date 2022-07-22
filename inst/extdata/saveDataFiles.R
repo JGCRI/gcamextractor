@@ -110,6 +110,7 @@ map_param_query <- tibble::tribble(
   "electricity","elecCapByFuel", c("elec gen by gen tech cogen USA","elec gen by gen tech USA","elec gen by gen tech and cooling tech"),"pal_hot","no",
   "electricity","elecFinalBySecTWh",  "inputs by tech","pal_hot","no",
   "electricity","elecFinalByFuelTWh", "Final energy by detailed end-use sector and fuel","pal_hot","no",
+  "electricity","elecConsumByDemandSectorTWh", "elec consumption by demand sector", "pal_hot", "no",
   # Transport
   "transport","transportPassengerVMTByMode", "transport service output by mode","pal_hot","no",
   "transport","transportFreightVMTByMode", "transport service output by mode","pal_hot","no",
