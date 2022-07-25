@@ -76,7 +76,7 @@ Or pick an individual param from the list:
 "energyFinalSubsecByFuelBuildTWh", "energyFinalSubsecByFuelIndusTWh","energyFinalSubsecBySectorBuildTWh",
 
 # electricity
-"elecByTechTWh","elecCapByFuel","elecFinalBySecTWh","elecFinalByFuelTWh",
+"elecByTechTWh","elecCapByFuel","elecFinalBySecTWh","elecFinalByFuelTWh", "elecConsumByDemandSector",
 "elecNewCapCost","elecNewCapGW","elecAnnualRetPrematureCost","elecAnnualRetPrematureGW","elecCumCapCost","elecCumCapGW","elecCumRetPrematureCost","elecCumRetPrematureGW",
 
 # transport
