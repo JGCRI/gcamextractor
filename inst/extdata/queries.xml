@@ -1502,4 +1502,12 @@
                     <comments/>
                 </supplyDemandQuery>
 		</aQuery>
+<aQuery>
+            <emissionsQueryBuilder title="CO2 sequestration by sector">
+                <axis1 name="sector">sector</axis1>
+                <axis2 name="Year">emissions-sequestered</axis2>
+                <xPath buildList="true" dataName="emissions" group="false" sumAll="false">*[@type = 'sector' ]//CO2/emissions-sequestered/node()</xPath>
+                <comments/>
+            </emissionsQueryBuilder>
+</aQuery>
 </queries>
