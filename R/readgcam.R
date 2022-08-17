@@ -5788,17 +5788,17 @@ readgcam <- function(gcamdatabase = NULL,
   # ...........
   # unit Conversions
   # ...........
-  dataxEJtoMTOE <- datax %>% dplyr::filter(grepl("\\(EJ\\)",units)) %>%
-    dplyr::mutate(value=value*gcamextractor::convert$conv_EJ_to_MTOE,
-                  units = gsub("\\(EJ\\)","(Mtoe)",units),
-                  param = gsub("EJ","MTOE",param)); dataxEJtoMTOE
+  # dataxEJtoMTOE <- datax %>% dplyr::filter(grepl("\\(EJ\\)",units)) %>%
+  #   dplyr::mutate(value=value*gcamextractor::convert$conv_EJ_to_MTOE,
+  #                 units = gsub("\\(EJ\\)","(Mtoe)",units),
+  #                 param = gsub("EJ","MTOE",param)); dataxEJtoMTOE
+  #
+  # dataxEJtoTWh <- datax %>% dplyr::filter(grepl("\\(EJ\\)",units)) %>%
+  #   dplyr::mutate(value=value*gcamextractor::convert$conv_EJ_to_TWh,
+  #                 units = gsub("\\(EJ\\)","(TWh)",units),
+  #                 param = gsub("EJ","TWh",param))
 
-  dataxEJtoTWh <- datax %>% dplyr::filter(grepl("\\(EJ\\)",units)) %>%
-    dplyr::mutate(value=value*gcamextractor::convert$conv_EJ_to_TWh,
-                  units = gsub("\\(EJ\\)","(TWh)",units),
-                  param = gsub("EJ","TWh",param))
-
-  datax <- dplyr::bind_rows(datax,dataxEJtoMTOE,dataxEJtoTWh)
+  #datax <- dplyr::bind_rows(datax,dataxEJtoMTOE,dataxEJtoTWh)
 
 
   # Remove repeated USA regions
