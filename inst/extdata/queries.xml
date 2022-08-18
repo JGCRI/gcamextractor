@@ -480,12 +480,13 @@
   </supplyDemandQuery>
  </aQuery>
  <aQuery>
-  <supplyDemandQuery title="Land Use Change Emission (future)">
-   <axis1 name="land-use-change-emission">LandLeaf</axis1>
-   <axis2 name="Year">land-use-change-emission[@year]</axis2>
-   <xPath buildList="true" dataName="land-use-change-emission" group="false" sumAll="true">/LandNode[@name='root' or @type='LandNode' (: collapse :)]//land-use-change-emission[@year&gt;1975]/text()</xPath>
-   <comments/>
-  </supplyDemandQuery>
+    <all-regions/>
+      <supplyDemandQuery title="Land Use Change Emission (future)">
+   	<axis1 name="land-use-change-emission">LandLeaf</axis1>
+   	<axis2 name="Year">land-use-change-emission[@year]</axis2>
+   	<xPath buildList="true" dataName="land-use-change-emission" group="false" sumAll="true">/LandNode[@name='root' or @type='LandNode' (: collapse :)]//land-use-change-emission[@year&gt;1975]/text()</xPath>
+   	<comments/>
+      </supplyDemandQuery>
  </aQuery>
 
  <aQuery>
@@ -1503,6 +1504,7 @@
                 </supplyDemandQuery>
 		</aQuery>
 <aQuery>
+	<all-regions/>
             <emissionsQueryBuilder title="CO2 sequestration by sector">
                 <axis1 name="sector">sector</axis1>
                 <axis2 name="Year">emissions-sequestered</axis2>

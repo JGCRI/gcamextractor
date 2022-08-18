@@ -136,7 +136,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   basedir <- getwd()
 
-  # Normalzie path to gcamdatabase
+  # Normalize path to gcamdatabase
   if(!is.null(gcamdatabase)){gcamdatabase <- normalizePath(gcamdatabase)}
 
   # if(paramsSelect=="cerf" & is.null(regionsSelect)){
@@ -193,7 +193,12 @@ readgcam <- function(gcamdatabase = NULL,
     queriesSelectx <- as.vector(unlist(unique(paramQueryMap$query)))
   }
 
-  queriesSelectx <- queriesSelectx [!is.na(queriesSelectx )]
+  queriesSelectx <- unique(queriesSelectx [!is.na(queriesSelectx )])
+
+  # remove USA queries if not needed
+  if(!is.null(regionsSelect) && !any(c("USA", gcamextractor::regions_US52) %in% regionsSelect)){
+    queriesSelectx <- queriesSelectx[!grepl("USA", queriesSelectx)]
+  }
 
 #.............................
 # Create necessary directories if they dont exist.
@@ -349,7 +354,7 @@ readgcam <- function(gcamdatabase = NULL,
     if(!file.exists(gsub("//","/",paste(queryPath, "/", queryxml, sep = "")))){stop(paste("query file: ", queryPath,"/",queryxml," is incorrect or doesn't exist.",sep=""))}
     if(file.exists(gsub("//","/",paste(queryPath, "/subSetQueries.xml", sep = "")))){unlink(gsub("//","/",paste(queryPath, "/subSetQueries.xml", sep = "")))}
 
-    # Subset the query file if queriwsSelect is not "All"
+    # Subset the query file if queriesSelect is not "All"
     if(!any(c("All","all","ALL") %in% paramsSelect)){
 
     xmlFilePath = gsub("//","/",paste(queryPath, "/", queryxml, sep = ""))
@@ -359,8 +364,27 @@ readgcam <- function(gcamdatabase = NULL,
 
     for(i in 1:length(xmltop)){
       for(j in 1:length(queriesSelectx)){
-        if(any(grepl(gsub("\\(","\\\\(",gsub("\\)","\\\\)",queriesSelectx[j])), as.character(xmltop[[i]]))))
-          top <- XML::addChildren(top, xmltop[[i]])
+        if(queriesSelectx[j] == XML::xmlGetAttr(xmltop[[i]][[length(xmltop[[i]])]], "title")){
+          # include only selected regions when applicable
+          # (user has selected regions and original query uses "all-regions")
+          if(!is.null(regionsSelect) && !regionsSelect %in% c("All", "all", "ALL") && XML::names.XMLNode(xmltop[[i]])[1] == "all-regions"){
+            # remove the all-regions element
+            to_add <- XML::removeChildren(xmltop[[i]],1)
+            # add each region
+            for(k in 1:length(regionsSelect)){
+              to_add <- XML::addChildren(to_add,
+                                         XML::xmlNode("region",
+                                                      attrs = c(name = regionsSelect[k])))
+            }
+            # reorder children so that regions are at the top
+            XML::xmlChildren(to_add) <- XML::xmlChildren(to_add)[c(2:(length(regionsSelect)+1),1)]
+            # add modified node back into xml
+            top <- XML::addChildren(top, to_add)
+          }else{
+            # else include all regions (don't change query from orig query file)
+            top <- XML::addChildren(top, xmltop[[i]])
+          }
+        }
       }
     }
     XML::saveXML(top, file=gsub("//","/",paste(queryPath, "/subSetQueries.xml", sep = "")))
