@@ -11,9 +11,9 @@ library(dplyr); library(assertthat)
 map_param_query <- tibble::tribble(
   ~group, ~param, ~query,~mapPalette,~gcamdata,
   # Summary
-  "summary","emissGHGBySectorGWPAR5", c("nonCO2 emissions by sector", "nonCO2 emissions by resource production", "Land Use Change Emission (future)", "CO2 sequestration by sector"),"pal_hot","no",
-  "summary","emissGHGByGasGWPAR5", c("nonCO2 emissions by sector", "nonCO2 emissions by resource production", "Land Use Change Emission (future)", "CO2 sequestration by sector"),"pal_hot","no",
-  "summary","emissCO2BySector", c("CO2 emissions by sector", "CO2 sequestration by sector", "Land Use Change Emission (future)"),"pal_hot","no",
+  "summary","emissGHGBySectorGWPAR5", c("nonCO2 emissions by sector", "CO2 emissions by sector", "CO2 emissions by sector (no bio)", "nonCO2 emissions by resource production", "Land Use Change Emission (future)", "CO2 sequestration by sector"),"pal_hot","no",
+  "summary","emissGHGByGasGWPAR5", c("nonCO2 emissions by sector", "CO2 emissions by sector", "CO2 emissions by sector (no bio)", "nonCO2 emissions by resource production", "Land Use Change Emission (future)", "CO2 sequestration by sector"),"pal_hot","no",
+  "summary","emissCO2BySector", c("CO2 emissions by sector", "CO2 emissions by sector", "CO2 emissions by sector (no bio)", "CO2 sequestration by sector", "Land Use Change Emission (future)"),"pal_hot","no",
   "summary", "energyFinalConsumBySecEJ", "total final energy by aggregate sector","pal_hot","no",
   "summary", "energyFinalByFuelEJ", "Final energy by detailed end-use sector and fuel","pal_hot","no",
   "summary", "elecConsumByDemandSectorTWh", "elec consumption by demand sector", "pal_hot", "no",
@@ -129,6 +129,9 @@ map_param_query <- tibble::tribble(
   "transport","transportFreightVMTByFuelNew", "transport service output by tech (new)","pal_hot","no",
   "transport","transportPassengerVMTByFuel","transport service output by tech","pal_hot","no",
   "transport","transportFreightVMTByFuel", "transport service output by tech","pal_hot","no",
+  "transport", "transportPassengerVMTByTech", "transport service output by tech", "pal_hot", "no",
+  "transport", "transportFreightVMTByTech", "transport service output by tech", "pal_hot", "no",
+
   # Water
   "water","watConsumBySec", "water consumption by state, sector, basin (includes desal)","pal_wet","no",
   "water","watWithdrawBySec", "water withdrawals by state, sector, basin (includes desal)","pal_wet","no",
@@ -164,14 +167,14 @@ map_param_query <- tibble::tribble(
   "general","inputs", "inputs by tech","pal_hot","no",
   "general","outputs", "outputs by tech","pal_hot","no",
   # Emissions
-  "emissions","emissGHGBySectorGWPAR5", c("nonCO2 emissions by sector", "nonCO2 emissions by sector USA", "nonCO2 emissions by resource production", "Land Use Change Emission (future)", "CO2 sequestration by sector"),"pal_hot","no",
-  "emissions","emissGHGByGasGWPAR5", c("nonCO2 emissions by sector", "nonCO2 emissions by sector USA", "nonCO2 emissions by resource production", "Land Use Change Emission (future)", "CO2 sequestration by sector"),"pal_hot","no",
+  "emissions","emissGHGBySectorGWPAR5", c("nonCO2 emissions by sector", "nonCO2 emissions by sector USA", "nonCO2 emissions by resource production", "CO2 emissions by sector (no bio)", "CO2 emissions by sector", "Land Use Change Emission (future)", "CO2 sequestration by sector"),"pal_hot","no",
+  "emissions","emissGHGByGasGWPAR5", c("nonCO2 emissions by sector", "nonCO2 emissions by sector USA", "nonCO2 emissions by resource production", "CO2 emissions by sector (no bio)", "CO2 emissions by sector", "Land Use Change Emission (future)", "CO2 sequestration by sector"),"pal_hot","no",
   #"emissions","emissNonCO2BySectorGTPAR5", "nonCO2 emissions by sector","pal_hot","no",
   #"emissions","emissNonCO2BySectorGWPAR5", "nonCO2 emissions by sector USA","pal_hot","no",
   #"emissions","emissNonCO2BySectorGTPAR5", "nonCO2 emissions by sector USA","pal_hot","no",
   #"emissions","emissNonCO2BySectorOrigUnits", "nonCO2 emissions by sector","pal_hot","no",
   "emissions","emissLUC", "Land Use Change Emission (future)","pal_hot","no",
-  "emissions","emissCO2BySector", c("CO2 emissions by sector", "CO2 sequestration by sector", "Land Use Change Emission (future)"),"pal_hot","no",
+  "emissions","emissCO2BySector", c("CO2 emissions by sector", "CO2 emissions by sector (no bio)", "CO2 sequestration by sector", "Land Use Change Emission (future)"),"pal_hot","no",
   "emissions","emissCO2CumGlobal2010to2100", "CO2 emissions by sector","pal_hot","no",
   "emissions","emissCO2CumGlobal2010to2100RCP", "CO2 emissions by sector","pal_hot","no",
   # "emissions","emissNonCO2BySector", c("nonCO2 emissions by sector USA",
