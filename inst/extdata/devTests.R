@@ -93,9 +93,9 @@ library(gcamextractor); library(dplyr)
 # List of params in gcamextractor
 params <- gcamextractor::params; params
 
-gcamdatabase_i = "C:/Z/projects/current/00_IM3/pic_checks/databases/database_rcp85hotter_ssp5_runoff"
+gcamdatabase_i = "C:/Z/projects/current/00_IM3/pic_checks/databases/database_rcp85cooler_ssp3_rcp85gdp"
 gcamdata_folder_i = "C:/gcam/gcam-usa-im3/input/gcamdata"
-rgcam::localDBConn("C:/Z/projects/current/00_IM3/pic_checks/databases/","database_rcp85hotter_ssp5_runoff")
+rgcam::localDBConn("C:/Z/projects/current/00_IM3/pic_checks/databases/","database_rcp85cooler_ssp3_rcp85gdp")
 reReadData_i = T
 dataProjFile_i = "dataProj_cerf.proj"
 regionsSelect_i = c("Global","USA",rmap::mapping_US52,"Alaska grid","California grid","Central East grid","Central Northeast grid",
@@ -105,7 +105,7 @@ regionsSelect_i = c("Global","USA",rmap::mapping_US52,"Alaska grid","California 
 folder_i="cerf_test"
 
 # Issue #20
-paramsSelect_i = c("elec_heat_rate_BTUperkWh")
+paramsSelect_i = c("elec_lifetime_scurve_yr")
 paramsSelect_i = c("cerf")
 
 dataGCAM <- readgcam(reReadData = reReadData_i,

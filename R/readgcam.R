@@ -503,8 +503,8 @@ readgcam <- function(gcamdatabase = NULL,
   # Read in paramaters from query file to create formatted table
  queriesx <- queries
 
-  if(!any(queriesSelectx %in% queries)){stop("None of the selected params are available in the data that has been read.
-                                             Please check your data if reRead was set to F. Otherwise check the paramSelect entries and the queryxml file.")}
+  if(!any(queriesSelectx %in% queries)){
+    rlang::inform("No queries exist for the param selected in the queryxml file.")}
 
   paramsSelectAll <- as.vector(unlist(unique(paramQueryMap$param)))
 
