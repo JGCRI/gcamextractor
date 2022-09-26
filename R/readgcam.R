@@ -705,7 +705,12 @@ readgcam <- function(gcamdatabase = NULL,
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
+        if("region" %in% names(tbl)){
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
+        } else {
+          tbl <- tbl %>%
+            dplyr::mutate(region = "region")
+        }
       }
       tbl <- tbl %>%
         dplyr::mutate(param = paramx,
@@ -780,7 +785,12 @@ readgcam <- function(gcamdatabase = NULL,
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
-        tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
+        if("region" %in% names(tbl)){
+          tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
+        } else {
+          tbl <- tbl %>%
+            dplyr::mutate(region = "region")
+        }
       }
 
       # Regional Biomass reported at National Level
@@ -856,8 +866,8 @@ readgcam <- function(gcamdatabase = NULL,
 
       if(!is.null(gcamdata_files)){
         if(
-          file.exists(gcamdata_files[["/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa"]]) &
-          file.exists(gcamdata_files[["/inst/extdata/gcam-usa/A23.elec_tech_mapping_cool"]])){
+          ("/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa" %in% names(gcamdata_files)) &
+          ("/inst/extdata/gcam-usa/A23.elec_tech_mapping_cool" %in% names(gcamdata_files))){
       # Read in additional files
       add_techs <- tibble::as_tibble(gcamdata_files[["/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa"]]) %>%
         dplyr::select(class1 = minicam.energy.input,
@@ -1260,8 +1270,8 @@ readgcam <- function(gcamdatabase = NULL,
       # Read in additional files
       if(!is.null(gcamdata_files)){
         if(
-          file.exists(gcamdata_files[["/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa"]]) &
-          file.exists(gcamdata_files[["/inst/extdata/gcam-usa/A23.elec_tech_mapping_cool"]])){
+          ("/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa"%in% names(gcamdata_files)) &
+          ("/inst/extdata/gcam-usa/A23.elec_tech_mapping_cool" %in% names(gcamdata_files))){
 
       add_techs <- tibble::as_tibble(gcamdata_files[["/inst/extdata/gcam-usa/calibrated_techs_dispatch_usa"]]) %>%
         dplyr::select(class1 = minicam.energy.input,
