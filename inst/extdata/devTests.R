@@ -91,7 +91,7 @@ maps <- rmap::map(data_map%>%filter(param=="elecByTechTWh"))
 library(gcamextractor); library(dplyr)
 
 # List of params in gcamextractor
-params <- gcamextractor::params; params
+params <- gcamextractor::params; params %>% sort()
 
 gcamdatabase_i = "C:/Z/projects/current/00_IM3/pic_checks/databases/database_rcp85cooler_ssp3_rcp85gdp"
 gcamdata_folder_i = "C:/gcam/gcam-usa-im3/input/gcamdata"
@@ -105,9 +105,7 @@ regionsSelect_i = c("Global","USA",rmap::mapping_US52,"Alaska grid","California 
 folder_i="cerf_test"
 
 # Issue #20
-paramsSelect_i = c("elec_fuel_price_2015USDperMBTU",
-                   "elec_fuel_price_escl_rate_fraction",
-                   "elec_variable_om_2015USDperMWh"
+paramsSelect_i = c("elecLoadBySegmentGW"
                    )
 #paramsSelect_i = c("cerf")
 

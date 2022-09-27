@@ -2,7 +2,7 @@
 # Load Libraries
 #-----------------
 library(tibble);library(dplyr);library(devtools); library(rgcam); library(usethis);
-7library(dplyr); library(assertthat)
+library(dplyr); library(assertthat)
 
 #-------------------
 # gcamextractor mapping between params and quereies
@@ -198,6 +198,11 @@ map_param_query <- tibble::tribble(
 
 use_data(map_param_query, version=3, overwrite=T)
 
+params <- unique(gcamextractor::map_param_query$param) %>% sort(); data_params
+queries <- unlist(unique(gcamextractor::map_param_query$query)) %>% sort(); data_queries
+use_data(params, version=3, overwrite=T)
+use_data(queries, version=3, overwrite=T)
+
 #-------------------
 # Data Files
 #-------------------
@@ -218,11 +223,7 @@ use_data(queries_xml, version=3, overwrite=T)
 #-------------------
 
 capfactors <- data.table::fread(file=paste0(getwd(),"/inst/extdata/capacity_factor_by_elec_gen_subsector.csv"),skip=5,encoding="Latin-1")
-params <- unique(gcamextractor::map_param_query$param); data_params
-queries <- unlist(unique(gcamextractor::map_param_query$query)); data_queries
 use_data(capfactors, version=3, overwrite=T)
-use_data(params, version=3, overwrite=T)
-use_data(queries, version=3, overwrite=T)
 
 #-------------------
 # Regional Mapping
