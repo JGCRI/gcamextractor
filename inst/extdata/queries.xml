@@ -1512,4 +1512,78 @@
                 <comments/>
             </emissionsQueryBuilder>
 </aQuery>
+<aQuery>
+  <region name="AK"/>
+  <region name="AL"/>
+  <region name="AR"/>
+  <region name="AZ"/>
+  <region name="CA"/>
+  <region name="CO"/>
+  <region name="CT"/>
+  <region name="DC"/>
+  <region name="DE"/>
+  <region name="FL"/>
+  <region name="GA"/>
+  <region name="HI"/>
+  <region name="IA"/>
+  <region name="ID"/>
+  <region name="IL"/>
+  <region name="IN"/>
+  <region name="KS"/>
+  <region name="KY"/>
+  <region name="LA"/>
+  <region name="MA"/>
+  <region name="MD"/>
+  <region name="ME"/>
+  <region name="MI"/>
+  <region name="MN"/>
+  <region name="MO"/>
+  <region name="MS"/>
+  <region name="MT"/>
+  <region name="NC"/>
+  <region name="ND"/>
+  <region name="NE"/>
+  <region name="NH"/>
+  <region name="NJ"/>
+  <region name="NM"/>
+  <region name="NV"/>
+  <region name="NY"/>
+  <region name="OH"/>
+  <region name="OK"/>
+  <region name="OR"/>
+  <region name="PA"/>
+  <region name="RI"/>
+  <region name="SC"/>
+  <region name="SD"/>
+  <region name="TN"/>
+  <region name="TX"/>
+  <region name="UT"/>
+  <region name="VA"/>
+  <region name="VT"/>
+  <region name="WA"/>
+  <region name="WI"/>
+  <region name="WV"/>
+  <region name="WY"/>
+  <region name="Alaska grid"/>
+  <region name="California grid"/>
+  <region name="Central East grid"/>
+  <region name="Central Northeast grid"/>
+  <region name="Central Northwest grid"/>
+  <region name="Central Southwest grid"/>
+  <region name="Florida grid"/>
+  <region name="Hawaii grid"/>
+  <region name="Mid-Atlantic grid"/>
+  <region name="New England grid"/>
+  <region name="New York grid"/>
+  <region name="Northwest grid"/>
+  <region name="Southeast grid"/>
+  <region name="Southwest grid"/>
+  <region name="Texas grid"/>
+    <supplyDemandQuery title="elec gen by segment (grid level)">
+      <axis1 name="segment">segment-production[@segment]</axis1>
+      <axis2 name="Year">dispatch[@year]</axis2>
+      <xPath buildList="true" dataName="generation" group="false" sumAll="false">*[@type = 'sector' (:collapse:) and (@name='electricity')]/dispatch/segment-production/node()</xPath>
+      <comments/>
+    </supplyDemandQuery>
+ </aQuery>
 </queries>

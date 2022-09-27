@@ -2000,6 +2000,118 @@ readgcam <- function(gcamdatabase = NULL,
     }
   }
 
+
+  # Calculate electricity load by US segments by grid and spread to states
+  # Electricity Load (GW) by Segment and State
+  paramx<-"elecLoadBySegmentGW"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "elec gen by segment (grid level)"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+
+      gridregion <- gcamextractor::map_state_to_gridregion %>%
+        dplyr::rename(subRegion = state) %>%
+        dplyr::select(grid_region, subRegion)
+
+      map_all <- gridregion %>%
+        tidyr::expand(scenario = unique(tbl$scenario),
+                      subRegion,
+                      year = seq(min(tbl$year), max(tbl$year), 5),
+                      units = "Electricity Load (GW)") %>%
+        dplyr::left_join(gridregion, by = 'subRegion')
+
+      if (!is.null(regionsSelect) &&
+          (any(c("USA", gcamextractor::regions_US52, "All", "ALL", "all") %in% regionsSelect))) {
+        tbl <- tbl %>%
+          dplyr::filter(region %in% unique(gridregion$grid_region))
+        if(any(gcamextractor::regions_US52 %in% regionsSelect)){
+          tbl <- tbl %>%
+            dplyr::filter(region %in% gridregion$grid_region[gridregion$subRegion %in% regionsSelect])
+        }
+      }
+
+
+      # Expand fuel price out to related techs
+      # Check if all required files are present
+      (paramQueryMap %>%
+          dplyr::filter(param %in% paramx))$gcamdata %>%
+        unlist() %>%
+        unique() -> gcamdata_files_needed
+
+      gcamdata_files_needed <- gcamdata_files_needed[!gcamdata_files_needed %in% "no"]
+
+      if(!is.null(gcamdata_folder)){
+        if(dir.exists(gcamdata_folder)){
+          for(file_i in gcamdata_files_needed){
+            file_ix <- paste0(gcamdata_folder, "/", file_i, ".csv")
+            if(!file.exists(file_ix)){
+              rlang::inform(paste0("File needed does not exist: ", file_ix))
+              rlang::inform(paste0("Some results may be missing."))
+            }
+          }
+        }
+      }
+
+
+      if(!is.null(gcamdata_files[["/outputs/L102.load_segments_gcamusa"]])){
+        # Read in additional files
+        gen_hours <- tibble::as_tibble(gcamdata_files[["/outputs/L102.load_segments_gcamusa"]]) %>%
+          dplyr::select(grid_region, segment, hours)
+
+        tbl <- tbl %>%
+          dplyr::rename(grid_region = region) %>%
+          dplyr::left_join(gen_hours, by = c('grid_region', 'segment')) %>%
+          dplyr::mutate(origValue = value,
+                        value = value * gcamextractor::convert$conv_EJ_to_GWh / hours,
+                        units = "Electricity Load (GW)") %>%
+          dplyr::select(scenario, grid_region, year, segment, value, origValue, units)
+
+        tbl_states <- map_all %>%
+          dplyr::left_join(tbl,
+                           by = c('scenario', 'grid_region', 'units', 'year')) %>%
+          dplyr::mutate(param = paramx,
+                        sources = "Sources",
+                        origScen = scenario,
+                        origQuery = queryx,
+                        origValue = origValue,
+                        origUnits = "EJ",
+                        origX = year,
+                        subRegion=subRegion,
+                        region = 'USA',
+                        scenario = scenNewNames,
+                        value = value,
+                        units = units,
+                        vintage = paste("Vint_", year, sep = ""),
+                        x = year,
+                        xLabel = "Year",
+                        aggregate = "sum",
+                        class1 = segment,
+                        classLabel1 = "segment",
+                        classPalette1 = "pal_all",
+                        class2 = "class2",
+                        classLabel2 = "class2",
+                        classPalette2 = "pal_all")%>%
+          dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origValue, origUnits, origX)%>%
+          dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                          aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                          origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+          dplyr::ungroup()%>%
+          dplyr::filter(!is.na(value))
+
+      }
+
+      datax <- dplyr::bind_rows(datax, tbl_states)
+
+
+    } else {
+      # raise error?
+    }}
+
+
+
   paramx<-"energyPrimaryByFuelEJ"
   # primary energy consumption by region (direct equivalent)
   if(paramx %in% paramsSelectx){

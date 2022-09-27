@@ -2,7 +2,7 @@
 # Load Libraries
 #-----------------
 library(tibble);library(dplyr);library(devtools); library(rgcam); library(usethis);
-library(dplyr); library(assertthat)
+7library(dplyr); library(assertthat)
 
 #-------------------
 # gcamextractor mapping between params and quereies
@@ -122,6 +122,7 @@ map_param_query <- tibble::tribble(
   "electricity","elecFinalBySecTWh",  "inputs by tech","pal_hot","no",
   "electricity","elecFinalByFuelTWh", "Final energy by detailed end-use sector and fuel","pal_hot","no",
   "electricity","elecConsumByDemandSectorTWh", "elec consumption by demand sector", "pal_hot", "no",
+  "electricity","elecLoadBySegmentGW", "elec gen by segment (grid level)", "pal_hot", c("/outputs/L102.load_segments_gcamusa"),
   # Transport
   "transport","transportPassengerVMTByMode", "transport service output by mode","pal_hot","no",
   "transport","transportFreightVMTByMode", "transport service output by mode","pal_hot","no",
@@ -281,6 +282,8 @@ map_state_to_gridregion <- tibble::tribble(
   "NM","Southwest	grid","USA",
   "WY","Southwest	grid","USA",
   "TX","Texas	grid","USA")
+map_state_to_gridregion <- map_state_to_gridregion %>%
+  dplyr::mutate(grid_region = gsub('[\t\n]', ' ', grid_region))
 use_data(map_state_to_gridregion, version=3, overwrite=T)
 
 
