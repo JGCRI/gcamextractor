@@ -362,12 +362,20 @@ readgcam <- function(gcamdatabase = NULL,
     xmltop <- XML::xmlRoot(xmlfile)
     top <- XML::xmlNode(XML::xmlName(xmltop))
 
+    # Subset regions in queries
     for(i in 1:length(xmltop)){
       for(j in 1:length(queriesSelectx)){
-        if(queriesSelectx[j] == XML::xmlGetAttr(xmltop[[i]][[length(xmltop[[i]])]], "title")){
+       if(queriesSelectx[j] == XML::xmlGetAttr(xmltop[[i]][[length(xmltop[[i]])]], "title")){
           # include only selected regions when applicable
           # (user has selected regions and original query uses "all-regions")
-          if(!is.null(regionsSelect) && !regionsSelect %in% c("All", "all", "ALL") && XML::names.XMLNode(xmltop[[i]])[1] == "all-regions" && !(queriesSelectx[j] == "CO2 emissions by sector" && any(c("emissCO2CumGlobal2010to2100", "emissCO2CumGlobal2010to2100RCP") %in% paramsSelect))){
+          if(!is.null(regionsSelect) &&
+             !regionsSelect %in% c("All", "all", "ALL") &&
+             XML::names.XMLNode(xmltop[[i]])[1] == "all-regions" &&
+             !(queriesSelectx[j] == "CO2 emissions by sector" &&
+               any(c("emissCO2CumGlobal2010to2100", "emissCO2CumGlobal2010to2100RCP") %in% paramsSelect)) &&
+             !(queriesSelectx[j] == "prices by sector") &&
+             !(queriesSelectx[j] == "elec operating costs by tech and vintage")
+             ){
             # keep all regions for CO2 emissions by sector if cumulative global emissions are selected
             # remove the all-regions element
             to_add <- XML::removeChildren(xmltop[[i]],1)
@@ -388,6 +396,7 @@ readgcam <- function(gcamdatabase = NULL,
         }
       }
     }
+
     XML::saveXML(top, file=gsub("//","/",paste(queryPath, "/subSetQueries.xml", sep = "")))
     } else {
       rlang::inform(paste("paramsSelect includes 'All' so running all available queries: ",paste(queriesSelectx,collapse=", "),".",sep=""))
@@ -620,7 +629,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
 
-      if(grepl("cerf",paramsSelect,ignore.case = T)){
+      if(any(grepl("cerf",paramsSelect,ignore.case = T))){
         tbl <- tbl %>%
           dplyr::filter(grepl("^USA$",region,ignore.case = T))}
 
@@ -779,7 +788,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   # Fuel price
   paramx<-"elec_fuel_price_2015USDperMBTU"
-  if(paramx %in% paramsSelectx){
+  if((any(paramx %in% paramsSelectx) | (paramsSelectx == "elec_fuel_price_escl_rate_fraction"))){
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "prices by sector"
     if (queryx %in% queriesx) {
@@ -793,7 +802,7 @@ readgcam <- function(gcamdatabase = NULL,
         }
       }
 
-      # Regional Biomass reported at National Level
+      # Regional Biomass reported at State Level
       tbl_bio <- tbl %>%
         dplyr::filter(sector %in% c("regional biomass")) %>%
         dplyr::filter(region %in% gcamextractor::regions_US52); tbl_bio
@@ -885,7 +894,7 @@ readgcam <- function(gcamdatabase = NULL,
                       classLabel2="technology")
       }}
 
-      if(grepl("cerf",paramsSelect,ignore.case = T)){
+      if(any(grepl("cerf",paramsSelect,ignore.case = T))){
         tbl_comb <- tbl_comb %>%
           dplyr::filter(grepl("^USA$",region,ignore.case = T))}
 
@@ -1290,7 +1299,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(class2))
       }}
 
-      if(grepl("cerf",paramsSelect,ignore.case = T)){
+      if(any(grepl("cerf",paramsSelect,ignore.case = T))){
         tbl <- tbl %>%
           dplyr::filter(grepl("^USA$",region,ignore.case = T))}
 

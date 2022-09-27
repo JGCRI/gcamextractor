@@ -105,8 +105,11 @@ regionsSelect_i = c("Global","USA",rmap::mapping_US52,"Alaska grid","California 
 folder_i="cerf_test"
 
 # Issue #20
-paramsSelect_i = c("elec_lifetime_scurve_yr")
-paramsSelect_i = c("cerf")
+paramsSelect_i = c("elec_fuel_price_2015USDperMBTU",
+                   "elec_fuel_price_escl_rate_fraction",
+                   "elec_variable_om_2015USDperMWh"
+                   )
+#paramsSelect_i = c("cerf")
 
 dataGCAM <- readgcam(reReadData = reReadData_i,
                      gcamdatabase = gcamdatabase_i,
