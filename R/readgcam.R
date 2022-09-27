@@ -2101,6 +2101,8 @@ readgcam <- function(gcamdatabase = NULL,
           dplyr::ungroup()%>%
           dplyr::filter(!is.na(value))
 
+      } else {
+        tbl_states <- NULL
       }
 
       datax <- dplyr::bind_rows(datax, tbl_states)
