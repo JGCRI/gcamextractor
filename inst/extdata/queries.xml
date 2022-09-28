@@ -1391,6 +1391,17 @@
 
   <aQuery>
   <all-regions/>
+  <emissionsQueryBuilder title="nonCO2 emissions by subsector">
+     <axis1 name="GHG">GHG</axis1>
+     <axis2 name="Year">emissions</axis2>
+     <xPath buildList="true" dataName="emissions" group="false" sumAll="false">*[@type = 'sector']/*[@type = 'subsector']//
+            *[@type = 'GHG']/emissions/node()</xPath>
+     <comments/>
+   </emissionsQueryBuilder>
+ </aQuery>
+
+  <aQuery>
+  <all-regions/>
   <emissionsQueryBuilder title="CO2 emissions by sector">
    <axis1 name="sector">sector</axis1>
    <axis2 name="Year">emissions</axis2>
