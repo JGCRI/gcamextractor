@@ -91,18 +91,23 @@ maps <- rmap::map(data_map%>%filter(param=="elecByTechTWh"))
 library(gcamextractor); library(dplyr)
 
 # List of params in gcamextractor
-params <- gcamextractor::params; params
+params <- gcamextractor::params; params %>% sort()
 
-gcamdatabase_i = "C:/Z/projects/current/00_IM3/pic_checks/databases/database_rcp85hotter_ssp5_runoff"
+gcamdatabase_i = "C:/Z/projects/current/00_IM3/pic_checks/databases/database_rcp85cooler_ssp3_rcp85gdp"
 gcamdata_folder_i = "C:/gcam/gcam-usa-im3/input/gcamdata"
-rgcam::localDBConn("C:/Z/projects/current/00_IM3/pic_checks/databases/","database_rcp85hotter_ssp5_runoff")
+rgcam::localDBConn("C:/Z/projects/current/00_IM3/pic_checks/databases/","database_rcp85cooler_ssp3_rcp85gdp")
 reReadData_i = T
 dataProjFile_i = "dataProj_cerf.proj"
-regionsSelect_i = NULL
+regionsSelect_i = c("Global","USA",rmap::mapping_US52,"Alaska grid","California grid","Central East grid","Central Northeast grid",
+                    "Central Northwest grid", "Central Southwest grid","Florida grid","Hawaii grid",
+                    "Mid-Atlantic grid","New England grid","New York grid","Northwest grid",
+                    "Southeast grid","Southwest grid","Texas grid")
 folder_i="cerf_test"
 
 # Issue #20
-paramsSelect_i = c("elec_heat_rate_BTUperkWh")
+paramsSelect_i = c("elecLoadBySegmentGW"
+                   )
+#paramsSelect_i = c("cerf")
 
 dataGCAM <- readgcam(reReadData = reReadData_i,
                      gcamdatabase = gcamdatabase_i,
@@ -125,6 +130,54 @@ dataGCAM <- readgcam(reReadData = reReadData_i,
 # scenNewNames = NULL
 
 
+# SEASIA Tests
 
+library(dplyr)
+library(gcamextractor)
+library(rchart)
+
+# Create path to database
+cities_db <- "C:/gcam/gcam_v5p3_seasia/output/database_seasia_cities"
+
+
+# Run gcamextractor for desired database, regions, and parameters
+cities <- gcamextractor::readgcam(gcamdatabase = cities_db,
+                                  regionsSelect = c("Malaysia", "KualaLumpur", "Rest of Malaysia"),
+                                  regionsAggregate = list(c("Malaysia", "KualaLumpur", "Rest of Malaysia")),
+                                  regionsAggregateNames = c("All of Malaysia"),
+                                  paramsSelect = "pop",
+                                  folder = "cities")
+
+
+
+#----------------------
+# CERF GO DEEP
+#----------------------
+
+library(gcamextractor); library(dplyr)
+
+# List of params in gcamextractor
+params <- gcamextractor::params; params
+
+gcamdatabase_i = "C:/gcam/gcam-v6.0-Windows-Release-Package/output/database_basexdb"
+gcamdata_folder_i = "C:/gcam/gcam-v6.0-Windows-Release-Package/input/gcamdata"
+rgcam::localDBConn("C:/gcam/gcam-v6.0-Windows-Release-Package/output/","database_basexdb")
+reReadData_i = T
+dataProjFile_i = "dataProj_cerf_godeep.proj"
+regionsSelect_i = NULL
+folder_i="cerf_test"
+
+# Issue #20
+paramsSelect_i = c("cerf")
+
+dataGCAM <- readgcam(reReadData = reReadData_i,
+                     gcamdatabase = gcamdatabase_i,
+                     gcamdata_folder = gcamdata_folder_i,
+                     dataProjFile = dataProjFile_i,
+                     regionsSelect = regionsSelect_i,
+                     paramsSelect = paramsSelect_i,
+                     folder = folder_i)
+
+dataGCAM$dataAggParam
 
 
