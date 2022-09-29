@@ -132,7 +132,7 @@ readgcam <- function(gcamdatabase = NULL,
     transport -> gcamdata -> half.life -> lifetime -> read.csv -> sector_1 -> steepness -> PrimaryFuelCO2Coef ->
     PrimaryFuelCO2Coef.name -> country -> grid_region -> 'io-coefficient' -> 'minicam.energy.input' ->
     'remove.fraction' ->  state ->  subsector.name -> 'to.technology' -> coefficient -> tbl_carbon_capture_rate ->
-    gcamdata_files -> aggSector -> tblGHGEmissRes
+    gcamdata_files -> aggSector -> tblGHGEmissRes -> segment -> hours
 
   basedir <- getwd()
 
@@ -1564,6 +1564,57 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+
+  paramx<-"energyFinalConsumBySecEJNoFeedstock"
+  # Total final energy by aggregate end-use sector not including industrial feedstocks
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "total final energy by sector"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames,
+                      sector != "industrial feedstocks")%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(param = "energyFinalConsumBySecEJNoFeedstock",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      units = "Final Energy by Sector (EJ)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = dplyr::case_when(
+                        grepl("building|comm|resid",sector)~"building",
+                        grepl("indus|cement|fert",sector)~"industry",
+                        grepl("transport|trn",sector)~"transport",
+                        T ~ sector),
+                      classLabel1 = "Sector",
+                      classPalette1 = "pal_all",
+                      class2 = sector,
+                      classLabel2 = "Subsector",
+                      classPalette2 = "pal_all")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    }
+  }
+
+
   paramx<-"energyFinalSubsecBySectorBuildEJ"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
@@ -1680,6 +1731,84 @@ readgcam <- function(gcamdatabase = NULL,
         #dplyr::mutate(class1=dplyr::case_when(class2=="trans intl av"~paste(class1,"av",sep=" "),
                                              #class2=="trans intl shp"~paste(class1,"shp",sep=" "),
                                              #TRUE~class1))%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+  paramx<-"energyFinalByFuelEJNoFeedstock"
+  # Total final energy by aggregate end-use sector
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "Final energy by detailed end-use sector and fuel"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::filter(!grepl("trn",input),
+                      !sector %in% c("industrial feedstocks"))%>%
+        dplyr::mutate(input=dplyr::if_else(input=="biomass","bioenergy",input),
+                      sector=gsub("process heat cement","industry",sector),
+                      sector=gsub("cement","industry",sector),
+                      sector=gsub("industrial energy use","industry",sector),
+                      sector=gsub("N fertilizer","industry",sector),
+                      #sector=gsub("trn_aviation_intl","trans intl av",sector),
+                      #sector=gsub("trn_shipping_intl","trans intl shp",sector),
+                      sector = replace(sector, stringr::str_detect(sector, "trn"), "transport"),
+                      sector=gsub("comm cooling","building",sector),
+                      sector=gsub("comm heating","building",sector),
+                      sector=gsub("comm others","building",sector),
+                      sector=gsub("resid cooling","building",sector),
+                      sector=gsub("resid heating","building",sector),
+                      sector=gsub("resid others","building",sector),
+                      input=gsub("elect\\_td\\_ind","electricity",input),
+                      input=gsub("elect\\_td\\_bld","electricity",input),
+                      input=gsub("elect\\_td\\_trn","electricity",input),
+                      input=gsub("delivered coal","coal",input),
+                      input=gsub("refined liquids enduse","liquids",input),
+                      input=gsub("delivered biomass","biomass",input),
+                      input=gsub("H2 enduse","hydrogen",input),
+                      input=gsub("refined liquids industrial","liquids",input),
+                      input=gsub("liquids av", "liquids", input),
+                      input=gsub("liquids shp", "liquids", input),
+                      input=gsub("wholesale gas","gas",input),
+                      input=gsub("traditional biomass","biomass",input),
+                      input=gsub("delivered gas","gas",input),
+                      input=gsub("district heat","Other",input),
+                      param = "energyFinalByFuelEJNoFeedstock",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      units = "Final Energy by Fuel (EJ)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = input,
+                      classLabel1 = "Fuel",
+                      classPalette1 = "pal_all",
+                      class2 = sector,
+                      classLabel2 = "classLabel2",
+                      classPalette2 = "classPalette2")%>%
+        #dplyr::mutate(class1=dplyr::case_when(class2=="trans intl av"~paste(class1,"av",sep=" "),
+        #class2=="trans intl shp"~paste(class1,"shp",sep=" "),
+        #TRUE~class1))%>%
         dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
                       aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
                       origScen, origQuery, origValue, origUnits, origX)%>%
@@ -3874,6 +4003,8 @@ readgcam <- function(gcamdatabase = NULL,
             sector=dplyr::case_when(
               grepl("refining",sector,ignore.case=T)~"refining",
               grepl("regional biomass|regional biomassOil|regional corn for ethanol|regional sugar for ethanol|biomass", sector,ignore.case=T)~"biomass",
+              grepl("trn_aviation_intl", sector)~"International Aviation",
+              grepl("trn_shipping_intl", sector) ~ "International Shipping",
               grepl("trn_",sector,ignore.case=T)~"transport",
               grepl("comm |resid ",sector,ignore.case=T)~"building",
               grepl("electricity|elec_|electricity |csp_backup",sector,ignore.case=T)~"electricity",
@@ -3924,6 +4055,8 @@ readgcam <- function(gcamdatabase = NULL,
           sector=dplyr::case_when(
             grepl("refining",sector,ignore.case=T)~"refining",
             grepl("regional biomass|regional biomassOil|regional corn for ethanol|regional sugar for ethanol", sector,ignore.case=T)~"biomass",
+            grepl("trn_aviation_intl", sector)~"International Aviation",
+            grepl("trn_shipping_intl", sector) ~ "International Shipping",
             grepl("trn_",sector,ignore.case=T)~"transport",
             grepl("comm |resid ",sector,ignore.case=T)~"building",
             grepl("electricity|elec_|electricity |csp_backup",sector,ignore.case=T)~"electricity",

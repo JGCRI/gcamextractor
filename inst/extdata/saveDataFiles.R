@@ -116,6 +116,8 @@ map_param_query <- tibble::tribble(
   "energy","energyFinalSubsecByFuelIndusTWh", "industry final energy by fuel","pal_hot","no",
   "energy","energyFinalSubsecBySectorBuildTWh", "building final energy by subsector","pal_hot","no",
   "energy","energyFinalConsumByIntlShpAvTWh", "transport final energy by mode and fuel","pal_hot","no",
+  "energy", "energyFinalConsumBySecEJNoFeedstock", "total final energy by sector", "pal_hot", "no",
+  "energy", "energyFinalByFuelEJNoFeedstock", "Final energy by detailed end-use sector and fuel", "pal_hot", "no",
   # Electricity
   "electricity","elecByTechTWh", c("elec gen by gen tech cogen USA","elec gen by gen tech USA","elec gen by gen tech and cooling tech"),"pal_hot","no",
   "electricity","elecCapByFuel", c("elec gen by gen tech cogen USA","elec gen by gen tech USA","elec gen by gen tech and cooling tech"),"pal_hot","no",
