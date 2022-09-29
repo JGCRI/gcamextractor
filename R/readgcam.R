@@ -3930,7 +3930,7 @@ readgcam <- function(gcamdatabase = NULL,
   # emissions -----------------------------
 
 
-  # LUC CO2 ===========================
+  ## LUC CO2 ===========================
   # need LUC for CO2BySector, GHGBYSector, and GHGByGas
   if(any(c("emissCO2BySector", "emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissLUC") %in% paramsSelectx)){
 
@@ -3985,7 +3985,7 @@ readgcam <- function(gcamdatabase = NULL,
       datax <- dplyr::bind_rows(datax, tblEmissLUC)
     }
 
-    # CO2 by sector ===========================
+    ## CO2 by sector ===========================
     # need CO2 for CO2BySector, GHGBySector, and GHGByGas
     if(any(c("emissCO2BySector", "emissGHGBySectorGWPAR5", "emissGHGByGasGWPAR5") %in% paramsSelectx)){
       queryx <- "CO2 emissions by sector"
@@ -4038,7 +4038,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   } # end CO2 by sector query
 
-  # CO2 by sector (no bio) ===========================
+  ## CO2 by sector (no bio) ===========================
   # need CO2 for CO2BySectorNoBio, GHGBySectorNoBio, and GHGByGasNoBio
   if(any(c("emissCO2BySector", "emissGHGBySectorGWPAR5", "emissGHGByGasGWPAR5") %in% paramsSelectx)){
     queryx <- "CO2 emissions by sector (no bio)"
@@ -4090,7 +4090,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   } # end CO2 by sector (no bio) query
 
-  # # CO2 sequestration ===========================
+  ## # CO2 sequestration ===========================
   # # need CO2 sequestration for CO2BySector, GHGBySector, and GHGByGas
   # if(any(c("emissCO2BySector", "emissGHGBySectorGWPAR5", "emissGHGByGasGWPAR5") %in% paramsSelectx)){
   #   queryx <- "CO2 sequestration by sector"
@@ -4183,7 +4183,7 @@ readgcam <- function(gcamdatabase = NULL,
 
 
 
-  # nonCO2 by sector/gas ===========================
+  ## nonCO2 by sector/gas ===========================
   # need nonCO2 for GHGBySector and GHGByGas
   if(any(c("emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5") %in% paramsSelectx)){
       queryx <- "nonCO2 emissions by sector"
@@ -4329,7 +4329,7 @@ readgcam <- function(gcamdatabase = NULL,
   } # end nonCO2 query
 
 
-  # nonCO2 by resource production ===========================
+  ## nonCO2 by resource production ===========================
   # need nonCO2 res prod for GHGBySector and GHGByGas
   if(any(c("emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissGHGByResProdGWPAR5") %in% paramsSelectx)){
     #rlang::inform(paste0("Running param: ", paramx,"..."))
@@ -4747,7 +4747,7 @@ readgcam <- function(gcamdatabase = NULL,
   # }
 
 
-  # Cumulative global emissions ===========================
+  ## Cumulative global emissions ===========================
 
   if(any(c("emissCO2CumGlobal2010to2100","emissCO2CumGlobal2010to2100RCP") %in% paramsSelectx)){
 
@@ -5687,7 +5687,7 @@ readgcam <- function(gcamdatabase = NULL,
   # Transport -----------------------------
 
 
-  # Service output by mode ===========================
+  ## Service output by mode ===========================
 
   paramx<-"transportPassengerVMTByMode"
   # Total final energy by aggregate end-use sector
