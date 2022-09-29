@@ -3930,7 +3930,7 @@ readgcam <- function(gcamdatabase = NULL,
   # emissions -----------------------------
 
 
-  # LUC CO2 ===========================
+  ## LUC CO2 ===========================
   # need LUC for CO2BySector, GHGBYSector, and GHGByGas
   if(any(c("emissCO2BySector", "emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissLUC") %in% paramsSelectx)){
 
@@ -3985,7 +3985,7 @@ readgcam <- function(gcamdatabase = NULL,
       datax <- dplyr::bind_rows(datax, tblEmissLUC)
     }
 
-    # CO2 by sector ===========================
+    ## CO2 by sector ===========================
     # need CO2 for CO2BySector, GHGBySector, and GHGByGas
     if(any(c("emissCO2BySector", "emissGHGBySectorGWPAR5", "emissGHGByGasGWPAR5") %in% paramsSelectx)){
       queryx <- "CO2 emissions by sector"
@@ -4038,9 +4038,9 @@ readgcam <- function(gcamdatabase = NULL,
 
   } # end CO2 by sector query
 
-  # CO2 by sector (no bio) ===========================
+  ## CO2 by sector (no bio) ===========================
   # need CO2 for CO2BySectorNoBio, GHGBySectorNoBio, and GHGByGasNoBio
-  if(any(c("emissCO2BySector", "emissGHGBySectorGWPAR5", "emissGHGByGasGWPAR5") %in% paramsSelectx)){
+  if(any(c("emissCO2BySectorNoBio", "emissGHGBySectorGWPAR5NoBio", "emissGHGByGasGWPAR5NoBio") %in% paramsSelectx)){
     queryx <- "CO2 emissions by sector (no bio)"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -4090,42 +4090,43 @@ readgcam <- function(gcamdatabase = NULL,
 
   } # end CO2 by sector (no bio) query
 
-  # # CO2 sequestration ===========================
-  # # need CO2 sequestration for CO2BySector, GHGBySector, and GHGByGas
-  # if(any(c("emissCO2BySector", "emissGHGBySectorGWPAR5", "emissGHGByGasGWPAR5") %in% paramsSelectx)){
-  #   queryx <- "CO2 sequestration by sector"
-  #   if (queryx %in% queriesx) {
-  #     tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-  #     if (!is.null(regionsSelect)) {
-  #       tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
-  #     }
-  #     #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
-  #     tbl <- tbl %>%
-  #       dplyr::filter(scenario %in% scenOrigNames)%>%
-  #       dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-  #       dplyr::mutate(
-  #         origValue=value,
-  #         value=value*gcamextractor::convert$conv_C_CO2*(-1), # convert from MTC to MTCO2eq and make negative
-  #         origUnits=Units,
-  #         units="CO2 emissions - (MTCO2)",
-  #         sources = "Sources",
-  #         origScen = scenario,
-  #         origQuery = queryx,
-  #         origX = year, subRegion=region,
-  #         scenario = scenNewNames,
-  #         vintage = paste("Vint_", year, sep = ""),
-  #         x = year,
-  #         xLabel = "Year",
-  #         aggregate = "sum",
-  #         classPalette1 = "pal_all",
-  #         classPalette2 = "pal_all",
-  #         ghg = "CO2") %>%
-  #       dplyr::select(scenario, region, subRegion, sources, x, xLabel, vintage, units, value,
-  #                     aggregate, ghg, sector, classPalette1, classPalette2,
-  #                     origScen, origQuery, origValue, origUnits, origX)
-  #     tblCO2Seq <- tbl
-  #   }
-  # } # end CO2 sequestration query
+  # CO2 sequestration ===========================
+  # need CO2 sequestration for CO2BySector, GHGBySector, and GHGByGas
+  if(any(c("co2SequestrationBySector") %in% paramsSelectx)){
+    queryx <- "CO2 sequestration by sector"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(
+          origValue=value,
+          value=value*gcamextractor::convert$conv_C_CO2*(-1), # convert from MTC to MTCO2eq and make negative
+          origUnits=Units,
+          units="CO2 emissions - (MTCO2)",
+          sources = "Sources",
+          origScen = scenario,
+          origQuery = queryx,
+          origX = year, subRegion=region,
+          scenario = scenNewNames,
+          vintage = paste("Vint_", year, sep = ""),
+          x = year,
+          xLabel = "Year",
+          aggregate = "sum",
+          classPalette1 = "pal_all",
+          classPalette2 = "pal_all",
+          ghg = "CO2") %>%
+        dplyr::select(scenario, region, subRegion, sources, x, xLabel, vintage, units, value,
+                      aggregate, ghg, sector, classPalette1, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)
+      tblCO2Seq <- tbl
+      datax <- dplyr::bind_rows(datax, tblCO2Seq)
+    }
+  } # end CO2 sequestration query
 
     # add CO2 by sector to data if emissCO2BySector param is chosen
     if("emissCO2BySector" %in% paramsSelectx){
@@ -4134,11 +4135,6 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::rename(class1 = sector, class2 = ghg) %>%
         dplyr::mutate(classLabel1 = "sector",
                         classLabel2 = "ghg")
-      # # sequestration
-      # tblEmissCO2BySector_seq <- tblCO2Seq %>%
-      #   dplyr::rename(class1 = sector, class2 = ghg) %>%
-      #   dplyr::mutate(classLabel1 = "sector",
-      #                 classLabel2 = "ghg")
 
       # other sectors
       tblEmissCO2BySector_CO2 <- tblCO2Emiss %>%
@@ -4161,11 +4157,6 @@ readgcam <- function(gcamdatabase = NULL,
       dplyr::rename(class1 = sector, class2 = ghg) %>%
       dplyr::mutate(classLabel1 = "sector",
                     classLabel2 = "ghg")
-    # # sequestration
-    # tblEmissCO2BySector_seq <- tblCO2Seq %>%
-    #   dplyr::rename(class1 = sector, class2 = ghg) %>%
-    #   dplyr::mutate(classLabel1 = "sector",
-    #                 classLabel2 = "ghg")
 
     # other sectors
     tblEmissCO2BySectorNoBio_CO2 <- tblCO2EmissNoBio %>%
@@ -4183,7 +4174,7 @@ readgcam <- function(gcamdatabase = NULL,
 
 
 
-  # nonCO2 by sector/gas ===========================
+  ## nonCO2 by sector/gas ===========================
   # need nonCO2 for GHGBySector and GHGByGas
   if(any(c("emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5") %in% paramsSelectx)){
       queryx <- "nonCO2 emissions by sector"
@@ -4329,7 +4320,7 @@ readgcam <- function(gcamdatabase = NULL,
   } # end nonCO2 query
 
 
-  # nonCO2 by resource production ===========================
+  ## nonCO2 by resource production ===========================
   # need nonCO2 res prod for GHGBySector and GHGByGas
   if(any(c("emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissGHGByResProdGWPAR5") %in% paramsSelectx)){
     #rlang::inform(paste0("Running param: ", paramx,"..."))
@@ -4405,7 +4396,6 @@ readgcam <- function(gcamdatabase = NULL,
   if("emissGHGBySectorGWPAR5" %in% paramsSelectx){
     tblGHGEmissBySector <- dplyr::bind_rows(
       tblLUEmiss, tblCO2Emiss, tblNonCO2Emiss, tblNonCO2EmissUSA,
-      #tblCO2Seq,
       tblNonCO2EmissRes) %>%
       dplyr::rename(class1 = sector, class2 = ghg) %>%
       dplyr::mutate(classLabel1 = "sector",
@@ -4420,7 +4410,6 @@ readgcam <- function(gcamdatabase = NULL,
   if("emissGHGByGasGWPAR5" %in% paramsSelectx){
     tblGHGEmissByGas <- dplyr::bind_rows(
       tblLUEmiss, tblCO2Emiss, tblNonCO2Emiss, tblNonCO2EmissUSA,
-      #tblCO2Seq,
       tblNonCO2EmissRes) %>%
       dplyr::rename(class1 = ghg, class2 = sector) %>%
       dplyr::mutate(classLabel1 = "ghg",
@@ -4435,7 +4424,6 @@ readgcam <- function(gcamdatabase = NULL,
   if("emissGHGBySectorNoBioGWPAR5" %in% paramsSelectx){
     tblGHGEmissBySectorNoBio <- dplyr::bind_rows(
       tblLUEmiss, tblCO2EmissNoBio, tblNonCO2Emiss, tblNonCO2EmissUSA,
-      #tblCO2Seq,
       tblNonCO2EmissRes) %>%
       dplyr::rename(class1 = sector, class2 = ghg) %>%
       dplyr::mutate(classLabel1 = "sector",
@@ -4450,7 +4438,6 @@ readgcam <- function(gcamdatabase = NULL,
   if("emissGHGByGasNoBioGWPAR5" %in% paramsSelectx){
     tblGHGEmissByGasNoBio <- dplyr::bind_rows(
       tblLUEmiss, tblCO2EmissNoBio, tblNonCO2Emiss, tblNonCO2EmissUSA,
-      #tblCO2Seq,
       tblNonCO2EmissRes) %>%
       dplyr::rename(class1 = ghg, class2 = sector) %>%
       dplyr::mutate(classLabel1 = "ghg",
@@ -4747,7 +4734,7 @@ readgcam <- function(gcamdatabase = NULL,
   # }
 
 
-  # Cumulative global emissions ===========================
+  ## Cumulative global emissions ===========================
 
   if(any(c("emissCO2CumGlobal2010to2100","emissCO2CumGlobal2010to2100RCP") %in% paramsSelectx)){
 
@@ -5687,7 +5674,7 @@ readgcam <- function(gcamdatabase = NULL,
   # Transport -----------------------------
 
 
-  # Service output by mode ===========================
+  ## Service output by mode ===========================
 
   paramx<-"transportPassengerVMTByMode"
   # Total final energy by aggregate end-use sector
