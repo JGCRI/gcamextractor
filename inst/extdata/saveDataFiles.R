@@ -189,6 +189,7 @@ map_param_query <- tibble::tribble(
   #                                      "nonCO2 emissions by sector"),"pal_hot","no",
   "emissions","emissCO2BySectorNoBio", c("CO2 emissions by sector (no bio)", "CO2 sequestration by sector", "Land Use Change Emission (future)"),"pal_hot","no",
   "emissions","emissGHGByResProdGWPAR5", "nonCO2 emissions by resource production","pal_hot","no",
+  "emissions", "co2SequestrationBySector", "CO2 sequestration by sector", "pal_hot", "no",
   #"emissions","emissMethaneBySourceGWPAR5", "nonCO2 emissions by sector","pal_hot","no",
   #"emissions","emissByGasGWPAR5FFI", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
   #"emissions","emissByGasGWPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
