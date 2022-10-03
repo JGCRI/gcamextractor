@@ -591,6 +591,18 @@
    <comments/>
   </demographicsQuery>
  </aQuery>
+<aQuery>
+<supplyDemandQuery title="total final energy by sector">
+            <axis1 name="sector">sector</axis1>
+            <axis2 name="Year">demand-physical[@vintage]</axis2>
+            <xPath buildList="true" dataName="input" group="false" sumAll="false">*[@type='sector' and ((@name='building' or @name='industry' or @name='transportation') or
+            (exists(child::keyword/@final-energy)))]//*[@type='input' (:collapse:) and
+            not(@name='limestone' or @name='process heat cement' or @name='industrial energy use' or
+                @name='industrial feedstocks' or @name='renewable' or contains(@name, 'trn_') or @name='oil-credits')]/
+            demand-physical[@unit='EJ']/node()</xPath>
+            <comments/>
+         </supplyDemandQuery>
+</aQuery>
  <aQuery>
   <all-regions/>
   <supplyDemandQuery title="total final energy by aggregate sector">
@@ -1387,6 +1399,17 @@
    <xPath buildList="true" dataName="emissions" group="false" sumAll="false">*[@type = 'sector']//*[@type = 'GHG']/emissions/node()</xPath>
    <comments/>
   </emissionsQueryBuilder>
+ </aQuery>
+
+  <aQuery>
+  <all-regions/>
+  <emissionsQueryBuilder title="nonCO2 emissions by subsector">
+     <axis1 name="GHG">GHG</axis1>
+     <axis2 name="Year">emissions</axis2>
+     <xPath buildList="true" dataName="emissions" group="false" sumAll="false">*[@type = 'sector']/*[@type = 'subsector']//
+            *[@type = 'GHG']/emissions/node()</xPath>
+     <comments/>
+   </emissionsQueryBuilder>
  </aQuery>
 
   <aQuery>
