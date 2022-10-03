@@ -139,9 +139,12 @@ readgcam <- function(gcamdatabase = NULL,
   # Normalize path to gcamdatabase
   if(!is.null(gcamdatabase)){gcamdatabase <- normalizePath(gcamdatabase)}
 
-  # if(paramsSelect=="cerf" & is.null(regionsSelect)){
-  #   regionsSelect <-
-  # }
+  if(any(paramsSelect %in% c('elec_lifetime_scurve_yr', 'elec_lifetime_yr',
+                             'elec_fuel_co2_content_tonsperMBTU',
+                             'elec_carbon_capture_rate_fraction',
+                             'elec_carbon_capture_escl_rate_fraction'))){
+    paramsSelect <- c('pop',paramsSelect)
+  }
 
   if(!is.null(regionsSelect)){
     if(any(grepl("$all^", regionsSelect, ignore.case = T))){
@@ -788,7 +791,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   # Fuel price
   paramx<-"elec_fuel_price_2015USDperMBTU"
-  if((any(paramx %in% paramsSelectx) | (paramsSelectx == "elec_fuel_price_escl_rate_fraction"))){
+  if((any(paramx %in% paramsSelectx) | any(paramsSelectx == "elec_fuel_price_escl_rate_fraction"))){
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "prices by sector"
     if (queryx %in% queriesx) {
@@ -1084,6 +1087,7 @@ readgcam <- function(gcamdatabase = NULL,
                       origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
       dplyr::ungroup()%>%
       dplyr::filter(!is.na(value))
+
     datax <- dplyr::bind_rows(datax, tbl)
   }
   }
@@ -6231,7 +6235,86 @@ readgcam <- function(gcamdatabase = NULL,
   # Save Data in CSV
   #.....................
 
-  datax <- datax  %>% unique()
+  #.................................
+  # Expand cerf data to include all scenarios and states
+  #.................................
+
+  if(any(c('elec_lifetime_scurve_yr', 'elec_lifetime_yr',
+         'elec_fuel_co2_content_tonsperMBTU',
+         'elec_carbon_capture_rate_fraction',
+         'elec_carbon_capture_escl_rate_fraction') %in% paramsSelectx)){
+
+  scenarios_expand <- data.frame("scenarios_new" = scenarios) %>%
+    dplyr::mutate(scenario = "scenario")
+
+  datax_expand_scenarios <- datax %>%
+    dplyr::filter(param %in% c('elec_lifetime_scurve_yr', 'elec_lifetime_yr',
+                               'elec_fuel_co2_content_tonsperMBTU',
+                               'elec_carbon_capture_rate_fraction',
+                               'elec_carbon_capture_escl_rate_fraction')) %>%
+    dplyr::filter(scenario=="scenario") %>%
+    dplyr::left_join(scenarios_expand, by="scenario") %>%
+    dplyr::select(-scenario) %>%
+    dplyr::rename(scenario=scenarios_new)
+
+  datax <- datax %>%
+    dplyr::filter(!((param %in% c('elec_lifetime_scurve_yr', 'elec_lifetime_yr',
+                                  'elec_fuel_co2_content_tonsperMBTU',
+                                  'elec_carbon_capture_rate_fraction',
+                                  'elec_carbon_capture_escl_rate_fraction')) &
+                      (scenario=="scenario"))) %>%
+    dplyr::bind_rows(datax_expand_scenarios)
+
+  subRegions_expand <- data.frame("subRegions_new" = gcamextractor::regions_US49) %>%
+    dplyr::mutate(subRegion = "Global")
+
+  datax_expand_regions <- datax %>%
+    dplyr::filter(param %in% c('elec_lifetime_scurve_yr', 'elec_lifetime_yr',
+                               'elec_fuel_co2_content_tonsperMBTU',
+                               'elec_carbon_capture_rate_fraction',
+                               'elec_carbon_capture_escl_rate_fraction')) %>%
+    dplyr::filter(region=="Global") %>%
+    dplyr::left_join(subRegions_expand, by="subRegion") %>%
+    dplyr::mutate(region = "USA") %>%
+    dplyr::select(-subRegion) %>%
+    dplyr::rename(subRegion = subRegions_new)
+
+  datax <- datax %>%
+    dplyr::filter(!((param %in% c('elec_lifetime_scurve_yr', 'elec_lifetime_yr',
+                                'elec_fuel_co2_content_tonsperMBTU',
+                                'elec_carbon_capture_rate_fraction',
+                                'elec_carbon_capture_escl_rate_fraction')) &
+                    ((region == "Global")))) %>%
+    dplyr::bind_rows(datax_expand_regions)
+
+  x_expand <- data.frame("x_new" = datax$x%>%unique(),"x" = c("x_expand")) %>%
+    dplyr::filter(x_new >=2015); x_expand
+
+  datax_expand_x <- datax %>%
+    dplyr::filter(is.na(x)) %>%
+    dplyr::mutate(x = "x_expand") %>%
+    dplyr::left_join(x_expand, by="x") %>%
+    dplyr::select(-x) %>%
+    dplyr::rename(x = x_new)
+
+  datax <- datax %>%
+    dplyr::filter(!((param %in% c('elec_lifetime_scurve_yr', 'elec_lifetime_yr',
+                                 'elec_fuel_co2_content_tonsperMBTU',
+                                 'elec_carbon_capture_rate_fraction',
+                                 'elec_carbon_capture_escl_rate_fraction')) &
+                     ((is.na(x))))) %>%
+    dplyr::bind_rows(datax_expand_x)
+
+
+  }
+
+  # Rename US regions
+  datax <- datax %>%
+    dplyr::mutate(region = dplyr::if_else(region %in% c(gcamextractor::map_state_to_gridregion$grid_region%>%unique(),
+                                                        gcamextractor::regions_US52),"USA",region)) %>%
+    unique()
+
+  #.............................................
 
   if(!all(regionsSelect %in% unique(datax$region))){
     rlang::inform(paste("Regions not available in data: ", paste(regionsSelect[!(regionsSelect %in% unique(datax$region))],collapse=", "), sep=""))
