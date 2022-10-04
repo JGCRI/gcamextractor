@@ -6490,7 +6490,7 @@ readgcam <- function(gcamdatabase = NULL,
   #.....................
 
   #.................................
-  # Expand cerf data to include all scenarios and states
+  # Expand data to include all scenarios and states for CERF
   #.................................
 
   if(any(c('elec_lifetime_scurve_yr', 'elec_lifetime_yr',
@@ -6559,6 +6559,10 @@ readgcam <- function(gcamdatabase = NULL,
                      ((is.na(x))))) %>%
     dplyr::bind_rows(datax_expand_x)
 
+  # Update vintages for elec_fuel_co2_content_tonsperMBTU
+  datax <- datax %>%
+    dplyr::mutate(vintage = dplyr::if_else((vintage == "vintage" &
+                                              param == "elec_fuel_co2_content_tonsperMBTU"),paste0("Vint_",x),vintage))
 
   }
 

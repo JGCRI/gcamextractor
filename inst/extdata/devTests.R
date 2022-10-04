@@ -109,7 +109,7 @@ paramsSelect_i = c('elec_lifetime_scurve_yr', 'elec_lifetime_yr',
 'elec_fuel_co2_content_tonsperMBTU',
 'elec_carbon_capture_rate_fraction',
 'elec_carbon_capture_escl_rate_fraction')
-# paramsSelect_i = c("cerf")
+#paramsSelect_i = c("elec_fuel_co2_content_tonsperMBTU")
 
 dataGCAM <- readgcam(reReadData = reReadData_i,
                      gcamdatabase = gcamdatabase_i,
