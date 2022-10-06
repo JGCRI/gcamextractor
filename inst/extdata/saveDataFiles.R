@@ -51,6 +51,7 @@ map_param_query <- tibble::tribble(
                                        "nonCO2 emissions by sector USA nonUS",
                                        "nonCO2 emissions by sector"),"pal_hot","no",
   # "cerf","gcam_to_cerf_tech_name_map",
+  "cerf","pop", "Population by region","pal_hot","no",
   "cerf","elec_lifetime_scurve_yr",NA,"pal_hot",c("/outputs/L2244.TechSCurve_nuc_gen2_USA",
                                       "/outputs/L223.TechSCurve_Dispatch",
                                       "/outputs/L2241.TechSCurve_coalret_vintage_dispatch_gcamusa",
