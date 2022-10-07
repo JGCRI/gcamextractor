@@ -3544,7 +3544,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   ## emissLUC ===========================
   # need LUC for CO2BySector, GHGBYSector, and GHGByGas
-  if(any(c("emissCO2BySector", "emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissLUC") %in% paramsSelectx)){
+  if(any(c("emissCO2BySector", "emissCO2BySectorNoBio", "emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissLUC") %in% paramsSelectx)){
 
     queryx <- "Land Use Change Emission (future)"
     if (queryx %in% queriesx) {
@@ -3599,7 +3599,7 @@ readgcam <- function(gcamdatabase = NULL,
 
     ## emissCO2BySector ===========================
     # need CO2 for CO2BySector, GHGBySector, and GHGByGas
-    if(any(c("emissCO2BySector", "emissGHGBySectorGWPAR5", "emissGHGByGasGWPAR5") %in% paramsSelectx)){
+    if(any(c("emissCO2BySector", "emissGHGBySectorGWPAR5", "emissGHGByGasGWPAR5", "emissGHGBySectorPowerGWPAR5") %in% paramsSelectx)){
       queryx <- "CO2 emissions by sector"
       if (queryx %in% queriesx) {
         tbl <- rgcam::getQuery(dataProjLoaded, queryx)
@@ -3771,7 +3771,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   ## emissGHGBySectorGWPAR5 ===========================
   # need nonCO2 for GHGBySector and GHGByGas
-  if(any(c("emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissGHGBySectorBuildingsGWPAR5") %in% paramsSelectx)){
+  if(any(c("emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissGHGBySectorBuildingsGWPAR5", "emissGHGBySectorPowerGWPAR5") %in% paramsSelectx)){
       queryx <- "nonCO2 emissions by sector"
       if (queryx %in% queriesx) {
         tbl <- rgcam::getQuery(dataProjLoaded, queryx)
@@ -5311,7 +5311,142 @@ readgcam <- function(gcamdatabase = NULL,
 
   ## Sectoral details ======================================
 
-  #TODO
+  # emissCO2BySubsector
+  # need CO2 by subsector for emissGHGBySectorTransportGWPAR5
+  if(any(c("emissGHGBySectorTransportGWPAR5", "emissGHGBySectorIndustryGWPAR5") %in% paramsSelectx)){
+    queryx <- "CO2 emissions by subsector"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(
+          origValue=value,
+          value=value*44/12, # convert from MTC to MTCO2eq
+          origUnits=Units,
+          units="CO2 emissions - (MTCO2)",
+          sources = "Sources",
+          origScen = scenario,
+          origQuery = queryx,
+          origX = year, subRegion=region,
+          scenario = scenNewNames,
+          vintage = paste("Vint_", year, sep = ""),
+          x = year,
+          xLabel = "Year",
+          aggregate = "sum",
+          classPalette1 = "pal_all",
+          classPalette2 = "pal_all",
+          ghg = "CO2") %>%
+        dplyr::select(scenario, region, subRegion, sources, x, xLabel, vintage, units, value,
+                      aggregate, ghg, sector, subsector, classPalette1, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)
+      tblCO2EmissSubsec <- tbl
+    }
+  }
+
+  # emiss nonCO2 by subsector
+  # need for emissGHGBySectorTransportGWPAR5
+  if(any(c("emissGHGBySectorTransportGWPAR5", "emissGHGBySectorIndustryGWPAR5") %in% paramsSelectx)){
+    queryx <- "nonCO2 emissions by subsector"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(ghg = dplyr::case_when ((grepl("HFC", ghg)) ~ "HFCs",
+                                              (grepl("SF6", ghg)) ~ "SF6",
+                                              (grepl("CO2", ghg)) ~ "CO2",
+                                              (grepl("N2O", ghg)) ~ "N2O",
+                                              (grepl("CH4", ghg)) ~ "CH4",
+                                              (grepl("SO2", ghg)) ~ "SO2",
+                                              (grepl("NH3", ghg)) ~ "NH3",
+                                              (grepl("CF4", ghg)) ~ "CF4",
+                                              (grepl("C2F6", ghg)) ~ "C2F6",
+                                              TRUE ~ "Other"))%>%
+        dplyr::left_join(gcamextractor::GWP,by="ghg") %>%
+        dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
+        dplyr::filter(ghg!='CO2') %>%
+        dplyr::mutate(origValue=value,
+                      value=value*GWPAR5*Convert,
+                      origUnits=Units,
+                      origUnits = dplyr::case_when(ghg=="Other"~"Units",TRUE~origUnits),
+                      units="GHG Emissions GWPAR5 (MTCO2eq)",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      classPalette2 = "pal_all",
+                      classPalette1 = "pal_all") %>%
+        dplyr::select(scenario, region, subRegion, sources, x, xLabel, vintage, units, value,
+                      aggregate, ghg, sector, subsector, classPalette1, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)
+
+      tblNonCO2EmissSubsec <- tbl
+    } else {
+      tblNonCO2EmissSubsec <- tibble::tibble()
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  ### Power ##########################################
+  paramx <- "emissGHGBySectorPowerGWPAR5"
+  if(paramx %in% paramsSelectx) {
+    # CO2 emissions
+    tblCO2EmissPower <- tblCO2Emiss %>%
+      dplyr::filter(grepl("elec", sector)) %>%
+      dplyr::mutate(sector = dplyr::case_when(
+        grepl("biomass", sector) ~ paste0(ghg, "_biomass"),
+        grepl("coal", sector) ~ paste0(ghg, "_coal"),
+        grepl("gas", sector) ~ paste0(ghg, "_natural gas"),
+        grepl("refined liquids", sector) ~ paste0(ghg, "_refined liquids"),
+        ghg != "CO2" ~ ghg,
+        T ~ paste0(sector, "_", ghg))) %>%
+      dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
+                      aggregate, ghg, sector, classPalette1, classPalette2,
+                      origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+      dplyr::filter(!is.na(value)) %>%
+      dplyr::rename(class1 = sector, class2 = ghg) %>%
+      dplyr::mutate(classLabel1 = "sector",
+                    classLabel2 = "ghg")
+
+    # NonCO2 emissions
+    tblNonCO2EmissPower <- tblNonCO2Emiss %>%
+      dplyr::filter(grepl("elec", sector)) %>%
+      dplyr::mutate(sector = dplyr::case_when(
+        grepl("biomass", sector) ~ paste0(ghg, "_biomass"),
+        grepl("coal", sector) ~ paste0(ghg, "_coal"),
+        grepl("gas", sector) ~ paste0(ghg, "_natural gas"),
+        grepl("refined liquids", sector) ~ paste0(ghg, "_refined liquids"),
+        ghg != "CO2" ~ ghg,
+        T ~ paste0(sector, "_", ghg))) %>%
+      dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
+                      aggregate, ghg, sector, classPalette1, classPalette2,
+                      origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+      dplyr::filter(!is.na(value)) %>%
+      dplyr::rename(class1 = sector, class2 = ghg) %>%
+      dplyr::mutate(classLabel1 = "sector",
+                    classLabel2 = "ghg")
+
+    # all CO2
+    tblEmissGHGPower <- dplyr::bind_rows(tblCO2EmissPower,
+                                         tblNonCO2EmissPower) %>%
+      dplyr::mutate(param = "emissGHGBySectorPowerGWPAR5",
+                    units="GHG emissions - (MTCO2eq)")
+    datax <- dplyr::bind_rows(datax, tblEmissGHGPower)
+  }
+
   ### Buildings ############################################
   paramx <- "emissGHGBySectorBuildingsGWPAR5"
   if(paramx %in% paramsSelectx) {
@@ -5349,8 +5484,13 @@ readgcam <- function(gcamdatabase = NULL,
   paramx <- "emissGHGBySectorTransportGWPAR5"
   if(paramx %in% paramsSelectx) {
     # CO2 emissions
-    tblCO2EmissBuild <- tblCO2EmissNoBio %>%
+    tblCO2EmissTrn <- tblCO2EmissSubsec %>%
       dplyr::filter(grepl("trn", sector)) %>%
+      dplyr::mutate(sector = dplyr::case_when(
+        subsector %in% c("Car", "Large Car and Truck", "Mini Car") ~ "4W LDV",
+        subsector %in% c("Heavy truck", "Light truck", "Medium truck") ~ "Freight road",
+        T ~ subsector)) %>%
+      dplyr::select(-subsector) %>%
       dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
                       aggregate, ghg, sector, classPalette1, classPalette2,
                       origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
@@ -5360,8 +5500,13 @@ readgcam <- function(gcamdatabase = NULL,
                     classLabel2 = "ghg")
 
     # NonCO2 emissions
-    tblNonCO2EmissBuild <- tblNonCO2Emiss %>%
-      dplyr::filter(grepl("ctrn", sector)) %>%
+    tblNonCO2EmissTrn <- tblNonCO2EmissSubsec %>%
+      dplyr::filter(grepl("trn", sector)) %>%
+      dplyr::mutate(sector = dplyr::case_when(
+        subsector %in% c("Car", "Large Car and Truck", "Mini Car") ~ "4W LDV",
+        subsector %in% c("Heavy truck", "Light truck", "Medium truck") ~ "Freight road",
+        T ~ subsector)) %>%
+      dplyr::select(-subsector) %>%
       dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
                       aggregate, ghg, sector, classPalette1, classPalette2,
                       origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
@@ -5371,11 +5516,60 @@ readgcam <- function(gcamdatabase = NULL,
                     classLabel2 = "ghg")
 
     # all CO2
-    tblEmissGHGBuild <- dplyr::bind_rows(tblCO2EmissBuild,
-                                         tblNonCO2EmissBuild) %>%
-      dplyr::mutate(param = "emissGHGBySectorBuildingsGWPAR5",
+    tblEmissGHGTrn <- dplyr::bind_rows(tblCO2EmissTrn,
+                                       tblNonCO2EmissTrn) %>%
+      dplyr::mutate(param = "emissGHGBySectorTransportGWPAR5",
                     units="GHG emissions - (MTCO2eq)")
-    datax <- dplyr::bind_rows(datax, tblEmissGHGBuild)
+    datax <- dplyr::bind_rows(datax, tblEmissGHGTrn)
+  }
+
+  ### Industry #############################################
+  paramx <- "emissGHGBySectorIndustryGWPAR5"
+  if(paramx %in% paramsSelectx) {
+    # CO2 emissions
+    tblCO2EmissInd <- tblCO2EmissSubsec %>%
+      dplyr::filter(grepl("ind|N fertilizer|cement", sector)) %>%
+      dplyr::mutate(sector = dplyr::case_when(
+        sector == "industrial energy use" ~ subsector,
+        sector == "industrial feedstocks" ~ sector,
+        grepl("cement", sector) ~ "cement",
+        grepl("industrial processes", sector) ~ "industrial processes",
+        grepl("N fertilizer", sector) ~ "N fertilizer",
+        T ~ paste0(sector, "_", subsector))) %>%
+      dplyr::select(-subsector) %>%
+      dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
+                      aggregate, ghg, sector, classPalette1, classPalette2,
+                      origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+      dplyr::filter(!is.na(value)) %>%
+      dplyr::rename(class1 = sector, class2 = ghg) %>%
+      dplyr::mutate(classLabel1 = "sector",
+                    classLabel2 = "ghg")
+
+    # NonCO2 emissions
+    tblNonCO2EmissInd <- tblNonCO2EmissSubsec %>%
+      dplyr::filter(grepl("ind|N fertilizer|cement", sector)) %>%
+      dplyr::mutate(sector = dplyr::case_when(
+        sector == "industrial energy use" ~ subsector,
+        sector == "industrial feedstocks" ~ sector,
+        grepl("cement", sector) ~ "cement",
+        grepl("industrial processes", sector) ~ "industrial processes",
+        grepl("N fertilizer", sector) ~ "N fertilizer",
+        T ~ paste0(sector, "_", subsector))) %>%
+      dplyr::select(-subsector) %>%
+      dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
+                      aggregate, ghg, sector, classPalette1, classPalette2,
+                      origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+      dplyr::filter(!is.na(value)) %>%
+      dplyr::rename(class1 = sector, class2 = ghg) %>%
+      dplyr::mutate(classLabel1 = "sector",
+                    classLabel2 = "ghg")
+
+    # all CO2
+    tblEmissGHGInd <- dplyr::bind_rows(tblCO2EmissInd,
+                                       tblNonCO2EmissInd) %>%
+      dplyr::mutate(param = "emissGHGBySectorIndustryGWPAR5",
+                    units="GHG emissions - (MTCO2eq)")
+    datax <- dplyr::bind_rows(datax, tblEmissGHGInd)
   }
 
   # Transport -----------------------------
