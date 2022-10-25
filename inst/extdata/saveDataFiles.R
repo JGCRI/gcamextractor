@@ -11,8 +11,8 @@ library(dplyr); library(assertthat)
 map_param_query <- tibble::tribble(
   ~group, ~param, ~query,~mapPalette,~gcamdata,
   # Summary
-  "summary","emissGHGBySectorGWPAR5", c("nonCO2 emissions by sector", "CO2 emissions by sector", "CO2 emissions by sector (no bio)", "nonCO2 emissions by resource production", "Land Use Change Emission (future)", "CO2 sequestration by sector"),"pal_hot","no",
-  "summary","emissGHGByGasGWPAR5", c("nonCO2 emissions by sector", "CO2 emissions by sector", "CO2 emissions by sector (no bio)", "nonCO2 emissions by resource production", "Land Use Change Emission (future)", "CO2 sequestration by sector"),"pal_hot","no",
+  "summary","emissGHGBySectorGWPAR5", c("nonCO2 emissions by sector", "nonCO2 emissions by sector USA", "nonCO2 emissions by resource production", "CO2 emissions by sector", "Land Use Change Emission (future)", "CO2 sequestration by sector"),"pal_hot","no",
+  "summary","emissGHGByGasGWPAR5", c("nonCO2 emissions by sector", "nonCO2 emissions by sector USA", "nonCO2 emissions by resource production", "CO2 emissions by sector", "Land Use Change Emission (future)", "CO2 sequestration by sector"),"pal_hot","no",
   "summary","emissCO2BySector", c("CO2 emissions by sector", "CO2 emissions by sector", "CO2 emissions by sector (no bio)", "CO2 sequestration by sector", "Land Use Change Emission (future)"),"pal_hot","no",
   "summary", "energyFinalConsumBySecEJ", "total final energy by aggregate sector","pal_hot","no",
   "summary", "energyFinalByFuelEJ", "Final energy by detailed end-use sector and fuel","pal_hot","no",
@@ -47,9 +47,6 @@ map_param_query <- tibble::tribble(
   "diagnostic","landAllocByCrop", "land allocation by crop","pal_green","no",
   "diagnostic","emissLUC", "Land Use Change Emission (future)","pal_hot","no",
   "diagnostic","emissCO2BySector", "CO2 emissions by sector","pal_hot","no",
-  "diagnostic","emissNonCO2BySector", c("nonCO2 emissions by sector USA",
-                                       "nonCO2 emissions by sector USA nonUS",
-                                       "nonCO2 emissions by sector"),"pal_hot","no",
   # "cerf","gcam_to_cerf_tech_name_map",
   "cerf","pop", "Population by region","pal_hot","no",
   "cerf","elec_lifetime_scurve_yr",NA,"pal_hot",c("/outputs/L2244.TechSCurve_nuc_gen2_USA",
@@ -177,37 +174,19 @@ map_param_query <- tibble::tribble(
   "emissions","emissGHGBySectorNoBioGWPAR5", c("nonCO2 emissions by sector", "nonCO2 emissions by sector USA", "nonCO2 emissions by resource production", "CO2 emissions by sector (no bio)", "CO2 emissions by sector", "Land Use Change Emission (future)", "CO2 sequestration by sector"),"pal_hot","no",
   "emissions","emissGHGByGasGWPAR5", c("nonCO2 emissions by sector", "nonCO2 emissions by sector USA", "nonCO2 emissions by resource production", "CO2 emissions by sector", "Land Use Change Emission (future)", "CO2 sequestration by sector"),"pal_hot","no",
   "emissions","emissGHGByGasNoBioGWPAR5", c("nonCO2 emissions by sector", "nonCO2 emissions by sector USA", "nonCO2 emissions by resource production", "CO2 emissions by sector (no bio)", "Land Use Change Emission (future)", "CO2 sequestration by sector"),"pal_hot","no",
-  #"emissions","emissNonCO2BySectorGTPAR5", "nonCO2 emissions by sector","pal_hot","no",
-  #"emissions","emissNonCO2BySectorGWPAR5", "nonCO2 emissions by sector USA","pal_hot","no",
-  #"emissions","emissNonCO2BySectorGTPAR5", "nonCO2 emissions by sector USA","pal_hot","no",
-  #"emissions","emissNonCO2BySectorOrigUnits", "nonCO2 emissions by sector","pal_hot","no",
   "emissions","emissLUC", "Land Use Change Emission (future)","pal_hot","no",
   "emissions","emissCO2BySector", c("CO2 emissions by sector", "CO2 sequestration by sector", "Land Use Change Emission (future)"),"pal_hot","no",
   "emissions","emissCO2CumGlobal2010to2100", "CO2 emissions by sector","pal_hot","no",
   "emissions","emissCO2CumGlobal2010to2100RCP", "CO2 emissions by sector","pal_hot","no",
-  # "emissions","emissNonCO2BySector", c("nonCO2 emissions by sector USA",
-  #                                      "nonCO2 emissions by sector USA nonUS",
-  #                                      "nonCO2 emissions by sector"),"pal_hot","no",
   "emissions","emissCO2BySectorNoBio", c("CO2 emissions by sector (no bio)", "CO2 sequestration by sector", "Land Use Change Emission (future)"),"pal_hot","no",
   "emissions","emissGHGByResProdGWPAR5", "nonCO2 emissions by resource production","pal_hot","no",
-  "emissions", "co2SequestrationBySector", "CO2 sequestration by sector", "pal_hot", "no",
-  #"emissions","emissMethaneBySourceGWPAR5", "nonCO2 emissions by sector","pal_hot","no",
-  #"emissions","emissByGasGWPAR5FFI", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
-  #"emissions","emissByGasGWPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
-  #"emissions","emissBySectorGWPAR5FFI", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
-  #"emissions","emissBySectorGWPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
-  #"emissions","emissNonCO2ByResProdGTPAR5", "nonCO2 emissions by resource production","pal_hot","no",
-  #"emissions","emissMethaneBySourceGTPAR5", "nonCO2 emissions by sector","pal_hot","no",
-  #"emissions","emissByGasGTPAR5FFI", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
-  #"emissions","emissGHGByGasGTPAR5", c("nonCO2 emissions by resource production","nonCO2 emissions by sector", "Land Use Change Emission (future)"),"pal_hot","no",
-  #"emissions","emissBySectorGTPAR5FFI",  c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
-  #"emissions","emissBySectorGTPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
+  "emissions", "co2SequestrationBySector", "CO2 sequestration by sector", "pal_hot", "no"
 ); map_param_query
 
 use_data(map_param_query, version=3, overwrite=T)
 
-params <- unique(gcamextractor::map_param_query$param) %>% sort(); data_params
-queries <- unlist(unique(gcamextractor::map_param_query$query)) %>% sort(); data_queries
+params <- unique(gcamextractor::map_param_query$param) %>% sort(); params
+queries <- unlist(unique(gcamextractor::map_param_query$query)) %>% sort(); queries
 use_data(params, version=3, overwrite=T)
 use_data(queries, version=3, overwrite=T)
 

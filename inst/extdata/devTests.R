@@ -181,4 +181,35 @@ dataGCAM <- readgcam(reReadData = reReadData_i,
 
 dataGCAM$dataAggParam
 
+#.............
+# Check NonCO2
+#............
 
+library(gcamextractor); library(dplyr)
+
+# List of params in gcamextractor
+params <- gcamextractor::params; params
+
+gcamdatabase_i = "C:/gcam/gcam-v6.0-Windows-Release-Package/output/database_basexdb"
+gcamdata_folder_i = "C:/gcam/gcam-v6.0-Windows-Release-Package/input/gcamdata"
+rgcam::localDBConn("C:/gcam/gcam-v6.0-Windows-Release-Package/output/","database_basexdb")
+reReadData_i = T
+dataProjFile_i = "dataProj_nonCO2.proj"
+regionsSelect_i = NULL
+folder_i="nonCO2_test"
+
+# Issue #20
+paramsSelect_i = c("emissGHGByGasGWPAR5")
+
+dataGCAM <- readgcam(reReadData = F,
+                     gcamdatabase = gcamdatabase_i,
+                     gcamdata_folder = gcamdata_folder_i,
+                     dataProjFile = dataProjFile_i,
+                     regionsSelect = regionsSelect_i,
+                     paramsSelect = paramsSelect_i,
+                     folder = folder_i)
+
+dataGCAM$dataAggParam
+dataGCAM$dataAggParam$param %>% unique()
+dataGCAM$data$class1 %>% unique()
+dataGCAM$dataAll%>%tail() %>% as.data.frame()
