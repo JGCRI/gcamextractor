@@ -38,7 +38,7 @@ gcamextractor::map_param_query # Get a table of params and the relevants queries
 **Table 1:** Summary of parameters for socioeconomics.
 
 ```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
-library(kableExtra); library(dplyr)
+library(kableExtra); library(dplyr); library(gcamextractor)
   
   table_raw <-   map_param_query%>%filter(grepl("socio",group)) 
   
@@ -79,7 +79,7 @@ library(kableExtra); library(dplyr)
 **Table 2:** Summary of parameters for transport.
 
 ```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
-library(kableExtra); library(dplyr)
+library(kableExtra); library(dplyr); library(gcamextractor)
   
   table_raw <-   map_param_query%>%filter(grepl("transport",group)) 
   
@@ -125,7 +125,7 @@ library(kableExtra); library(dplyr)
 **Table 3:** Summary of parameters for water.
 
 ```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
-library(kableExtra); library(dplyr)
+library(kableExtra); library(dplyr); library(gcamextractor)
   
   table_raw <-   map_param_query%>%filter(grepl("water",group)) 
   
@@ -188,7 +188,7 @@ library(kableExtra); library(dplyr)
 **Table 4:** Summary of parameters for agriculture.
 
 ```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
-library(kableExtra); library(dplyr)
+library(kableExtra); library(dplyr); library(gcamextractor)
   
   table_raw <-   map_param_query%>%filter(grepl("ag",group)) 
   
@@ -228,7 +228,7 @@ library(kableExtra); library(dplyr)
 **Table 5:** Summary of parameters for livestock.
 
 ```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
-library(kableExtra); library(dplyr)
+library(kableExtra); library(dplyr); library(gcamextractor)
   
   table_raw <-   map_param_query%>%filter(grepl("livestock",group)) 
   
@@ -269,7 +269,7 @@ library(kableExtra); library(dplyr)
 **Table 6:** Summary of  parameters for land use.
 
 ```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
-library(kableExtra); library(dplyr)
+library(kableExtra); library(dplyr); library(gcamextractor)
   
   table_raw <-   map_param_query%>%filter(grepl("land",group)) 
   
@@ -321,7 +321,7 @@ library(kableExtra); library(dplyr)
 **Table 7:** Summary of parameters for emissions.
 
 ```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
-library(kableExtra); library(dplyr)
+library(kableExtra); library(dplyr); library(gcamextractor)
   
   table_raw <-   map_param_query%>%filter(grepl("emiss",group)) 
   
@@ -397,7 +397,7 @@ library(kableExtra); library(dplyr)
 **Table 8:** Summary of parameters for electricity.
 
 ```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
-library(kableExtra); library(dplyr)
+library(kableExtra); library(dplyr)l; library(gcamextractor)
   
   table_raw <-   map_param_query%>%filter(grepl("elec",group)) 
   
@@ -505,7 +505,7 @@ dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv5
 **Table 9:** Summary of parameters for energy.
 
 ```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
-library(kableExtra); library(dplyr)
+library(kableExtra); library(dplyr);library(gcamextractor)
   
   table_raw <-   map_param_query%>%filter(grepl("energy",group)) 
   
