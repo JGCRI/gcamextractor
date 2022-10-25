@@ -397,7 +397,7 @@ library(kableExtra); library(dplyr); library(gcamextractor)
 **Table 8:** Summary of parameters for electricity.
 
 ```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
-library(kableExtra); library(dplyr)l; library(gcamextractor)
+library(kableExtra); library(dplyr); library(gcamextractor)
   
   table_raw <-   map_param_query%>%filter(grepl("elec",group)) 
   
