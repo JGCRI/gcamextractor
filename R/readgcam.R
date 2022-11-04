@@ -632,7 +632,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
 
-      if(any(grepl("cerf",paramsSelect,ignore.case = T))){
+      if(any(grepl("^cerf$|^go$",paramsSelect,ignore.case = T))){
         tbl <- tbl %>%
           dplyr::filter(grepl("^USA$",region,ignore.case = T))}
 
@@ -897,7 +897,7 @@ readgcam <- function(gcamdatabase = NULL,
                       classLabel2="technology")
       }}
 
-      if(any(grepl("cerf",paramsSelect,ignore.case = T))){
+      if(any(grepl("^cerf$|^go$",paramsSelect,ignore.case = T))){
         tbl_comb <- tbl_comb %>%
           dplyr::filter(grepl("^USA$",region,ignore.case = T))}
 
@@ -1303,7 +1303,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(class2))
       }}
 
-      if(any(grepl("cerf",paramsSelect,ignore.case = T))){
+      if(any(grepl("^cerf$|^go$",paramsSelect,ignore.case = T))){
         tbl <- tbl %>%
           dplyr::filter(grepl("^USA$",region,ignore.case = T))}
 

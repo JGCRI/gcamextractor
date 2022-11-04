@@ -151,35 +151,7 @@ cities <- gcamextractor::readgcam(gcamdatabase = cities_db,
 
 
 
-#----------------------
-# CERF GO DEEP
-#----------------------
 
-library(gcamextractor); library(dplyr)
-
-# List of params in gcamextractor
-params <- gcamextractor::params; params
-
-gcamdatabase_i = "C:/gcam/gcam-v6.0-Windows-Release-Package/output/database_basexdb"
-gcamdata_folder_i = "C:/gcam/gcam-v6.0-Windows-Release-Package/input/gcamdata"
-rgcam::localDBConn("C:/gcam/gcam-v6.0-Windows-Release-Package/output/","database_basexdb")
-reReadData_i = T
-dataProjFile_i = "dataProj_cerf_godeep.proj"
-regionsSelect_i = NULL
-folder_i="cerf_test"
-
-# Issue #20
-paramsSelect_i = c("cerf")
-
-dataGCAM <- readgcam(reReadData = reReadData_i,
-                     gcamdatabase = gcamdatabase_i,
-                     gcamdata_folder = gcamdata_folder_i,
-                     dataProjFile = dataProjFile_i,
-                     regionsSelect = regionsSelect_i,
-                     paramsSelect = paramsSelect_i,
-                     folder = folder_i)
-
-dataGCAM$dataAggParam
 
 #.............
 # Check NonCO2
@@ -213,3 +185,12 @@ dataGCAM$dataAggParam
 dataGCAM$dataAggParam$param %>% unique()
 dataGCAM$data$class1 %>% unique()
 dataGCAM$dataAll%>%tail() %>% as.data.frame()
+
+
+##
+conn <- rgcam::localDBConn("C:/gcam/gcam-v6.0-Windows-Release-Package/output/",
+                           "database_basexdb",migabble = FALSE)
+prj <- rgcam::addScenario(conn,
+                          "prj.proj",
+                          "Reference",
+                          "C:/Z/models/gcamextractor/inst/extdata/queries_check.xml")
