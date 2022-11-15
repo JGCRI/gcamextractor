@@ -5531,6 +5531,14 @@ readgcam <- function(gcamdatabase = NULL,
   scenarios_expand <- data.frame("scenarios_new" = scenarios) %>%
     dplyr::mutate(scenario = "scenario")
 
+  if(!is.null(scenNewNames)){
+    scenarios_expand <- scenarios_expand %>%
+      dplyr::rename(scenarios_old=scenarios_new)%>%
+    dplyr::left_join(data.frame(scenarios_old=scenOrigNames_i,
+                                scenarios_new=scenNewNames,
+                                by="scenarios_old"))
+    }
+
   datax_expand_scenarios <- datax %>%
     dplyr::filter(param %in% c('elec_lifetime_scurve_yr', 'elec_lifetime_yr',
                                'elec_fuel_co2_content_tonsperMBTU',

@@ -105,7 +105,10 @@ regionsSelect_i = c("Global","USA",rmap::mapping_US52,"Alaska grid","California 
 folder_i="cerf_test"
 
 # Issue #20
-paramsSelect_i = c("cerf")
+paramsSelect_i = c("elec_lifetime_scurve_yr")
+
+scenOrigNames_i = c("rcp85cooler_ssp3_rcp85gdp") # make sure these exist (See outputs of the rgcam::localDBConn)
+scenNewNames_i = c("rcp85cooler_ssp3")
 
 dataGCAM <- readgcam(reReadData = reReadData_i,
                      gcamdatabase = gcamdatabase_i,
@@ -113,7 +116,11 @@ dataGCAM <- readgcam(reReadData = reReadData_i,
                      dataProjFile = dataProjFile_i,
                      regionsSelect = regionsSelect_i,
                      paramsSelect = paramsSelect_i,
+                     scenOrigNames = scenOrigNames_i,
+                     scenNewNames = scenNewNames_i,
                      folder = folder_i)
+
+dataGCAM$data %>% dplyr::select(param,scenario) %>% unique()
 
 # reReadData = T
 # gcamdatabase = gcamdatabase_i
