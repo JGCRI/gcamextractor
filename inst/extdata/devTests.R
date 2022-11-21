@@ -105,7 +105,7 @@ regionsSelect_i = c("Global","USA",rmap::mapping_US52,"Alaska grid","California 
 folder_i="cerf_test"
 
 # Issue #20
-paramsSelect_i = c("elec_lifetime_scurve_yr")
+paramsSelect_i = c("elec_capacity_factor_usa_in")
 
 scenOrigNames_i = c("rcp85cooler_ssp3_rcp85gdp") # make sure these exist (See outputs of the rgcam::localDBConn)
 scenNewNames_i = c("rcp85cooler_ssp3")
