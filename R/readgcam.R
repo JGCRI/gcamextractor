@@ -592,9 +592,10 @@ readgcam <- function(gcamdatabase = NULL,
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
 
-      if(any(grepl("sector...6", names(tbl)))){
-        tbl <- tbl%>%dplyr::rename("sector_1"="sector...6")
-      }
+      tbl_sector_names <- names(tbl)[grepl("^sector",names(tbl))] %>% sort()
+      tbl <- tbl %>%
+        dplyr::rename(sector1=tbl_sector_names[1],
+                      sector2=tbl_sector_names[2])
 
       tbl <- tbl %>%
         # remove secondary inputs
@@ -620,7 +621,7 @@ readgcam <- function(gcamdatabase = NULL,
                       class1 = gsub("elec_","",input),
                       classLabel1 = "subsector",
                       classPalette1 = "pal_all",
-                      class2 = sector_1,
+                      class2 = sector2,
                       classLabel2 = "technology",
                       classPalette2 = "pal_all")%>%
         dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
@@ -946,6 +947,11 @@ readgcam <- function(gcamdatabase = NULL,
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
+
+      tbl_sector_names <- names(tbl)[grepl("^sector",names(tbl))] %>% sort()
+      tbl <- tbl %>%
+        dplyr::rename(sector1=tbl_sector_names[1],
+                      sector2=tbl_sector_names[2])
       tbl <- tbl %>%
         dplyr::filter(region %in% gcamextractor::regions_US52) %>%
         dplyr::mutate(param = paramx,
@@ -963,10 +969,10 @@ readgcam <- function(gcamdatabase = NULL,
                       x = year,
                       xLabel = "Year",
                       aggregate = "mean",
-                      class1 = sector...4,
+                      class1 = sector1,
                       classLabel1 = "investment_segment",
                       classPalette1 = "pal_all",
-                      class2 = sector...6,
+                      class2 = sector2,
                       classLabel2 = "technology",
                       classPalette2 = "pal_all")%>%
         dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,

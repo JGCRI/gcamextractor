@@ -121,6 +121,17 @@ dataGCAM <- readgcam(reReadData = reReadData_i,
                      folder = folder_i)
 
 dataGCAM$data %>% dplyr::select(param,scenario) %>% unique()
+(dataGCAM$data)$value%>%range()
+
+# On PIC direct
+library(rgcam)
+dataProj.proj <- rgcam::addScenario(conn = rgcam::localDBConn("/pic/projects/im3/gcamusa/gcam-usa-im3/output/","database_rcp85hotter_ssp5"),
+                                    proj = "test_proj.proj",
+                                    scenario = "rcp85hotter_ssp5",
+                                    queryFile = "/pic/projects/im3/gcamusa/diagnostics/outputs_CERF/queries_test.xml")
+dataProjLoaded <- rgcam::loadProject("test_proj.proj")
+queryx <- "elec investment capacity factor"
+tbl <- rgcam::getQuery(dataProjLoaded, queryx)
 
 # reReadData = T
 # gcamdatabase = gcamdatabase_i
