@@ -37,11 +37,22 @@
  </aQuery>
  <aQuery>
   <supplyDemandQuery title="outputs by tech">
-   <axis1 name="technology">technology[@name]</axis1>
+   <axis1 name="technology">technology</axis1>
    <axis2 name="Year">physical-output[@vintage]</axis2>
    <xPath buildList="true" dataName="output" group="false" sumAll="false">*[@type='sector']/*[@type='subsector']/*[@type='technology']/*[@type='output']/physical-output/node()</xPath>
    <comments/>
   </supplyDemandQuery>
+ </aQuery>
+ <aQuery>
+  <supplyDemandQuery title="building service output by tech">
+     <axis1 name="technology">technology</axis1>
+     <axis2 name="Year">physical-output[@vintage]</axis2>
+     <xPath buildList="true" dataName="output" group="false" sumAll="false">*[@type='sector' and (@name='building' or (exists(child::keyword[@final-energy='building'])))]/
+     *[@type='subsector']/*[@type='technology']/
+     output-primary[@type='output' (:collapse:)]/
+     physical-output/node()</xPath>
+     <comments/>
+   </supplyDemandQuery>
  </aQuery>
  <aQuery>
   <supplyDemandQuery title="water consumption by state, sector, basin (includes desal)">

@@ -132,7 +132,7 @@ readgcam <- function(gcamdatabase = NULL,
     transport -> gcamdata -> half.life -> lifetime -> read.csv -> sector_1 -> steepness -> PrimaryFuelCO2Coef ->
     PrimaryFuelCO2Coef.name -> country -> grid_region -> 'io-coefficient' -> 'minicam.energy.input' ->
     'remove.fraction' ->  state ->  subsector.name -> 'to.technology' -> coefficient -> tbl_carbon_capture_rate ->
-    gcamdata_files -> aggSector -> tblGHGEmissRes -> segment -> hours
+    gcamdata_files -> aggSector -> tblGHGEmissRes -> segment -> hours -> scenarios_new -> str -> subRegions_new -> x_new
 
   basedir <- getwd()
 
@@ -202,6 +202,8 @@ readgcam <- function(gcamdatabase = NULL,
   if(!is.null(regionsSelect) && !any(c("USA", gcamextractor::regions_US52) %in% regionsSelect)){
     queriesSelectx <- queriesSelectx[!grepl("USA", queriesSelectx)]
   }
+  print("SELECTED QUERIES:")
+  print(queriesSelectx)
 
 #.............................
 # Create necessary directories if they dont exist.
@@ -568,6 +570,7 @@ readgcam <- function(gcamdatabase = NULL,
 } # Close Read in all raw gcamdata base and gcam folder data.
 
 
+
 #.....................
 # Collect and format selected parameters
 #.....................
@@ -580,6 +583,8 @@ readgcam <- function(gcamdatabase = NULL,
   if(T){
 
   queriesx <- queriesx[queriesx %in% queries]
+
+  print(queriesx)
 
   # Electricity ------------------------------------------
 
@@ -3821,6 +3826,7 @@ readgcam <- function(gcamdatabase = NULL,
 
         tblNonCO2Emiss <- tbl
       } else {
+        print("NonCO2 WAS NOT IN QUERIES")
         tblNonCO2Emiss <- tibble::tibble()
         # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
       }
@@ -3828,6 +3834,7 @@ readgcam <- function(gcamdatabase = NULL,
       # Aggregate Sectors
       if(any(c("emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5") %in% paramsSelectx)){
           #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
+        print(str(tblNonCO2Emiss))
         tblNonCO2EmissAgg <- tblNonCO2Emiss %>%
             dplyr::mutate(
               sector=dplyr::case_when(
@@ -5479,6 +5486,51 @@ readgcam <- function(gcamdatabase = NULL,
                       units="GHG emissions - (MTCO2eq)")
       datax <- dplyr::bind_rows(datax, tblEmissGHGBuild)
   }
+
+  paramx <- "serviceOutputByTechBuildings"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "building service output by tech"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames,
+                      grepl("comm|resid", sector))%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(
+          class1 = paste0(sector, " (", technology, ")"),
+          param = "serviceOutputByTechBuildings",
+          sources = "Sources",
+          origScen = scenario,
+          origQuery = queryx,
+          origValue = value,
+          origUnits = Units,
+          origX = year, subRegion=region,
+          scenario = scenNewNames,
+          units = Units,
+          vintage = paste("Vint_", year, sep = ""),
+          x = year,
+          xLabel = "Year",
+          aggregate = "sum",
+          classLabel1 = "technology",
+          classPalette1 = "pal_all",
+          class2 = "class2",
+          classLabel2 = "classLabel2",
+          classPalette2 = "classPalette2")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
 
   ### Transport #############################################
   paramx <- "emissGHGBySectorTransportGWPAR5"

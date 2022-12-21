@@ -138,6 +138,9 @@ map_param_query <- tibble::tribble(
   "transport", "transportPassengerGHGByMode", "nonCO2 emissions by subsector", "pal_hot", "no",
   "transport", "transportFreightGHGByMode", "nonCO2 emissions by subsector", "pal_hot", "no",
 
+  # Buildings
+  "buildings", "serviceOutputByTechBuildings", "building service output by tech", "pal_hot", "no",
+
   # Water
   "water","watConsumBySec", "water consumption by state, sector, basin (includes desal)","pal_wet","no",
   "water","watWithdrawBySec", "water withdrawals by state, sector, basin (includes desal)","pal_wet","no",
