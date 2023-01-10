@@ -6044,7 +6044,7 @@ readgcam <- function(gcamdatabase = NULL,
   if(paramx %in% paramsSelectx){
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "transport service output by tech"
-    vmt_array <- c( "trn_pass", "trn_pass_road", "trn_pass_road_LDV",
+    vmt_array <- c("trn_aviation_intl", "trn_pass", "trn_pass_road", "trn_pass_road_LDV",
                    "trn_pass_road_LDV_2W", "trn_pass_road_LDV_4W")
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
