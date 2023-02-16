@@ -37,12 +37,21 @@ gcamextractor::map_param_query # Get a table of params and the relevants queries
 <a name="table1"></a>
 **Table 1:** Summary of parameters for socioeconomics.
 
-| Parameter | Description and Unit | Original GCAM Unit | Source Queries |
-|---|---|---|---|
-| [gdpPerCapita](#gdppercapita) | GDP per Capita (Thousand 1990 USD per Person) | Thousand 1990 USD per Person | GDP per capita MER by region |
-| [gdp](#gdp) | GDP (Billion 1990 USD) | Million 1990 USD | GDP MER by region |
-| [gdpGrowthRate](#gdpgrowthrate) | GDP Growth Rate (Percent) | Million 1990 USD | GDP MER by region |
-| [pop](#pop) | Population (Millions) | Thousands | Population by region |
+```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
+library(kableExtra); library(dplyr); library(gcamextractor)
+  
+  table_raw <-   map_param_query%>%filter(grepl("socio",group)) 
+  
+  if(any(!grepl("^no$",unlist(table_raw$gcamdata%>%unique())))){
+    table_kable <- table_raw %>% dplyr::select(param,query,gcamdata)} else {
+    table_kable <- table_raw %>% dplyr::select(param,query)
+  }
+  
+  table_kable %>%
+  kbl() %>%
+  kable_styling(bootstrap_options = c("bordered","striped", "hover", "condensed", "responsive")) %>%
+  row_spec(0, background = "#2A2A2A", color = "white")
+```
 
 <br />
 
@@ -69,12 +78,21 @@ gcamextractor::map_param_query # Get a table of params and the relevants queries
 <a name="table2"></a>
 **Table 2:** Summary of parameters for transport.
 
-| Parameter | Description and Unit<sup>*</sup> | Original GCAM Unit | Source Queries |
-|---|---|---|---|
-| [transportPassengerVMTByMode](#transportpassengervmtbymode) | Passenger VMT (services) by Mode (million pass-km) | million pass-km | transport service output by mode |
-| [transportFreightVMTByMode](#transportfreightvmtbymode) | Freight VMT (services) by Mode (million ton-km) | million ton-km | transport service output by mode |
-| [transportPassengerVMTByFuel](#transportpassengervmtbyfuel) | Passenger VMT (services) by Fuel (million pass-km) | million pass-km | transport service output by tech (new) |
-| [transportFreightVMTByFuel](#transportfreightvmtbyfuel) | Freight VMT (services) by Fuel (million ton-km) | million ton-km | transport service output by tech (new) |
+```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
+library(kableExtra); library(dplyr); library(gcamextractor)
+  
+  table_raw <-   map_param_query%>%filter(grepl("transport",group)) 
+  
+  if(any(!grepl("^no$",unlist(table_raw$gcamdata%>%unique())))){
+    table_kable <- table_raw %>% dplyr::select(param,query,gcamdata)} else {
+    table_kable <- table_raw %>% dplyr::select(param,query)
+  }
+  
+  table_kable %>%
+  kbl() %>%
+  kable_styling(bootstrap_options = c("bordered","striped", "hover", "condensed", "responsive")) %>%
+  row_spec(0, background = "#2A2A2A", color = "white")
+```
 
 <sub>\*Passenger VMT modes: 2W and 3W, bus, car, large car and truck, LDV, plane, and rail.</sub> \
 <sub>\*Freight VMT modes: heavy truck, light truck, medium truck, rail, and ship.</sub> \
@@ -106,16 +124,21 @@ gcamextractor::map_param_query # Get a table of params and the relevants queries
 <a name="table3"></a>
 **Table 3:** Summary of parameters for water.
 
-| Parameter | Description and Unit<sup>*</sup> | Original GCAM Unit | Source Queries |
-|---|---|---|---|
-| [watConsumBySec](#watconsumbysec) | Water Consumption by Sector (km3) | km3 | water consumption by state, sector, basin (includes desal) |
-| [watWithdrawBySec](#watwithdrawbysec) | Water Withdrawal by Sector (km3) | km3 | water withdrawals by state, sector, basin (includes desal) |
-| [watWithdrawByCrop](#watwithdrawbycrop) | Water Withdrawals by Crop (km3) | km3 | water withdrawals by crop |
-| [watBioPhysCons](#watbiophyscons) | Biophysical Water Consumption (km3) | km3 | biophysical water demand by crop type and land region |
-| [watIrrWithdrawBasin](#watirrwithdrawvasin) | Irrigation Water Withdrawal (km3) | km3 | water withdrawals by water mapping source |
-| [watIrrConsBasin](#watirrconsbasin) | Irrigation Water Consumption (km3) | km3 | water consumption by water mapping source |
-| [watSupRunoffBasin](#watsuprunoffbasin) | Runoff (km3) | km3 | Basin level available runoff |
-| [waterWithdrawROGW](#waterwithdrawrogw) | Runoff vs Groundwater (km3) | km3 | Water withdrawals by water source (runoff vs. groundwater) |
+```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
+library(kableExtra); library(dplyr); library(gcamextractor)
+  
+  table_raw <-   map_param_query%>%filter(grepl("water",group)) 
+  
+  if(any(!grepl("^no$",unlist(table_raw$gcamdata%>%unique())))){
+    table_kable <- table_raw %>% dplyr::select(param,query,gcamdata)} else {
+    table_kable <- table_raw %>% dplyr::select(param,query)
+  }
+  
+  table_kable %>%
+  kbl() %>%
+  kable_styling(bootstrap_options = c("bordered","striped", "hover", "condensed", "responsive")) %>%
+  row_spec(0, background = "#2A2A2A", color = "white")
+```
 
 <sub>\*Water consumption sectors: animal, domestic, electric, industry, irrigation, and primary.</sub> \
 <sub>\*Water withdrawal sectors: agriculture, electricity, industry, livestock, mining, municipal, and desalination.</sub> \
@@ -164,14 +187,21 @@ gcamextractor::map_param_query # Get a table of params and the relevants queries
 <a name="table4"></a>
 **Table 4:** Summary of parameters for agriculture.
 
-| Parameter | Description and Unit | Original GCAM Unit | Source Queries |
-|---|---|---|---|
-| [agProdbyIrrRfd](#agprodbyirrrfd) | Agricultural Production (Mt) | Mt | ag production by tech |
-| [agProdBiomass](#agprodbiomass) | Biomass Production (EJ) | EJ | ag production by tech |
-| [agProdForest](#agprodforest) | Forest Production (billion m3) | billion m3 | ag production by tech |
-| [agProdByCrop](#agprodbycrop) | Crop Production (Mt) | Mt | ag production by tech |
-
-
+```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
+library(kableExtra); library(dplyr); library(gcamextractor)
+  
+  table_raw <-   map_param_query%>%filter(grepl("ag",group)) 
+  
+  if(any(!grepl("^no$",unlist(table_raw$gcamdata%>%unique())))){
+    table_kable <- table_raw %>% dplyr::select(param,query,gcamdata)} else {
+    table_kable <- table_raw %>% dplyr::select(param,query)
+  }
+  
+  table_kable %>%
+  kbl() %>%
+  kable_styling(bootstrap_options = c("bordered","striped", "hover", "condensed", "responsive")) %>%
+  row_spec(0, background = "#2A2A2A", color = "white")
+```
 <br />
 
 <!-- ### agProdbyIrrRfd -->
@@ -197,12 +227,21 @@ gcamextractor::map_param_query # Get a table of params and the relevants queries
 <a name="table5"></a>
 **Table 5:** Summary of parameters for livestock.
 
-| Parameter | Description and Unit | Original GCAM Unit | Source Queries |
-|---|---|---|---|
-| [livestock_MeatDairybyTechMixed](#livestock_meatdairybytechmixed) | Livestock Production Mixed Feed (Mt) | Mt | meat and dairy production by tech |
-| [livestock_MeatDairybyTechPastoral](#livestock_meatdairybytechpastoral) | Livestock Production Pastoral (Mt) | Mt | meat and dairy production by tech |
-| [livestock_MeatDairybyTechImports](#livestock_meatdairybytechimports) | Livestock Production Imported Feed (Mt) | Mt | meat and dairy production by tech |
-| [livestock_MeatDairybySubsector](#livestock_meatdairybysubsector) | Livestock Production (Mt) | Mt | meat and dairy production by tech |
+```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
+library(kableExtra); library(dplyr); library(gcamextractor)
+  
+  table_raw <-   map_param_query%>%filter(grepl("livestock",group)) 
+  
+  if(any(!grepl("^no$",unlist(table_raw$gcamdata%>%unique())))){
+    table_kable <- table_raw %>% dplyr::select(param,query,gcamdata)} else {
+    table_kable <- table_raw %>% dplyr::select(param,query)
+  }
+  
+  table_kable %>%
+  kbl() %>%
+  kable_styling(bootstrap_options = c("bordered","striped", "hover", "condensed", "responsive")) %>%
+  row_spec(0, background = "#2A2A2A", color = "white")
+```
 
 <br />
 
@@ -229,14 +268,21 @@ gcamextractor::map_param_query # Get a table of params and the relevants queries
 <a name="table6"></a>
 **Table 6:** Summary of  parameters for land use.
 
-| Parameter | Description and Unit<sup>*</sup> | Original GCAM Unit | Source Queries |
-|---|---|---|---|
-| [landIrrRfd](#landirrrfd) | Irrigated vs Rainfed Land (1000 km2) | 1000 km2 | land allocation by crop and water source |
-| [landIrrCrop](#landirrcrop) | Irrigated Crop Land (1000 km2) | 1000 km2 | land allocation by crop and water source |
-| [landRfdCrop](#landrfdcrop) | Rainfed Crop Land (1000 km2) | 1000 km2 | land allocation by crop and water source |
-| [landAlloc](#landalloc) | Land Allocation by Aggregated Land Type (1000 km2) | 1000 km2 | aggregated land allocation |
-| [landAllocByCrop](#landallocbycrop) | Cropland Allocation (1000 km2) | 1000 km2 | land allocation by crop |
-| [landAllocDetail](#landallocdetail) | Land Allocation by Detailed Land Type (1000 km2) | 1000 km2 | detailed land allocation |
+```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
+library(kableExtra); library(dplyr); library(gcamextractor)
+  
+  table_raw <-   map_param_query%>%filter(grepl("land",group)) 
+  
+  if(any(!grepl("^no$",unlist(table_raw$gcamdata%>%unique())))){
+    table_kable <- table_raw %>% dplyr::select(param,query,gcamdata)} else {
+    table_kable <- table_raw %>% dplyr::select(param,query)
+  }
+  
+  table_kable %>%
+  kbl() %>%
+  kable_styling(bootstrap_options = c("bordered","striped", "hover", "condensed", "responsive")) %>%
+  row_spec(0, background = "#2A2A2A", color = "white")
+```
 
 <sub>\*Aggregated land type: crops, forest, natural other, natural other grass, natural other tree, pasture, and crop</sub> \
 <sub>\*Detailed land type: biomassGrass, biomassTree, Corn, FiberCrop, Forest, Grassland, MiscCrop, OilCrop, OtherArableLand, OtherGrain, PalmFruit, Pasture, ProtectedGrassland, ProtectedShrubland, ProtectedUnmanagedForest, ProtectedUnmanagedPasture, Rice, RootTuber, Shrubland, SugarCrop, UnmanagedForest, UnmanagedPasture, UrbanLand, Wheat, FodderGrass, FodderHerb, RockIceDesert, and Tundra</sub>
@@ -274,23 +320,22 @@ gcamextractor::map_param_query # Get a table of params and the relevants queries
 <a name="table7"></a>
 **Table 7:** Summary of parameters for emissions.
 
-| Parameter | Description and Unit | Original GCAM Unit | Source Queries |
-|---|---|---|---|
-| [emissNonCO2BySector](#emissnonco2bysector) | GHG Emissions (non CO2) by Gas Type (Gg/Tg/MTC) | Gg/Tg/MTC  | nonCO2 emissions by sector; <br /> nonCO2 emissions by sector USA; <br /> nonCO2 emissions by sector USA nonUS |
-| [emissNonCO2BySectorGWPAR5](#emissnonco2bysectorgwpar5) | GHG Emissions GWP AR5 (MTCO2eq) | Gg/Tg/MTC  | nonCO2 emissions by sector; <br /> nonCO2 emissions by sector USA |
-| [emissNonCO2BySectorGTPAR5](#emissnonco2bysectorgtpar5) | GHG Emissions GTP AR5 (MTCO2eq) | Gg/Tg/MTC  | nonCO2 emissions by sector; <br /> nonCO2 emissions by sector USA |
-| [emissNonCO2BySectorOrigUnits](#emissnonco2bysectororigunits) | GHG Emissions by Gas Type (Gg/Tg/MTC) | Gg/Tg/MTC  | nonCO2 emissions by sector |
-| [emissNonCO2ByResProdGWPAR5](#emissnonco2byresprodgwpar5) | Non-CO2 Emissions by Resource  Production GWP AR5 (MTCO2eq) | Tg  | nonCO2 emissions by resource production |
-| [emissNonCO2ByResProdGTPAR5](#emissnonco2byresprodgtpar5) | Non-CO2 Emissions by Resource Production GTP AR5 (MTCO2eq) | Tg  | nonCO2 emissions by resource production |
-| [emissCO2BySector](#emissco2bysector) | CO2 Emission (MTC) | MTC  | CO2 emissions by sector |
-| [emissCO2BySectorNoBio](#emissco2bysectornobio) | CO2 Emission without Bio (MTCO2eq) | MTC  | CO2 emissions by sector (no bio) |
-| [emissLUC](#emissluc) | LUC CO2 Emissions (MTCO2eq) | MTC  | Land Use Change Emission (future) |
-| [emissBySectorGTPAR5FFI](#emissbysectorgtpar5ffi) | Emissions from Fossil FUels and Industry (FFI) but LUC GTP AR5 (MTCO2eq) | MTC  | nonCO2 emissions by resource production; <br /> nonCO2 emissions by sector |
-| [emissBySectorGTPAR5LUC](#emissbysectorgtpar5luc) | Emissions from Landuse Change (LUC) GTP AR5 (MTCO2eq) | MTC  | nonCO2 emissions by resource production; <br /> nonCO2 emissions by sector |
-| [emissByGasGTPAR5FFI](#emissbygasgtpar5ffi) | Total Emissions without LUC GTP AR5 Summarized (MTCO2eq) | MTC  | nonCO2 emissions by resource production; <br /> nonCO2 emissions by sector |
-| [emissByGasGTPAR5LUC](#emissbygasgtpar5luc) | Total Emissions with LUC GTP AR5 Summarized (MTCO2eq) | MTC  | nonCO2 emissions by resource production; <br /> nonCO2 emissions by sector |
-| [emissMethaneBySourceGWPAR5](#emissmethanebysourcegwpar5) | Methane Emissions GWP AR5 (MTCO2eq) | Tg  | nonCO2 emissions by sector |
-| [emissMethaneBySourceGTPAR5](#emissmethanebysourcegtpar5) | Methane Emissions GTP AR5 (MTCO2eq) | Tg  | nonCO2 emissions by sector |
+```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
+library(kableExtra); library(dplyr); library(gcamextractor)
+  
+  table_raw <-   map_param_query%>%filter(grepl("emiss",group)) 
+  
+  if(any(!grepl("^no$",unlist(table_raw$gcamdata%>%unique())))){
+    table_kable <- table_raw %>% dplyr::select(param,query,gcamdata)} else {
+    table_kable <- table_raw %>% dplyr::select(param,query)
+  }
+  
+  table_kable %>%
+  kbl() %>%
+  kable_styling(bootstrap_options = c("bordered","striped", "hover", "condensed", "responsive")) %>%
+  row_spec(0, background = "#2A2A2A", color = "white")
+```
+
 
 
 <br />
@@ -351,12 +396,21 @@ gcamextractor::map_param_query # Get a table of params and the relevants queries
 <a name="table8"></a>
 **Table 8:** Summary of parameters for electricity.
 
-| Parameter | Description and Unit<sup>*</sup> | Original GCAM Unit | Source Queries |
-|---|---|---|---|
-| [elecByTechTWh](#elecbytechtwh) | Electricity Generation by Fuel (TWh) | EJ | elec gen by gen tech USA; <br /> elec gen by gen tech and cooling tech |
-| [elecCapByFuel](#eleccapbyfuel) | Electricity Capacity by Fuel (GW) | EJ | elec gen by gen tech USA; <br /> elec gen by gen tech and cooling tech |
-| [elecFinalBySecTWh](#elecfinalbysectwh) | Final Electricity by Sector (TWh) | EJ | inputs by tech |
-| [elecFinalByFuelTWh](#elecfinalbyfueltwh) | Final Electricity (TWh) | EJ | Final energy by detailed end-use sector and fuel |
+```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
+library(kableExtra); library(dplyr); library(gcamextractor)
+  
+  table_raw <-   map_param_query%>%filter(grepl("elec",group)) 
+  
+  if(any(!grepl("^no$",unlist(table_raw$gcamdata%>%unique())))){
+    table_kable <- table_raw %>% dplyr::select(param,query,gcamdata)} else {
+    table_kable <- table_raw %>% dplyr::select(param,query)
+  }
+  
+  table_kable %>%
+  kbl() %>%
+  kable_styling(bootstrap_options = c("bordered","striped", "hover", "condensed", "responsive")) %>%
+  row_spec(0, background = "#2A2A2A", color = "white")
+```
 
 <sub>\*Fuel: biomass, coal, gas, geothermal, hydro, nuclear, refined liquids, solar, and wind.</sub> \
 <sub>\*Final electricity sectors: building, industry, and transport.</sub>
@@ -450,17 +504,21 @@ dataGCAM <- gcamextractor::readgcam(dataProjFile = gcamextractor::example_GCAMv5
 <a name="table9"></a>
 **Table 9:** Summary of parameters for energy.
 
-| Parameter | Description and Unit<sup>*</sup> | Original GCAM Unit | Source Queries |
-|---|---|---|---|
-| [energyPrimaryByFuelEJ](#energyprimarybyfuelej) | Primary Energy Consumption by Fuel (EJ) | EJ | primary energy consumption by region (direct equivalent) |
-| [energyPrimaryRefLiqProdEJ](#energyprimaryrefliqprodej) | Refined Liquids Production (EJ) | EJ | refined liquids production by subsector |
-| [energyFinalConsumBySecEJ](#energyfinalconsumbysecej) | Final Energy by Sector (EJ) | EJ | total final energy by aggregate sector |
-| [energyFinalByFuelBySectorEJ](#energyfinalbyfuelbysectorej) | Final Energy by Fuel (EJ) | EJ | Final energy by detailed end-use sector and fuel |
-| [energyFinalSubsecByFuelTranspEJ](#energyfinalsubsecbyfueltranspej) | Transport Final Energy by Fuel (EJ) | EJ | transport final energy by fuel |
-| [energyFinalSubsecByFuelBuildEJ](#energyfinalsubsecbyfuelbuildej) | Building Final Energy by Fuel (EJ) | EJ | building final energy by fuel |
-| [energyFinalSubsecByFuelIndusEJ](#energyfinalsubsecbyfuelindusej) | Industry Final Energy by Fuel (EJ) | EJ | industry final energy by fuel |
-| [energyFinalSubsecBySectorBuildEJ](#energyfinalsubsecbysectorbuildej) | Building Final Energy By Subsector (EJ) | EJ | building final energy by subsector |
-| [energyFinalConsumByIntlShpAvEJ](#energyfinalconsumbyintlshpavej) | Final Energy International Aviation and Ship (EJ) | EJ | transport final energy by mode and fuel |
+```{r, results = 'show', eval=TRUE, echo=FALSE, warning=FALSE, error = FALSE, message = FALSE}
+library(kableExtra); library(dplyr);library(gcamextractor)
+  
+  table_raw <-   map_param_query%>%filter(grepl("energy",group)) 
+  
+  if(any(!grepl("^no$",unlist(table_raw$gcamdata%>%unique())))){
+    table_kable <- table_raw %>% dplyr::select(param,query,gcamdata)} else {
+    table_kable <- table_raw %>% dplyr::select(param,query)
+  }
+  
+  table_kable %>%
+  kbl() %>%
+  kable_styling(bootstrap_options = c("bordered","striped", "hover", "condensed", "responsive")) %>%
+  row_spec(0, background = "#2A2A2A", color = "white")
+```
 
 <sub>\*Final energy sectors: building, industry, transport, transport international aviation, and transport international ship.</sub> \
 <sub>\*Building final energy subsectors: commercial cooling and heating, commercial others, residential cooling and heating, and residential others.</sub> \

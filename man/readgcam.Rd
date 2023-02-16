@@ -98,7 +98,7 @@ Or pick an individual param from the list:
 "landIrrRfd", "landIrrCrop","landRfdCrop", "landAlloc","landAllocByCrop",
 
  # emissions
-"emissLUC", "emissGHGBySectorGWPAR5","emissGHGBySectorGTPAR5","emissNonCO2BySectorOrigUnits",
+"emissLUC", "emissGHGBySectorGWPAR5","emissGHGBySectorGTPAR5",
 "emissNonCO2ByResProdGWPAR5", "emissBySectorGWPAR5FFI","emissMethaneBySourceGWPAR5",
 "emissByGasGWPAR5FFI", "emissByGasGWPAR5LUC", "emissBySectorGWPAR5LUC",
 "emissNonCO2ByResProdGTPAR5", "emissBySectorGTPAR5FFI","emissMethaneBySourceGTPAR5",

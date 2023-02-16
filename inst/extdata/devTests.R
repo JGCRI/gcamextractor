@@ -105,11 +105,10 @@ regionsSelect_i = c("Global","USA",rmap::mapping_US52,"Alaska grid","California 
 folder_i="cerf_test"
 
 # Issue #20
-paramsSelect_i = c('elec_lifetime_scurve_yr', 'elec_lifetime_yr',
-'elec_fuel_co2_content_tonsperMBTU',
-'elec_carbon_capture_rate_fraction',
-'elec_carbon_capture_escl_rate_fraction')
-#paramsSelect_i = c("elec_fuel_co2_content_tonsperMBTU")
+paramsSelect_i = c("elec_capacity_factor_usa_in")
+
+scenOrigNames_i = c("rcp85cooler_ssp3_rcp85gdp") # make sure these exist (See outputs of the rgcam::localDBConn)
+scenNewNames_i = c("rcp85cooler_ssp3")
 
 dataGCAM <- readgcam(reReadData = reReadData_i,
                      gcamdatabase = gcamdatabase_i,
@@ -117,7 +116,22 @@ dataGCAM <- readgcam(reReadData = reReadData_i,
                      dataProjFile = dataProjFile_i,
                      regionsSelect = regionsSelect_i,
                      paramsSelect = paramsSelect_i,
+                     scenOrigNames = scenOrigNames_i,
+                     scenNewNames = scenNewNames_i,
                      folder = folder_i)
+
+dataGCAM$data %>% dplyr::select(param,scenario) %>% unique()
+(dataGCAM$data)$value%>%range()
+
+# On PIC direct
+library(rgcam)
+dataProj.proj <- rgcam::addScenario(conn = rgcam::localDBConn("/pic/projects/im3/gcamusa/gcam-usa-im3/output/","database_rcp85hotter_ssp5"),
+                                    proj = "test_proj.proj",
+                                    scenario = "rcp85hotter_ssp5",
+                                    queryFile = "/pic/projects/im3/gcamusa/diagnostics/outputs_CERF/queries_test.xml")
+dataProjLoaded <- rgcam::loadProject("test_proj.proj")
+queryx <- "elec investment capacity factor"
+tbl <- rgcam::getQuery(dataProjLoaded, queryx)
 
 # reReadData = T
 # gcamdatabase = gcamdatabase_i
@@ -151,9 +165,11 @@ cities <- gcamextractor::readgcam(gcamdatabase = cities_db,
 
 
 
-#----------------------
-# CERF GO DEEP
-#----------------------
+
+
+#.............
+# Check NonCO2
+#............
 
 library(gcamextractor); library(dplyr)
 
@@ -164,14 +180,14 @@ gcamdatabase_i = "C:/gcam/gcam-v6.0-Windows-Release-Package/output/database_base
 gcamdata_folder_i = "C:/gcam/gcam-v6.0-Windows-Release-Package/input/gcamdata"
 rgcam::localDBConn("C:/gcam/gcam-v6.0-Windows-Release-Package/output/","database_basexdb")
 reReadData_i = T
-dataProjFile_i = "dataProj_cerf_godeep.proj"
+dataProjFile_i = "dataProj_nonCO2.proj"
 regionsSelect_i = NULL
-folder_i="cerf_test"
+folder_i="nonCO2_test"
 
 # Issue #20
-paramsSelect_i = c("cerf")
+paramsSelect_i = c("emissGHGByGasGWPAR5")
 
-dataGCAM <- readgcam(reReadData = reReadData_i,
+dataGCAM <- readgcam(reReadData = F,
                      gcamdatabase = gcamdatabase_i,
                      gcamdata_folder = gcamdata_folder_i,
                      dataProjFile = dataProjFile_i,
@@ -180,5 +196,15 @@ dataGCAM <- readgcam(reReadData = reReadData_i,
                      folder = folder_i)
 
 dataGCAM$dataAggParam
+dataGCAM$dataAggParam$param %>% unique()
+dataGCAM$data$class1 %>% unique()
+dataGCAM$dataAll%>%tail() %>% as.data.frame()
 
 
+##
+conn <- rgcam::localDBConn("C:/gcam/gcam-v6.0-Windows-Release-Package/output/",
+                           "database_basexdb",migabble = FALSE)
+prj <- rgcam::addScenario(conn,
+                          "prj.proj",
+                          "Reference",
+                          "C:/Z/models/gcamextractor/inst/extdata/queries_check.xml")
