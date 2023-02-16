@@ -134,6 +134,9 @@ map_param_query <- tibble::tribble(
   "transport", "transportPassengerGHGByMode", "nonCO2 emissions by subsector", "pal_hot", "no",
   "transport", "transportFreightGHGByMode", "nonCO2 emissions by subsector", "pal_hot", "no",
 
+  # Buildings
+  "buildings", "serviceOutputByTechBuildings", "building service output by tech", "pal_hot", "no",
+
   # Water
   "water","watConsumBySec", "water consumption by state, sector, basin (includes desal)","pal_wet","no",
   "water","watWithdrawBySec", "water withdrawals by state, sector, basin (includes desal)","pal_wet","no",
@@ -179,7 +182,22 @@ map_param_query <- tibble::tribble(
   "emissions","emissCO2CumGlobal2010to2100RCP", "CO2 emissions by sector","pal_hot","no",
   "emissions","emissCO2BySectorNoBio", c("CO2 emissions by sector (no bio)", "CO2 sequestration by sector", "Land Use Change Emission (future)"),"pal_hot","no",
   "emissions","emissGHGByResProdGWPAR5", "nonCO2 emissions by resource production","pal_hot","no",
-  "emissions", "co2SequestrationBySector", "CO2 sequestration by sector", "pal_hot", "no"
+  "emissions", "co2SequestrationBySector", "CO2 sequestration by sector", "pal_hot", "no",
+  "emissions", "emissGHGBySectorBuildingsGWPAR5", c("nonCO2 emissions by sector", "nonCO2 emissions by sector USA", "CO2 emissions by sector (no bio)"), "pal_hot", "no",
+  "emissions", "emissGHGBySectorTransportGWPAR5", c("nonCO2 emissions by subsector", "CO2 emissions by subsector"), "pal_hot", "no",
+  "emissions", "emissGHGBySectorIndustryGWPAR5", c("nonCO2 emissions by subsector", "CO2 emissions by subsector"), "pal_hot", "no",
+  "emissions", "emissGHGBySectorPowerGWPAR5", c("CO2 emissions by sector", "nonCO2 emissions by sector"), "pal_hot", "no",
+  #"emissions","emissMethaneBySourceGWPAR5", "nonCO2 emissions by sector","pal_hot","no",
+  #"emissions","emissByGasGWPAR5FFI", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
+  #"emissions","emissByGasGWPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
+  #"emissions","emissBySectorGWPAR5FFI", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
+  #"emissions","emissBySectorGWPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
+  #"emissions","emissNonCO2ByResProdGTPAR5", "nonCO2 emissions by resource production","pal_hot","no",
+  #"emissions","emissMethaneBySourceGTPAR5", "nonCO2 emissions by sector","pal_hot","no",
+  #"emissions","emissByGasGTPAR5FFI", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
+  #"emissions","emissGHGByGasGTPAR5", c("nonCO2 emissions by resource production","nonCO2 emissions by sector", "Land Use Change Emission (future)"),"pal_hot","no",
+  #"emissions","emissBySectorGTPAR5FFI",  c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
+  #"emissions","emissBySectorGTPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
 ); map_param_query
 
 use_data(map_param_query, version=3, overwrite=T)

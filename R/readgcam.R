@@ -132,7 +132,7 @@ readgcam <- function(gcamdatabase = NULL,
     transport -> gcamdata -> half.life -> lifetime -> read.csv -> sector_1 -> steepness -> PrimaryFuelCO2Coef ->
     PrimaryFuelCO2Coef.name -> country -> grid_region -> 'io-coefficient' -> 'minicam.energy.input' ->
     'remove.fraction' ->  state ->  subsector.name -> 'to.technology' -> coefficient -> tbl_carbon_capture_rate ->
-    gcamdata_files -> aggSector -> tblGHGEmissRes -> segment -> hours
+    gcamdata_files -> aggSector -> tblGHGEmissRes -> segment -> hours -> scenarios_new -> str -> subRegions_new -> x_new
 
   basedir <- getwd()
 
@@ -202,6 +202,8 @@ readgcam <- function(gcamdatabase = NULL,
   if(!is.null(regionsSelect) && !any(c("USA", gcamextractor::regions_US52) %in% regionsSelect)){
     queriesSelectx <- queriesSelectx[!grepl("USA", queriesSelectx)]
   }
+  print("SELECTED QUERIES:")
+  print(queriesSelectx)
 
 #.............................
 # Create necessary directories if they dont exist.
@@ -568,6 +570,7 @@ readgcam <- function(gcamdatabase = NULL,
 } # Close Read in all raw gcamdata base and gcam folder data.
 
 
+
 #.....................
 # Collect and format selected parameters
 #.....................
@@ -580,6 +583,10 @@ readgcam <- function(gcamdatabase = NULL,
   if(T){
 
   queriesx <- queriesx[queriesx %in% queries]
+
+  print(queriesx)
+
+  # Electricity ------------------------------------------
 
   # elec_heat_rate_BTUperkWh
   paramx<-"elec_heat_rate_BTUperkWh"
@@ -661,7 +668,8 @@ readgcam <- function(gcamdatabase = NULL,
   }
 
 
-  # Elec capacity by tech and vintage
+  ## elec_cap_usa_GW =========================================
+  # elec capacity by tech and vintage
   paramx<-"elec_cap_usa_GW"
   if(paramx %in% paramsSelectx){
     rlang::inform(paste0("Running param: ", paramx,"..."))
@@ -710,6 +718,7 @@ readgcam <- function(gcamdatabase = NULL,
     }}
 
 
+  ## elec_variable_om_2015USDperMWh ============================================
   # Variable OnM costs electricity generation
   paramx<-"elec_variable_om_2015USDperMWh"
   if(paramx %in% paramsSelectx){
@@ -763,6 +772,7 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+  ## elec_variable_om_escl_rate_fraction =======================================
   # Variable OnM escalation rate costs electricity generation
   paramx<-"elec_variable_om_escl_rate_fraction"
   if(paramx %in% paramsSelectx){
@@ -790,6 +800,7 @@ readgcam <- function(gcamdatabase = NULL,
     }
     }
 
+  ## elec_fuel_price_2015USDperMBTU ============================================
   # Fuel price
   paramx<-"elec_fuel_price_2015USDperMBTU"
   if((any(paramx %in% paramsSelectx) | any(paramsSelectx == "elec_fuel_price_escl_rate_fraction"))){
@@ -909,6 +920,7 @@ readgcam <- function(gcamdatabase = NULL,
       tbl_fuel_price <- NULL
     }}
 
+  ## elec_fuel_price_escl_rate_fraction ========================================
   # Fuel price escalation rate
   paramx<-"elec_fuel_price_escl_rate_fraction"
   if(paramx %in% paramsSelectx){
@@ -937,6 +949,7 @@ readgcam <- function(gcamdatabase = NULL,
     # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
   }
 
+  ## elec_capacity_factor_usa_in ===============================================
   # Capacity Factor USA Input
   paramx<-"elec_capacity_factor_usa_in"
   if(paramx %in% paramsSelectx){
@@ -988,6 +1001,7 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+  ## elec_lifetime_scurve_yr ===================================================
   # Lifetime S Curve Parameters
   if(!is.null(gcamdata_folder)){
   paramx<-"elec_lifetime_scurve_yr"
@@ -1098,6 +1112,7 @@ readgcam <- function(gcamdatabase = NULL,
   }
   }
 
+  ## elec_lifetime_yr ==========================================================
   # Lifetime Parameters
   if(!is.null(gcamdata_folder)){
   paramx<-"elec_lifetime_yr"
@@ -1196,6 +1211,7 @@ readgcam <- function(gcamdatabase = NULL,
   }
   }
 
+  ## elec_fuel_co2_content_tonsperMBTU =========================================
   # Fuel CO2 Content
   if(!is.null(gcamdata_folder)){
     paramx<-"elec_fuel_co2_content_tonsperMBTU"
@@ -1318,6 +1334,7 @@ readgcam <- function(gcamdatabase = NULL,
     }
   }
 
+  ## elec_carbon_capture_rate_fraction =========================================
   # Carbon Capture Rate Fraction
   if(!is.null(gcamdata_folder)){
     paramx<-"elec_carbon_capture_rate_fraction"
@@ -1397,6 +1414,7 @@ readgcam <- function(gcamdatabase = NULL,
     }
   }
 
+  ## elec_carbon_capture_escl_rate_fraction ====================================
   # Carbon Capture Escalaction Rate Fraction
   paramx<-"elec_carbon_capture_escl_rate_fraction"
   if(paramx %in% paramsSelectx){
@@ -1423,518 +1441,8 @@ readgcam <- function(gcamdatabase = NULL,
     }
   }
 
-  paramx<-"energyFinalConsumByIntlShpAvEJ"
-  # Total final energy by aggregate end-use sector
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    queryx <- "transport final energy by mode and fuel"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
-        tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
-      }
-      tbl <- tbl %>%
-        dplyr::filter(mode %in% c("International Aviation", "International Ship"))%>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(param = "energyFinalConsumByIntlShpAvEJ",
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year, subRegion=region,
-                      scenario = scenNewNames,
-                      units = "Final Energy Intl. Av and Shp (EJ)",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1 = mode,
-                      classLabel1 = "Sector",
-                      classPalette1 = "pal_all",
-                      class2 = gsub(" enduse","",input),
-                      classLabel2 = "Fuel",
-                      classPalette2 = "pal_all")%>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-      tblFinalNrgIntlAvShip <- tbl
-      datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
-    }}
 
-  paramx<-"energyFinalConsumBySecEJ"
-  # Total final energy by aggregate end-use sector
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    queryx <- "total final energy by aggregate sector"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
-        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
-      }
-      tbl <- tbl %>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(param = "energyFinalConsumBySecEJ",
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year, subRegion=region,
-                      scenario = scenNewNames,
-                      units = "Final Energy by Sector (EJ)",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1 = dplyr::case_when(
-                        grepl("building|comm|resid",sector)~"building",
-                        grepl("industry",sector)~"industry",
-                        grepl("transport",sector)~"transport"),
-                      classLabel1 = "Sector",
-                      classPalette1 = "pal_all",
-                      class2 = sector,
-                      classLabel2 = "Subsector",
-                      classPalette2 = "pal_all")%>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-
-      if(!is.null(tblFinalNrgIntlAvShip)){
-      # Separat out Intl. Shipping and Aviation from Transport
-      tblTransport <- tbl%>%dplyr::filter(class1 %in% c("transportation","transport")) %>%
-        dplyr::mutate(class2="class2",classLabel2="classLabel2",classPalette2="classPalette2",
-                      class1=dplyr::if_else(class1=="transportation","transport",class1)) %>%
-        dplyr::select(-origValue)# Subset Transport Sector
-      tblFinalNrgIntlAvShipMod <- tblFinalNrgIntlAvShip %>%
-        dplyr::mutate(param=unique(tblTransport$param),
-                      sources=unique(tblTransport$sources),
-                      origQuery=unique(tblTransport$origQuery),
-                      origUnits=unique(tblTransport$origUnits),
-                      units=unique(tblTransport$units),
-                      xLabel=unique(tblTransport$xLabel),
-                      aggregate=unique(tblTransport$aggregate),
-                      class2=unique(tblTransport$class2),
-                      classLabel2=unique(tblTransport$classLabel2),
-                      classPalette2=unique(tblTransport$classPalette2),
-                      classLabel1=unique(tblTransport$classLabel1),
-                      classPalette1=unique(tblTransport$classPalette1))%>%
-        dplyr::select(-origValue)# Prepare in intl. transport in correct format
-      # Separate out Intl. Shipping and Aviation
-      tblSepTransportIntlAvShip <- tblTransport %>%
-        dplyr::bind_rows(tblFinalNrgIntlAvShipMod) %>%
-        tidyr::spread(key="class1",value="value") %>%
-        dplyr::mutate(transport=transport-`International Aviation`-`International Ship`)%>%
-        dplyr::rename(`transport intl av`=`International Aviation`,
-                      `transport intl shp`=`International Ship`) %>%
-        tidyr::gather(key="class1",value="value",
-                      -scenario, -region, -subRegion, -param, -sources, -class2, -x, -xLabel, -vintage, -units, -aggregate,
-                      -classLabel1, -classPalette1, -classLabel2, -classPalette2,
-                      -origScen,-origQuery,-origUnits,-origX)%>%
-        dplyr::mutate(origValue=value); tblSepTransportIntlAvShip%>%as.data.frame()
-      # Rbind Transport, Intl. Shipping and Aviation back to all other Final Energy types
-      tblMod<-tbl%>%dplyr::filter(class1!="transport") %>%
-        dplyr::bind_rows(tblSepTransportIntlAvShip) # Remove Transport sector from Original tbl
-
-      } else {
-        # rlang::inform(paste("tblFinalNrgIntlAvShip does not exist so skipping subset of final energy to remove intl. shipping and aviation."))
-        tblMod <- tbl
-        }
-
-      tblMod <- tblMod %>%
-        dplyr::mutate(class2 = dplyr::case_when(grepl("comm|resid|building",class1)~"building",
-                                         grepl("industry",class1)~"industry",
-                                         grepl("transport",class1)~"transport",
-                                         TRUE~class2)) %>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-
-      datax <- dplyr::bind_rows(datax, tblMod)
-    } else {
-      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
-    }}
-
-
-  paramx<-"energyFinalConsumBySecEJNoFeedstock"
-  # Total final energy by aggregate end-use sector not including industrial feedstocks
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    queryx <- "total final energy by sector"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
-        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
-      }
-      tbl <- tbl %>%
-        dplyr::filter(scenario %in% scenOrigNames,
-                      sector != "industrial feedstocks")%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(param = "energyFinalConsumBySecEJNoFeedstock",
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year, subRegion=region,
-                      scenario = scenNewNames,
-                      units = "Final Energy by Sector (EJ)",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1 = dplyr::case_when(
-                        grepl("building|comm|resid",sector)~"building",
-                        grepl("indus|cement|fert",sector)~"industry",
-                        grepl("transport|trn",sector)~"transport",
-                        T ~ sector),
-                      classLabel1 = "Sector",
-                      classPalette1 = "pal_all",
-                      class2 = sector,
-                      classLabel2 = "Subsector",
-                      classPalette2 = "pal_all")%>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-      datax <- dplyr::bind_rows(datax, tbl)
-    }
-  }
-
-
-  paramx<-"energyFinalSubsecBySectorBuildEJ"
-  # Total final energy by aggregate end-use sector
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    queryx <- "building final energy by subsector"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
-        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
-      }
-      tbl <- tbl %>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(param = "energyFinalSubsecBySectorBuildEJ",
-                      sector=gsub("comm\\scooling","Commercial CoolingHeating",sector),
-                      sector=gsub("comm\\sheating","Commercial CoolingHeating",sector),
-                      sector=gsub("comm\\sothers","Commercial Others",sector),
-                      sector=gsub("resid\\scooling","Residential CoolingHeating",sector),
-                      sector=gsub("resid\\sheating","Residential CoolingHeating",sector),
-                      sector=gsub("resid\\sothers","Residential Others",sector),
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year, subRegion=region,
-                      scenario = scenNewNames,
-                      units = "Building Final Energy By Subsector (EJ)",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1 = sector,
-                      classLabel1 = "Sector",
-                      classPalette1 = "pal_all",
-                      class2 = subsector,
-                      classLabel2 = "classLabel2",
-                      classPalette2 = "classPalette2")%>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-      datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
-    }}
-
-  paramx<-"energyFinalByFuelEJ"
-  # Total final energy by aggregate end-use sector
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    queryx <- "Final energy by detailed end-use sector and fuel"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
-        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
-      }
-      tbl <- tbl %>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::filter(!grepl("trn",input))%>%
-        dplyr::mutate(input=dplyr::if_else(input=="biomass","bioenergy",input),
-                      sector=gsub("process heat cement","industry",sector),
-                      sector=gsub("cement","industry",sector),
-                      sector=gsub("industrial energy use","industry",sector),
-                      sector=gsub("industrial feedstocks","industry",sector),
-                      sector=gsub("N fertilizer","industry",sector),
-                      sector=gsub("trn_aviation_intl","trans intl av",sector),
-                      sector=gsub("trn_shipping_intl","trans intl shp",sector),
-                      sector = replace(sector, stringr::str_detect(sector, "trn"), "transport"),
-                      sector=gsub("comm cooling","building",sector),
-                      sector=gsub("comm heating","building",sector),
-                      sector=gsub("comm others","building",sector),
-                      sector=gsub("resid cooling","building",sector),
-                      sector=gsub("resid heating","building",sector),
-                      sector=gsub("resid others","building",sector),
-                      input=gsub("elect\\_td\\_ind","electricity",input),
-                      input=gsub("elect\\_td\\_bld","electricity",input),
-                      input=gsub("elect\\_td\\_trn","electricity",input),
-                      input=gsub("delivered coal","coal",input),
-                      input=gsub("refined liquids enduse","liquids",input),
-                      input=gsub("delivered biomass","biomass",input),
-                      input=gsub("H2 enduse","hydrogen",input),
-                      input=gsub("refined liquids industrial","liquids",input),
-                      input=gsub("liquids av", "liquids", input),
-                      input=gsub("liquids shp", "liquids", input),
-                      input=gsub("wholesale gas","gas",input),
-                      input=gsub("traditional biomass","biomass",input),
-                      input=gsub("delivered gas","gas",input),
-                      input=gsub("district heat","Other",input),
-                      param = "energyFinalByFuelEJ",
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year, subRegion=region,
-                      scenario = scenNewNames,
-                      units = "Final Energy by Fuel (EJ)",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1 = input,
-                      classLabel1 = "Fuel",
-                      classPalette1 = "pal_all",
-                      class2 = sector,
-                      classLabel2 = "classLabel2",
-                      classPalette2 = "classPalette2")%>%
-        #dplyr::mutate(class1=dplyr::case_when(class2=="trans intl av"~paste(class1,"av",sep=" "),
-                                             #class2=="trans intl shp"~paste(class1,"shp",sep=" "),
-                                             #TRUE~class1))%>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-      datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
-    }}
-
-  paramx<-"energyFinalByFuelEJNoFeedstock"
-  # Total final energy by aggregate end-use sector
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    queryx <- "Final energy by detailed end-use sector and fuel"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
-        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
-      }
-      tbl <- tbl %>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::filter(!grepl("trn",input),
-                      !sector %in% c("industrial feedstocks"))%>%
-        dplyr::mutate(input=dplyr::if_else(input=="biomass","bioenergy",input),
-                      sector=gsub("process heat cement","industry",sector),
-                      sector=gsub("cement","industry",sector),
-                      sector=gsub("industrial energy use","industry",sector),
-                      sector=gsub("N fertilizer","industry",sector),
-                      #sector=gsub("trn_aviation_intl","trans intl av",sector),
-                      #sector=gsub("trn_shipping_intl","trans intl shp",sector),
-                      sector = replace(sector, stringr::str_detect(sector, "trn"), "transport"),
-                      sector=gsub("comm cooling","building",sector),
-                      sector=gsub("comm heating","building",sector),
-                      sector=gsub("comm others","building",sector),
-                      sector=gsub("resid cooling","building",sector),
-                      sector=gsub("resid heating","building",sector),
-                      sector=gsub("resid others","building",sector),
-                      input=gsub("elect\\_td\\_ind","electricity",input),
-                      input=gsub("elect\\_td\\_bld","electricity",input),
-                      input=gsub("elect\\_td\\_trn","electricity",input),
-                      input=gsub("delivered coal","coal",input),
-                      input=gsub("refined liquids enduse","liquids",input),
-                      input=gsub("delivered biomass","biomass",input),
-                      input=gsub("H2 enduse","hydrogen",input),
-                      input=gsub("refined liquids industrial","liquids",input),
-                      input=gsub("liquids av", "liquids", input),
-                      input=gsub("liquids shp", "liquids", input),
-                      input=gsub("wholesale gas","gas",input),
-                      input=gsub("traditional biomass","biomass",input),
-                      input=gsub("delivered gas","gas",input),
-                      input=gsub("district heat","Other",input),
-                      param = "energyFinalByFuelEJNoFeedstock",
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year, subRegion=region,
-                      scenario = scenNewNames,
-                      units = "Final Energy by Fuel (EJ)",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1 = input,
-                      classLabel1 = "Fuel",
-                      classPalette1 = "pal_all",
-                      class2 = sector,
-                      classLabel2 = "classLabel2",
-                      classPalette2 = "classPalette2")%>%
-        #dplyr::mutate(class1=dplyr::case_when(class2=="trans intl av"~paste(class1,"av",sep=" "),
-        #class2=="trans intl shp"~paste(class1,"shp",sep=" "),
-        #TRUE~class1))%>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-      datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
-    }}
-
-  paramx<-"energyFinalSubsecByFuelBuildEJ"
-  # Total final energy by aggregate end-use sector
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    queryx <- "building final energy by fuel"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
-        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
-      }
-      tbl <- tbl %>%
-        dplyr::rename(sector=input) %>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(sector=gsub("elect_td_bld","electricity",sector),
-                      sector=gsub("delivered gas","gas",sector),
-                      sector=gsub("delivered biomass","bioenergy",sector),
-                      sector=gsub("delivered coal","coal",sector),
-                      sector=gsub("refined liquids enduse","liquids",sector),
-                      param = "energyFinalSubsecByFuelBuildEJ",
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year, subRegion=region,
-                      scenario = scenNewNames,
-                      units = "Building Final Energy by Fuel (EJ)",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1 = sector,
-                      classLabel1 = "Fuel",
-                      classPalette1 = "pal_all",
-                      class2 = sector,
-                      classLabel2 = "classLabel2",
-                      classPalette2 = "classPalette2")%>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-      datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
-    }}
-
-  paramx<-"energyFinalSubsecByFuelIndusEJ"
-  # Total final energy by aggregate end-use sector
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    queryx <- "industry final energy by fuel"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
-        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
-      }
-      tbl <- tbl %>%
-        dplyr::rename(sector=input) %>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(sector=gsub("elect_td_ind","electricity",sector),
-                      sector=gsub("wholesale gas","gas",sector),
-                      sector=gsub("delivered biomass","bioenergy",sector),
-                      sector=gsub("delivered coal","coal",sector),
-                      sector=gsub("refined liquids industrial","liquids",sector),
-                      sector=gsub("H2 enduse","hydrogen",sector),
-                      param = "energyFinalSubsecByFuelIndusEJ",
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year, subRegion=region,
-                      scenario = scenNewNames,
-                      units = "Industry Final Energy by Fuel (EJ)",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1 = sector,
-                      classLabel1 = "Fuel",
-                      classPalette1 = "pal_all",
-                      class2 = sector,
-                      classLabel2 = "classLabel2",
-                      classPalette2 = "classPalette2")%>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-      datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
-    }}
-
+  ## elecFinalBySecTWh =========================================================
   paramx<-"elecFinalBySecTWh"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
@@ -1954,10 +1462,10 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::mutate(
           class2=sector,
           sector=dplyr::case_when(
-          grepl("comm |resid |elect_td_bld",sector,ignore.case = T)~"building",
-          grepl("elect_td_trn",sector,ignore.case = T)~"transport",
-          grepl("elect_td_ind",sector,ignore.case = T)~"industry",
-          TRUE~sector))%>%
+            grepl("comm |resid |elect_td_bld",sector,ignore.case = T)~"building",
+            grepl("elect_td_trn",sector,ignore.case = T)~"transport",
+            grepl("elect_td_ind",sector,ignore.case = T)~"industry",
+            TRUE~sector))%>%
         dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
         dplyr::mutate(param = "elecFinalBySecTWh",
                       sources = "Sources",
@@ -2033,6 +1541,8 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+
+  ## elecFinalByFuelTWh ========================================================
   paramx<-"elecFinalByFuelTWh"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
@@ -2093,6 +1603,8 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+
+  ## elecConsumByDemandSectorTWh ===============================================
   paramx <- "elecConsumByDemandSectorTWh"
   if(paramx %in% paramsSelectx){
     rlang::inform(paste0("Running param: ", paramx,"..."))
@@ -2142,6 +1654,7 @@ readgcam <- function(gcamdatabase = NULL,
   }
 
 
+  ## elecLoadBySegmentGW =======================================================
   # Calculate electricity load by US segments by grid and spread to states
   # Electricity Load (GW) by Segment and State
   paramx<-"elecLoadBySegmentGW"
@@ -2254,7 +1767,756 @@ readgcam <- function(gcamdatabase = NULL,
     }}
 
 
+  ## elecByTechTWh =============================================================
+  paramx <- "elecByTechTWh"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    tbl<-tibble::tibble()
+    tblUSA<-tibble::tibble()
+    tblUSACogen<-tibble::tibble()
+    tblGCAMReg<-tibble::tibble()
 
+    #.............
+    # For GCAM USA no cogen
+    #.............
+    queryx <- "elec gen by gen tech USA"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>%
+          dplyr::filter(region %in% regionsSelect)
+      }
+      if (nrow(tbl)>0) {
+        tbl <- tbl %>%
+          dplyr::filter(region %in% gcamextractor::regions_US52)%>%
+          dplyr::filter(!sector %in% "industrial energy use")
+      }
+      tblUSA <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(param = "elecByTechTWh",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      value = value * gcamextractor::convert$conv_EJ_to_TWh,
+                      units = "Electricity Generation by Fuel (TWh)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = subsector,
+                      classLabel1 = "Fuel",
+                      classPalette1 = "pal_all",
+                      class2 = paste(technology,sector,sep=" "),
+                      classLabel2 = "Technology",
+                      classPalette2 = "pal_all")
+    }
+    #.............
+    # For GCAM USA cogen
+    #.............
+    # queryx <- "elec gen by gen tech cogen USA"
+    # if (queryx %in% queriesx) {
+    #   tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+    #   if (!is.null(regionsSelect)) {
+    #     tbl <- tbl %>%
+    #       dplyr::filter(region %in% regionsSelect)
+    #   }
+    #   if (nrow(tbl)>0) {
+    #     tbl <- tbl %>%
+    #       dplyr::filter(region %in% gcamextractor::regions_US52)
+    #   }
+    #   tblUSACogen <- tbl %>%
+    #     dplyr::filter(scenario %in% scenOrigNames)%>%
+    #     dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+    #     dplyr::mutate(param = "elecByTechTWh",
+    #                   sources = "Sources",
+    #                   origScen = scenario,
+    #                   origQuery = queryx,
+    #                   origValue = value,
+    #                   origUnits = Units,
+    #                   origX = year, subRegion=region,
+    #                   scenario = scenNewNames,
+    #                   value = value * gcamextractor::convert$conv_EJ_to_TWh,
+    #                   units = "Electricity Generation by Fuel (TWh)",
+    #                   vintage = paste("Vint_", year, sep = ""),
+    #                   x = year,
+    #                   xLabel = "Year",
+    #                   aggregate = "sum",
+    #                   class1 = subsector,
+    #                   classLabel1 = "Fuel",
+    #                   classPalette1 = "pal_all",
+    #                   class2 = technology,
+    #                   classLabel2 = "Technology",
+    #                   classPalette2 = "pal_all")
+    # }
+    tblUSACogen <- tibble::tibble()
+    #....................
+    # GCAM other Regions
+    #........................
+    queryx <- "elec gen by gen tech and cooling tech"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>%
+          dplyr::filter(region %in% regionsSelect) %>%
+          dplyr::filter(!region %in% gcamextractor::regions_US52)
+      }
+      tblGCAMReg <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames,
+                      Units == "EJ")%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(param = "elecByTechTWh",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      value = value * gcamextractor::convert$conv_EJ_to_TWh,
+                      units = "Electricity Generation by Fuel (TWh)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = subsector,
+                      classLabel1 = "Fuel",
+                      classPalette1 = "pal_all",
+                      class2 = technology,
+                      classLabel2 = "Technology",
+                      classPalette2 = "pal_all")
+    }else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }
+
+    if(nrow(tblUSA)>0 | nrow(tblUSACogen)>0 | nrow(tblGCAMReg)>0){
+      # Combine USA with others
+      commonNames = c(names(tblUSA),names(tblUSACogen),names(tblGCAMReg))%>%unique()
+
+      tbl <- tibble::tibble()
+      if(nrow(tblUSA)>0){tbl <- tbl %>% dplyr::bind_rows(tblUSA %>%
+                                                           dplyr::select(commonNames[commonNames %in% names(tblUSA)]))}
+      if(nrow(tblUSACogen)>0){tbl <- tbl %>% dplyr::bind_rows(tblUSACogen %>%
+                                                                dplyr::select(commonNames[commonNames %in% names(tblUSACogen)]))}
+      if(nrow(tblGCAMReg)>0){tbl <- tbl %>% dplyr::bind_rows(tblGCAMReg %>%
+                                                               dplyr::select(commonNames[commonNames %in% names(tblGCAMReg)]))}
+    } # Check different tblUSA, tblUSACogen and tblGCAMReg
+
+    if(nrow(tbl)>0){
+      tbl <- tbl %>%
+        dplyr::mutate(class1=dplyr::case_when(class1=="rooftop_pv"~"solar",
+                                              TRUE~class1))%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::mutate(origQuery="origQuery") %>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources,class1,class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX) %>%
+        dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+      tblelecByTechTWh<-tbl}
+  }
+
+
+  ## elecCapByFuel =============================================================
+  # Capacity Calculation based on exogenous cap factors
+  paramx<-"elecCapByFuel"
+  # Total final energy by aggregate end-use sector
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    if(!is.null(tblelecByTechTWh)){
+      capfactors <- gcamextractor::capfactors
+      capfactors
+      tbl <- tblelecByTechTWh  # Tibble
+      #rm(tblelecByTechTWh)
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::full_join(capfactors, by="class1")%>%
+        dplyr::mutate(param = "elecCapByFuel",
+                      gcamCapacityFactor=cf1971to2100,
+                      value = value*1000/(8760*gcamCapacityFactor),
+                      origValue = value,
+                      units = "Electricity Capacity by Fuel (GW)",
+                      origUnits = units) %>%
+        dplyr::filter(!is.na(value))%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)
+
+      datax <- dplyr::bind_rows(datax, tbl)
+
+
+    } else {
+      if("elec gen by gen tech and cooling tech" %in% queriesSelectx){
+        #rlang::inform(paste("elecByTechTWh did not run so skipping param elecCapByFuel."))
+      }
+    }}
+
+
+  # Energy ---------------------------------------------------------------------
+
+  ## energyFinalConsumByIntlShpAvEJ ============================================
+  paramx<-"energyFinalConsumByIntlShpAvEJ"
+  # Total final energy by aggregate end-use sector
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "transport final energy by mode and fuel"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
+      }
+      tbl <- tbl %>%
+        dplyr::filter(mode %in% c("International Aviation", "International Ship"))%>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(param = "energyFinalConsumByIntlShpAvEJ",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      units = "Final Energy Intl. Av and Shp (EJ)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = mode,
+                      classLabel1 = "Sector",
+                      classPalette1 = "pal_all",
+                      class2 = gsub(" enduse","",input),
+                      classLabel2 = "Fuel",
+                      classPalette2 = "pal_all")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      tblFinalNrgIntlAvShip <- tbl
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  ## energyFinalConsumBySecEJ ==================================================
+  paramx<-"energyFinalConsumBySecEJ"
+  # Total final energy by aggregate end-use sector
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "total final energy by aggregate sector"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(param = "energyFinalConsumBySecEJ",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      units = "Final Energy by Sector (EJ)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = dplyr::case_when(
+                        grepl("building|comm|resid",sector)~"building",
+                        grepl("industr|alumin|iron and steel",sector)~"industry",
+                        grepl("transport",sector)~"transport",
+                        grepl("agricultural energy use|municipal|water", sector)~"other"),
+                      classLabel1 = "Sector",
+                      classPalette1 = "pal_all",
+                      class2 = sector,
+                      classLabel2 = "Subsector",
+                      classPalette2 = "pal_all")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+
+      if(!is.null(tblFinalNrgIntlAvShip)){
+      # Separat out Intl. Shipping and Aviation from Transport
+      tblTransport <- tbl%>%dplyr::filter(class1 %in% c("transportation","transport")) %>%
+        dplyr::mutate(class2="class2",classLabel2="classLabel2",classPalette2="classPalette2",
+                      class1=dplyr::if_else(class1=="transportation","transport",class1)) %>%
+        dplyr::select(-origValue)# Subset Transport Sector
+      tblFinalNrgIntlAvShipMod <- tblFinalNrgIntlAvShip %>%
+        dplyr::mutate(param=unique(tblTransport$param),
+                      sources=unique(tblTransport$sources),
+                      origQuery=unique(tblTransport$origQuery),
+                      origUnits=unique(tblTransport$origUnits),
+                      units=unique(tblTransport$units),
+                      xLabel=unique(tblTransport$xLabel),
+                      aggregate=unique(tblTransport$aggregate),
+                      class2=unique(tblTransport$class2),
+                      classLabel2=unique(tblTransport$classLabel2),
+                      classPalette2=unique(tblTransport$classPalette2),
+                      classLabel1=unique(tblTransport$classLabel1),
+                      classPalette1=unique(tblTransport$classPalette1))%>%
+        dplyr::select(-origValue)# Prepare in intl. transport in correct format
+      # Separate out Intl. Shipping and Aviation
+      tblSepTransportIntlAvShip <- tblTransport %>%
+        dplyr::bind_rows(tblFinalNrgIntlAvShipMod) %>%
+        tidyr::spread(key="class1",value="value") %>%
+        dplyr::mutate(transport=transport-`International Aviation`-`International Ship`)%>%
+        dplyr::rename(`transport intl av`=`International Aviation`,
+                      `transport intl shp`=`International Ship`) %>%
+        tidyr::gather(key="class1",value="value",
+                      -scenario, -region, -subRegion, -param, -sources, -class2, -x, -xLabel, -vintage, -units, -aggregate,
+                      -classLabel1, -classPalette1, -classLabel2, -classPalette2,
+                      -origScen,-origQuery,-origUnits,-origX)%>%
+        dplyr::mutate(origValue=value); tblSepTransportIntlAvShip%>%as.data.frame()
+      # Rbind Transport, Intl. Shipping and Aviation back to all other Final Energy types
+      tblMod<-tbl%>%dplyr::filter(class1!="transport") %>%
+        dplyr::bind_rows(tblSepTransportIntlAvShip) # Remove Transport sector from Original tbl
+
+      } else {
+        # rlang::inform(paste("tblFinalNrgIntlAvShip does not exist so skipping subset of final energy to remove intl. shipping and aviation."))
+        tblMod <- tbl
+        }
+
+      tblMod <- tblMod %>%
+        dplyr::mutate(class2 = dplyr::case_when(grepl("comm|resid|building",class1)~"building",
+                                         grepl("industry",class1)~"industry",
+                                         grepl("transport",class1)~"transport",
+                                         grepl("other", class1)~"other",
+                                         TRUE~class2)) %>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+
+      datax <- dplyr::bind_rows(datax, tblMod)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  ## energyFinalConsumBySecEJNoFeedstock =======================================
+  paramx<-"energyFinalConsumBySecEJNoFeedstock"
+  # Total final energy by aggregate end-use sector not including industrial feedstocks
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "total final energy by sector"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames,
+                      sector != "industrial feedstocks")%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(param = "energyFinalConsumBySecEJNoFeedstock",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      units = "Final Energy by Sector (EJ)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = dplyr::case_when(
+                        grepl("building|comm|resid",sector)~"building",
+                        grepl("indus|cement|fert",sector)~"industry",
+                        grepl("transport|trn",sector)~"transport",
+                        T ~ sector),
+                      classLabel1 = "Sector",
+                      classPalette1 = "pal_all",
+                      class2 = sector,
+                      classLabel2 = "Subsector",
+                      classPalette2 = "pal_all")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    }
+  }
+
+
+  ## energyFinalSubsecBySectorBuildEJ ==========================================
+  paramx<-"energyFinalSubsecBySectorBuildEJ"
+  # Total final energy by aggregate end-use sector
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "building final energy by subsector"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(param = "energyFinalSubsecBySectorBuildEJ",
+                      sector=gsub("comm\\scooling","Commercial CoolingHeating",sector),
+                      sector=gsub("comm\\sheating","Commercial CoolingHeating",sector),
+                      sector=gsub("comm\\sothers","Commercial Others",sector),
+                      sector=gsub("resid\\scooling","Residential CoolingHeating",sector),
+                      sector=gsub("resid\\sheating","Residential CoolingHeating",sector),
+                      sector=gsub("resid\\sothers","Residential Others",sector),
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      units = "Building Final Energy By Subsector (EJ)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = sector,
+                      classLabel1 = "Sector",
+                      classPalette1 = "pal_all",
+                      class2 = subsector,
+                      classLabel2 = "classLabel2",
+                      classPalette2 = "classPalette2")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  ## energyFinalByFuelEJ =======================================================
+  paramx<-"energyFinalByFuelEJ"
+  # Total final energy by aggregate end-use sector
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "Final energy by detailed end-use sector and fuel"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::filter(!grepl("trn",input))%>%
+        dplyr::mutate(input=dplyr::if_else(input=="biomass","bioenergy",input),
+                      sector=gsub("process heat cement","industry",sector),
+                      sector=gsub("cement","industry",sector),
+                      sector=gsub("other industrial energy use","industry",sector),
+                      sector=gsub("other industrial feedstocks","industry",sector),
+                      sector=gsub("N fertilizer","industry",sector),
+                      sector=gsub("alumina","industry",sector),
+                      sector=gsub("aluminum","industry",sector),
+                      sector=gsub("industrial wastewater treatment","industry",sector),
+                      sector=gsub("industrial water abstraction","industry",sector),
+                      sector=gsub("industrial water treatment","industry",sector),
+                      sector=gsub("iron and steel","industry",sector),
+                      sector=gsub("trn_aviation_intl","trans intl av",sector),
+                      sector=gsub("trn_shipping_intl","trans intl shp",sector),
+                      sector=replace(sector, stringr::str_detect(sector, "trn"), "transport"),
+                      sector=gsub("comm cooling","building",sector),
+                      sector=gsub("comm heating","building",sector),
+                      sector=gsub("comm others","building",sector),
+                      sector=gsub("resid cooling","building",sector),
+                      sector=gsub("resid heating","building",sector),
+                      sector=gsub("resid others","building",sector),
+                      sector=gsub("agricultural energy use","other",sector),
+                      sector=gsub("irrigation water abstraction","other",sector),
+                      sector=gsub("desalinated water","other",sector),
+                      sector=gsub("municipal wastewater treatment","other",sector),
+                      sector=gsub("municipal water abstraction","other",sector),
+                      sector=gsub("municipal water distribution","other",sector),
+                      sector=gsub("municipal water treatment","other",sector),
+                      input=gsub("elect\\_td\\_ind","electricity",input),
+                      input=gsub("elect\\_td\\_bld","electricity",input),
+                      input=gsub("elect\\_td\\_trn","electricity",input),
+                      input=gsub("delivered coal","coal",input),
+                      input=gsub("refined liquids enduse","liquids",input),
+                      input=gsub("delivered biomass","biomass",input),
+                      input=gsub("H2 enduse","hydrogen",input),
+                      input=replace(input, stringr::str_detect(input, "H2"), "hydrogen"),
+                      input=gsub("refined liquids industrial","liquids",input),
+                      input=gsub("liquids av", "liquids", input),
+                      input=gsub("liquids shp", "liquids", input),
+                      input=gsub("wholesale gas","gas",input),
+                      input=gsub("traditional biomass","biomass",input),
+                      input=gsub("delivered gas","gas",input),
+                      input=gsub("district heat","Other",input),
+                      param = "energyFinalByFuelEJ",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      units = "Final Energy by Fuel (EJ)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = input,
+                      classLabel1 = "Fuel",
+                      classPalette1 = "pal_all",
+                      class2 = sector,
+                      classLabel2 = "classLabel2",
+                      classPalette2 = "classPalette2")%>%
+        #dplyr::mutate(class1=dplyr::case_when(class2=="trans intl av"~paste(class1,"av",sep=" "),
+                                             #class2=="trans intl shp"~paste(class1,"shp",sep=" "),
+                                             #TRUE~class1))%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  ## energyFinalByFuelEJNoFeedstock ============================================
+  paramx<-"energyFinalByFuelEJNoFeedstock"
+  # Total final energy by aggregate end-use sector
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "Final energy by detailed end-use sector and fuel"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::filter(!grepl("trn",input),
+                      !sector %in% c("industrial feedstocks"))%>%
+        dplyr::mutate(input=dplyr::if_else(input=="biomass","bioenergy",input),
+                      sector=gsub("process heat cement","industry",sector),
+                      sector=gsub("cement","industry",sector),
+                      sector=gsub("industrial energy use","industry",sector),
+                      sector=gsub("N fertilizer","industry",sector),
+                      sector=gsub("alumina","industry",sector),
+                      sector=gsub("aluminum","industry",sector),
+                      sector=gsub("iron and steel","industry",sector),
+                      #sector=gsub("trn_aviation_intl","trans intl av",sector),
+                      #sector=gsub("trn_shipping_intl","trans intl shp",sector),
+                      sector = replace(sector, stringr::str_detect(sector, "trn"), "transport"),
+                      sector=gsub("comm cooling","building",sector),
+                      sector=gsub("comm heating","building",sector),
+                      sector=gsub("comm others","building",sector),
+                      sector=gsub("resid cooling","building",sector),
+                      sector=gsub("resid heating","building",sector),
+                      sector=gsub("resid others","building",sector),
+                      sector=gsub("agricultural energy use","other",sector),
+                      sector=gsub("desalinated water","other",sector),
+                      sector=gsub("irrigation water abstraction","other",sector),
+                      sector=gsub("municipal wastewater treatment","other",sector),
+                      sector=gsub("municipal water abstraction","other",sector),
+                      sector=gsub("municipal water distribution","other",sector),
+                      sector=gsub("municipal water treatment","other",sector),
+                      input=gsub("elect\\_td\\_ind","electricity",input),
+                      input=gsub("elect\\_td\\_bld","electricity",input),
+                      input=gsub("elect\\_td\\_trn","electricity",input),
+                      input=gsub("delivered coal","coal",input),
+                      input=gsub("refined liquids enduse","liquids",input),
+                      input=gsub("delivered biomass","biomass",input),
+                      input=gsub("H2 enduse","hydrogen",input),
+                      input=gsub("refined liquids industrial","liquids",input),
+                      input=gsub("liquids av", "liquids", input),
+                      input=gsub("liquids shp", "liquids", input),
+                      input=gsub("wholesale gas","gas",input),
+                      input=gsub("traditional biomass","biomass",input),
+                      input=gsub("delivered gas","gas",input),
+                      input=gsub("district heat","Other",input),
+                      param = "energyFinalByFuelEJNoFeedstock",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      units = "Final Energy by Fuel (EJ)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = input,
+                      classLabel1 = "Fuel",
+                      classPalette1 = "pal_all",
+                      class2 = sector,
+                      classLabel2 = "classLabel2",
+                      classPalette2 = "classPalette2")%>%
+        #dplyr::mutate(class1=dplyr::case_when(class2=="trans intl av"~paste(class1,"av",sep=" "),
+        #class2=="trans intl shp"~paste(class1,"shp",sep=" "),
+        #TRUE~class1))%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  ## energyFinalSubsecByFuelBuildEJ ============================================
+  paramx<-"energyFinalSubsecByFuelBuildEJ"
+  # Total final energy by aggregate end-use sector
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "building final energy by fuel"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::rename(sector=input) %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(sector=gsub("elect_td_bld","electricity",sector),
+                      sector=gsub("delivered gas","gas",sector),
+                      sector=gsub("delivered biomass","bioenergy",sector),
+                      sector=gsub("delivered coal","coal",sector),
+                      sector=gsub("refined liquids enduse","liquids",sector),
+                      param = "energyFinalSubsecByFuelBuildEJ",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      units = "Building Final Energy by Fuel (EJ)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = sector,
+                      classLabel1 = "Fuel",
+                      classPalette1 = "pal_all",
+                      class2 = sector,
+                      classLabel2 = "classLabel2",
+                      classPalette2 = "classPalette2")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  ## energyFinalSubsecByFuelIndusEJ ============================================
+  paramx<-"energyFinalSubsecByFuelIndusEJ"
+  # Total final energy by aggregate end-use sector
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "industry final energy by fuel"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::rename(sector=input) %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(sector=gsub("elect_td_ind","electricity",sector),
+                      sector=gsub("wholesale gas","gas",sector),
+                      sector=gsub("delivered biomass","bioenergy",sector),
+                      sector=gsub("delivered coal","coal",sector),
+                      sector=gsub("refined liquids industrial","liquids",sector),
+                      sector=gsub("H2 enduse","hydrogen",sector),
+                      param = "energyFinalSubsecByFuelIndusEJ",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      units = "Industry Final Energy by Fuel (EJ)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = sector,
+                      classLabel1 = "Fuel",
+                      classPalette1 = "pal_all",
+                      class2 = sector,
+                      classLabel2 = "classLabel2",
+                      classPalette2 = "classPalette2")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  ## energyPrimaryByFuelEJ =====================================================
   paramx<-"energyPrimaryByFuelEJ"
   # primary energy consumption by region (direct equivalent)
   if(paramx %in% paramsSelectx){
@@ -2355,634 +2617,11 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
-  paramx <- "elecByTechTWh"
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    tbl<-tibble::tibble()
-    tblUSA<-tibble::tibble()
-    tblUSACogen<-tibble::tibble()
-    tblGCAMReg<-tibble::tibble()
-
-    #.............
-    # For GCAM USA no cogen
-    #.............
-    queryx <- "elec gen by gen tech USA"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
-        tbl <- tbl %>%
-          dplyr::filter(region %in% regionsSelect)
-      }
-      if (nrow(tbl)>0) {
-      tbl <- tbl %>%
-        dplyr::filter(region %in% gcamextractor::regions_US52)%>%
-        dplyr::filter(!sector %in% "industrial energy use")
-      }
-      tblUSA <- tbl %>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(param = "elecByTechTWh",
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year, subRegion=region,
-                      scenario = scenNewNames,
-                      value = value * gcamextractor::convert$conv_EJ_to_TWh,
-                      units = "Electricity Generation by Fuel (TWh)",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1 = subsector,
-                      classLabel1 = "Fuel",
-                      classPalette1 = "pal_all",
-                      class2 = paste(technology,sector,sep=" "),
-                      classLabel2 = "Technology",
-                      classPalette2 = "pal_all")
-    }
-    #.............
-    # For GCAM USA cogen
-    #.............
-    # queryx <- "elec gen by gen tech cogen USA"
-    # if (queryx %in% queriesx) {
-    #   tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-    #   if (!is.null(regionsSelect)) {
-    #     tbl <- tbl %>%
-    #       dplyr::filter(region %in% regionsSelect)
-    #   }
-    #   if (nrow(tbl)>0) {
-    #     tbl <- tbl %>%
-    #       dplyr::filter(region %in% gcamextractor::regions_US52)
-    #   }
-    #   tblUSACogen <- tbl %>%
-    #     dplyr::filter(scenario %in% scenOrigNames)%>%
-    #     dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-    #     dplyr::mutate(param = "elecByTechTWh",
-    #                   sources = "Sources",
-    #                   origScen = scenario,
-    #                   origQuery = queryx,
-    #                   origValue = value,
-    #                   origUnits = Units,
-    #                   origX = year, subRegion=region,
-    #                   scenario = scenNewNames,
-    #                   value = value * gcamextractor::convert$conv_EJ_to_TWh,
-    #                   units = "Electricity Generation by Fuel (TWh)",
-    #                   vintage = paste("Vint_", year, sep = ""),
-    #                   x = year,
-    #                   xLabel = "Year",
-    #                   aggregate = "sum",
-    #                   class1 = subsector,
-    #                   classLabel1 = "Fuel",
-    #                   classPalette1 = "pal_all",
-    #                   class2 = technology,
-    #                   classLabel2 = "Technology",
-    #                   classPalette2 = "pal_all")
-    # }
-    tblUSACogen <- tibble::tibble()
-      #....................
-      # GCAM other Regions
-      #........................
-      queryx <- "elec gen by gen tech and cooling tech"
-      if (queryx %in% queriesx) {
-        tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-        if (!is.null(regionsSelect)) {
-          tbl <- tbl %>%
-            dplyr::filter(region %in% regionsSelect) %>%
-            dplyr::filter(!region %in% gcamextractor::regions_US52)
-        }
-        tblGCAMReg <- tbl %>%
-          dplyr::filter(scenario %in% scenOrigNames,
-                        Units == "EJ")%>%
-          dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-          dplyr::mutate(param = "elecByTechTWh",
-                        sources = "Sources",
-                        origScen = scenario,
-                        origQuery = queryx,
-                        origValue = value,
-                        origUnits = Units,
-                        origX = year, subRegion=region,
-                        scenario = scenNewNames,
-                        value = value * gcamextractor::convert$conv_EJ_to_TWh,
-                        units = "Electricity Generation by Fuel (TWh)",
-                        vintage = paste("Vint_", year, sep = ""),
-                        x = year,
-                        xLabel = "Year",
-                        aggregate = "sum",
-                        class1 = subsector,
-                        classLabel1 = "Fuel",
-                        classPalette1 = "pal_all",
-                        class2 = technology,
-                        classLabel2 = "Technology",
-                        classPalette2 = "pal_all")
-      }else {
-        # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
-      }
-
-    if(nrow(tblUSA)>0 | nrow(tblUSACogen)>0 | nrow(tblGCAMReg)>0){
-      # Combine USA with others
-      commonNames = c(names(tblUSA),names(tblUSACogen),names(tblGCAMReg))%>%unique()
-
-      tbl <- tibble::tibble()
-      if(nrow(tblUSA)>0){tbl <- tbl %>% dplyr::bind_rows(tblUSA %>%
-                                                           dplyr::select(commonNames[commonNames %in% names(tblUSA)]))}
-      if(nrow(tblUSACogen)>0){tbl <- tbl %>% dplyr::bind_rows(tblUSACogen %>%
-                                                                dplyr::select(commonNames[commonNames %in% names(tblUSACogen)]))}
-      if(nrow(tblGCAMReg)>0){tbl <- tbl %>% dplyr::bind_rows(tblGCAMReg %>%
-                                                               dplyr::select(commonNames[commonNames %in% names(tblGCAMReg)]))}
-    } # Check different tblUSA, tblUSACogen and tblGCAMReg
-
-      if(nrow(tbl)>0){
-      tbl <- tbl %>%
-        dplyr::mutate(class1=dplyr::case_when(class1=="rooftop_pv"~"solar",
-                                              TRUE~class1))%>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::mutate(origQuery="origQuery") %>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources,class1,class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX) %>%
-       dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-      datax <- dplyr::bind_rows(datax, tbl)
-      tblelecByTechTWh<-tbl}
-    }
-
-
-  # Capacity Calculation based on exogenous cap factors
-  paramx<-"elecCapByFuel"
-  # Total final energy by aggregate end-use sector
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-  if(!is.null(tblelecByTechTWh)){
-    capfactors <- gcamextractor::capfactors
-    capfactors
-        tbl <- tblelecByTechTWh  # Tibble
-        #rm(tblelecByTechTWh)
-        if (!is.null(regionsSelect)) {
-          tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
-        }
-        tbl <- tbl %>%
-          dplyr::full_join(capfactors, by="class1")%>%
-          dplyr::mutate(param = "elecCapByFuel",
-                        gcamCapacityFactor=cf1971to2100,
-                        value = value*1000/(8760*gcamCapacityFactor),
-                        origValue = value,
-                        units = "Electricity Capacity by Fuel (GW)",
-                        origUnits = units) %>%
-          dplyr::filter(!is.na(value))%>%
-          dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origValue, origUnits, origX)
-
-        datax <- dplyr::bind_rows(datax, tbl)
-
-
-  } else {
-  if("elec gen by gen tech and cooling tech" %in% queriesSelectx){
-    #rlang::inform(paste("elecByTechTWh did not run so skipping param elecCapByFuel."))
-    }
-  }}
 
   # chart(tbl,xData="x",yData="value",useNewLabels = 0)
 
 
-  paramx <- "watConsumBySec"
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    # water consumption by sector
-    queryx <- "water consumption by state, sector, basin (includes desal)"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if(nrow(tbl)>0){
-        # If GCAM USA then remove "USA" region and use states
-        # if(any(gcamextractor::regions_US52 %in% unique(tbl$region))){
-        #   tbl <- tbl %>% dplyr::filter(region!="USA") # Remove region USA and use states instead
-        # }
-      }
-      if (!is.null(regionsSelect)) {
-        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
-      }
-      tbl <- tbl %>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(sector=dplyr::case_when(
-          grepl("desalination",technology,ignore.case=T)~"desalination",
-          sector=="water_td_an_C"~"animal",
-          sector=="water_td_dom_C"~"domestic",
-          sector=="water_td_muni_C"~"domestic",
-          sector=="water_td_elec_C"~"electric",
-          sector=="water_td_ind_C"~"industry",
-          sector=="water_td_pri_C"~"primary",
-          grepl("_irr_",sector)~"irrigation",
-          TRUE~sector)) %>%
-        dplyr::mutate(param = "watConsumBySec",
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year, subRegion=region,
-                      scenario = scenNewNames,
-                      value = value,
-                      units = "Water Consumption by Sector (km3)",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1 = sector,
-                      classLabel1 = "Sector",
-                      classPalette1 = "pal_all",
-                      class2 = subsector,
-                      classLabel2 = "basin",
-                      classPalette2 = "pal_all")%>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-      datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
-    }}
 
-
-  paramx<- "watWithdrawBySec"
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    # water consumption by sector
-    queryx <- "water withdrawals by state, sector, basin (includes desal)"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      # if(nrow(tbl)>0){
-      #   # If GCAM USA then remove "USA" region and use states
-      #   if(any(gcamextractor::regions_US52 %in% unique(tbl$region))){
-      #     tbl <- tbl %>% dplyr::filter(region!="USA") # Remove region USA and use states instead
-      #   }
-      # }
-      if (!is.null(regionsSelect)) {
-        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
-      }
-      tbl <- tbl %>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(sector=dplyr::case_when(
-          grepl("desalination",technology,ignore.case=T)~"desalination",
-          sector=="water_td_an_W"~"livestock",
-          sector=="water_td_dom_W"~"municipal",
-          sector=="water_td_muni_W"~"municipal",
-          sector=="water_td_elec_W"~"electricity",
-          sector=="water_td_ind_W"~"industry",
-          sector=="water_td_pri_W"~"mining",
-          grepl("_irr_",sector)~"agriculture",
-          TRUE~sector)) %>%
-        dplyr::mutate(param = "watWithdrawBySec",
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year, subRegion=region,
-                      scenario = scenNewNames,
-                      value = value,
-                      units = "Water Withdrawal by Sector (km3)",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1 = sector,
-                      classLabel1 = "Sector",
-                      classPalette1 = "pal_wet",
-                      class2 = subsector,
-                      classLabel2 = "basin",
-                      classPalette2 = "pal_all")%>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-      datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
-    }}
-
-
-  paramx <- "watWithdrawByCrop"
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    # water withdrawals by sector
-    queryx <- "water withdrawals by crop"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      # Need to add in conveyance losses for USA when running GCAM USA
-      # gcamusa.CONVEYANCE_LOSSES <- 0.829937455747218 from constants.R
-      if(nrow(tbl)>0){
-        if(any(unique(tbl$region) %in% gcamextractor::regions_US52)){
-          tbl <- tbl %>%
-            dplyr::mutate(value = dplyr::case_when(region=="USA"~value/0.829937455747218,
-                                            TRUE~value)) %>%
-            dplyr::filter(!region %in% gcamextractor::regions_US52)
-        }
-      }
-      if (!is.null(regionsSelect)) {
-        if(any(regionsSelect %in% gcamextractor::regions_US52)){
-          tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
-        } else {
-          tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
-        }
-      }
-      tbl <- tbl %>%
-        dplyr::filter(sector!="industry", sector!="mining" , sector!="municipal"
-                      , sector!="electricity" , sector!="livestock", !grepl("water_td_",sector))%>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(param = "watWithdrawByCrop",
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year, subRegion=region,
-                      scenario = scenNewNames,
-                      value = value,
-                      units = "Water Withdrawals by Crop (km3)",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1 = sector,
-                      classLabel1 = "Crop",
-                      classPalette1 = "pal_all",
-                      class2 = "class2",
-                      classLabel2 = "classLabel2",
-                      classPalette2 = "classPalette2")%>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-      datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
-    }}
-
-  paramx <- "watBioPhysCons"
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    # biophysical water demand by crop type and land region
-    queryx <- "biophysical water demand by crop type and land region"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
-        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
-      }
-      tbl <- tbl %>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(param = "watBioPhysCons",
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year, subRegion=region,
-                      scenario = scenNewNames,
-                      value = value,
-                      units = "Biophysical Water Consumption (km3)",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1 = sector,
-                      classLabel1 = "Crop",
-                      classPalette1 = "pal_16",
-                      class2 = "class2",
-                      classLabel2 = "classLabel2",
-                      classPalette2 = "classPalette2") %>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-      datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
-    }}
-
-  paramx <- "watIrrWithdrawBasin"
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    # water withdrawals by water mapping source
-    queryx <- "water withdrawals by water mapping source"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
-        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
-      }
-      tbl <- tbl %>%
-        dplyr::filter(grepl("_irr_",input))%>%
-        dplyr::mutate(input=gsub("water_td_irr_","",input),
-                      input=gsub("_W","",input))%>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(param = "watIrrWithdrawBasin",
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year, subRegion=region,
-                      scenario = scenNewNames,
-                      value = value,
-                      units = "Irrigation Water Withdrawal (km3)",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1 = input,
-                      classLabel1 = "Basin",
-                      classPalette1 = "pal_16",
-                      class2 = "class2",
-                      classLabel2 = "classLabel2",
-                      classPalette2 = "classPalette2") %>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-      datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
-    }}
-
-
-  paramx <- "watIrrConsBasin"
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    # water consumption by water mapping source
-    queryx <- "water consumption by water mapping source"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
-        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
-      }
-      tbl <- tbl %>%
-        dplyr::filter(grepl("_irr_",input))%>%
-        dplyr::mutate(input=gsub("water_td_irr_","",input),
-                      input=gsub("_C","",input))%>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(param = "watIrrConsBasin",
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year, subRegion=region,
-                      scenario = scenNewNames,
-                      value = value,
-                      units = "Irrigation Water Consumption (km3)",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1 = input,
-                      classLabel1 = "Basin",
-                      classPalette1 = "pal_16",
-                      class2 = "class2",
-                      classLabel2 = "classLabel2",
-                      classPalette2 = "classPalette2") %>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-      datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
-    }}
-
-
-  paramx <- "watSupRunoffBasin"
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    # water consumption by water mapping source
-    queryx <- "Basin level available runoff"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
-        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
-      }
-      tbl <- tbl %>%
-        dplyr::mutate(subRegion=gsub(" ","_",gsub("\\_.*","",basin)))%>%
-        dplyr::select(-basin)%>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(param = "watSupRunoffBasin",
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year,
-                      scenario = scenNewNames,
-                      value = value,
-                      units = "Runoff (km3)",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1="class1",
-                      classLabel1 = "runoff",
-                      classPalette1 = "pal_wet",
-                      class2 = "class2",
-                      classLabel2 = "classLabel2",
-                      classPalette2 = "pal_wet") %>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
-        dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-      datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
-    }}
-
-
-  paramx <- "waterWithdrawROGW"
-  if(paramx %in% paramsSelectx){
-    rlang::inform(paste0("Running param: ", paramx,"..."))
-    # water consumption by water mapping source
-    queryx <- "Water withdrawals by water source (runoff vs. groundwater)"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
-        if(any(regionsSelect %in% gcamextractor::regions_US52)){
-          tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
-        } else {
-          tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
-        }
-      }
-      tbl <- tbl %>%
-        dplyr::mutate(subRegion=gsub(" ","_",gsub("\\_.*","",resource)))%>%
-        dplyr::select(-resource)%>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(param = "waterWithdrawROGW",
-                      sources = "Sources",
-                      origScen = scenario,
-                      origQuery = queryx,
-                      origValue = value,
-                      origUnits = Units,
-                      origX = year,
-                      scenario = scenNewNames,
-                      value = value,
-                      units = "km3",
-                      vintage = paste("Vint_", year, sep = ""),
-                      x = year,
-                      xLabel = "Year",
-                      aggregate = "sum",
-                      class1=subresource,
-                      classLabel1 = "source",
-                      classPalette1 = "pal_all",
-                      class2 = "class2",
-                      classLabel2 = "classLabel2",
-                      classPalette2 = "pal_all") %>%
-        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
-                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)%>%
-        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
-                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
-                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
-      datax <- dplyr::bind_rows(datax, tbl)
-    } else {
-      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
-    }}
 
   paramx <- "gdpPerCapita"
   if(paramx  %in% paramsSelectx){
@@ -3936,13 +3575,11 @@ readgcam <- function(gcamdatabase = NULL,
     }}
 
 
-  #...........................................
-  # Emissions
-  #..........................................
+  # Emissions -----------------------------
 
-  ## LUC CO2 ===========================
+  ## emissLUC ===========================
   # need LUC for CO2BySector, GHGBYSector, and GHGByGas
-  if(any(c("emissCO2BySector", "emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissLUC") %in% paramsSelectx)){
+  if(any(c("emissCO2BySector", "emissCO2BySectorNoBio", "emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissLUC") %in% paramsSelectx)){
 
     queryx <- "Land Use Change Emission (future)"
     if (queryx %in% queriesx) {
@@ -3995,35 +3632,19 @@ readgcam <- function(gcamdatabase = NULL,
       datax <- dplyr::bind_rows(datax, tblEmissLUC)
     }
 
-    ## CO2 by sector ===========================
+    ## emissCO2BySector ===========================
     # need CO2 for CO2BySector, GHGBySector, and GHGByGas
-    if(any(c("emissCO2BySector", "emissGHGBySectorGWPAR5", "emissGHGByGasGWPAR5") %in% paramsSelectx)){
+    if(any(c("emissCO2BySector", "emissGHGBySectorGWPAR5", "emissGHGByGasGWPAR5", "emissGHGBySectorPowerGWPAR5") %in% paramsSelectx)){
       queryx <- "CO2 emissions by sector"
-      #queryx <- "CO2 emissions by sector (no bio)"
       if (queryx %in% queriesx) {
-        tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+        tbl <- rgcam::getQuery(dataProjLoaded, queryx)
         if (!is.null(regionsSelect)) {
           tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
         }
-        #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
         tbl <- tbl %>%
           dplyr::filter(scenario %in% scenOrigNames)%>%
           dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
           dplyr::mutate(
-            sector=dplyr::case_when(
-              grepl("refining",sector,ignore.case=T)~"refining",
-              grepl("regional biomass|regional biomassOil|regional corn for ethanol|regional sugar for ethanol|biomass", sector,ignore.case=T)~"biomass",
-              grepl("trn_aviation_intl", sector)~"International Aviation",
-              grepl("trn_shipping_intl", sector) ~ "International Shipping",
-              grepl("trn_",sector,ignore.case=T)~"transport",
-              grepl("comm |resid ",sector,ignore.case=T)~"building",
-              grepl("electricity|elec_|electricity |csp_backup",sector,ignore.case=T)~"electricity",
-              grepl("H2",sector,ignore.case=T)~"hydrogen",
-              grepl("cement|N fertilizer|industrial|ind ",sector,ignore.case=T)~"industry",
-              grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids",sector,ignore.case=T)~"industry",
-              grepl("Beef|Dairy|Pork|Poultry",sector,ignore.case=T)~"livestock",
-              grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",sector,ignore.case=T)~"crops",
-              TRUE~sector),
             origValue=value,
             value=value*44/12, # convert from MTC to MTCO2eq
             origUnits=Units,
@@ -4045,12 +3666,37 @@ readgcam <- function(gcamdatabase = NULL,
                         origScen, origQuery, origValue, origUnits, origX)
         tblCO2Emiss <- tbl
       }
+    }
 
-  } # end CO2 by sector query
+    # Aggregate sectors
+    if(any(c("emissCO2BySector", "emissGHGBySectorGWPAR5", "emissGHGByGasGWPAR5") %in% paramsSelectx)){
+        #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
+        tblCO2EmissAgg <- tblCO2Emiss %>%
+          dplyr::mutate(
+            sector=dplyr::case_when(
+              grepl("refining",sector,ignore.case=T)~"refining",
+              grepl("regional biomass|regional biomassOil|regional corn for ethanol|regional sugar for ethanol|biomass", sector,ignore.case=T)~"biomass",
+              grepl("trn_aviation_intl", sector)~"International Aviation",
+              grepl("trn_shipping_intl", sector) ~ "International Shipping",
+              grepl("trn_",sector,ignore.case=T)~"transport",
+              grepl("comm |resid ",sector,ignore.case=T)~"building",
+              grepl("electricity|elec_|electricity |csp_backup",sector,ignore.case=T)~"electricity",
+              grepl("H2",sector,ignore.case=T)~"hydrogen",
+              grepl("cement|N fertilizer|industrial|ind ",sector,ignore.case=T)~"industry",
+              grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids",sector,ignore.case=T)~"industry",
+              grepl("Beef|Dairy|Pork|Poultry",sector,ignore.case=T)~"livestock",
+              grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",sector,ignore.case=T)~"crops",
+              TRUE~sector)) %>%
+          dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
+                          aggregate, ghg, sector, classPalette1, classPalette2,
+                          origScen, origQuery, origUnits, origX) %>%
+          dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T))) %>% dplyr::ungroup()%>%
+          dplyr::filter(!is.na(value))
+  }
 
-  ## CO2 by sector (no bio) ===========================
+  ## emissCO2BySectorNoBio ===========================
   # need CO2 for CO2BySectorNoBio, GHGBySectorNoBio, and GHGByGasNoBio
-  if(any(c("emissCO2BySectorNoBio", "emissGHGBySectorGWPAR5NoBio", "emissGHGByGasGWPAR5NoBio") %in% paramsSelectx)){
+  if(any(c("emissCO2BySectorNoBio", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissGHGBySectorBuildingsGWPAR5") %in% paramsSelectx)){
     queryx <- "CO2 emissions by sector (no bio)"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -4062,20 +3708,6 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(scenario %in% scenOrigNames)%>%
         dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
         dplyr::mutate(
-          sector=dplyr::case_when(
-            grepl("refining",sector,ignore.case=T)~"refining",
-            grepl("regional biomass|regional biomassOil|regional corn for ethanol|regional sugar for ethanol", sector,ignore.case=T)~"biomass",
-            grepl("trn_aviation_intl", sector)~"International Aviation",
-            grepl("trn_shipping_intl", sector) ~ "International Shipping",
-            grepl("trn_",sector,ignore.case=T)~"transport",
-            grepl("comm |resid ",sector,ignore.case=T)~"building",
-            grepl("electricity|elec_|electricity |csp_backup",sector,ignore.case=T)~"electricity",
-            grepl("H2",sector,ignore.case=T)~"hydrogen",
-            grepl("cement|N fertilizer|industrial|ind ",sector,ignore.case=T)~"industry",
-            grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids|wholesale gas|delivered gas|delivered biomass",sector,ignore.case=T)~"industry",
-            grepl("Beef|Dairy|Pork|Poultry",sector,ignore.case=T)~"livestock",
-            grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",sector,ignore.case=T)~"crops",
-            TRUE~sector),
           origValue=value,
           value=value*44/12, # convert from MTC to MTCO2eq
           origUnits=Units,
@@ -4100,50 +3732,45 @@ readgcam <- function(gcamdatabase = NULL,
 
   } # end CO2 by sector (no bio) query
 
-  # CO2 sequestration ===========================
-  # need CO2 sequestration for CO2BySector, GHGBySector, and GHGByGas
-  if(any(c("co2SequestrationBySector") %in% paramsSelectx)){
-    queryx <- "CO2 sequestration by sector"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
-        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
-      }
-      #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
-      tbl <- tbl %>%
-        dplyr::filter(scenario %in% scenOrigNames)%>%
-        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+  # Aggregate sectors
+  if(any(c("emissCO2BySectorNoBio", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasNoBioGWPAR5") %in% paramsSelectx)){
+      tblCO2EmissNoBioAgg <- tblCO2EmissNoBio %>%
         dplyr::mutate(
-          origValue=value,
-          value=value*gcamextractor::convert$conv_C_CO2*(-1), # convert from MTC to MTCO2eq and make negative
-          origUnits=Units,
-          units="CO2 emissions - (MTCO2)",
-          sources = "Sources",
-          origScen = scenario,
-          origQuery = queryx,
-          origX = year, subRegion=region,
-          scenario = scenNewNames,
-          vintage = paste("Vint_", year, sep = ""),
-          x = year,
-          xLabel = "Year",
-          aggregate = "sum",
-          classPalette1 = "pal_all",
-          classPalette2 = "pal_all",
-          ghg = "CO2") %>%
-        dplyr::select(scenario, region, subRegion, sources, x, xLabel, vintage, units, value,
-                      aggregate, ghg, sector, classPalette1, classPalette2,
-                      origScen, origQuery, origValue, origUnits, origX)
-      tblCO2Seq <- tbl
-      datax <- dplyr::bind_rows(datax, tblCO2Seq)
+          sector=dplyr::case_when(
+            grepl("refining",sector,ignore.case=T)~"refining",
+            grepl("regional biomass|regional biomassOil|regional corn for ethanol|regional sugar for ethanol", sector,ignore.case=T)~"biomass",
+            grepl("trn_aviation_intl", sector)~"International Aviation",
+            grepl("trn_shipping_intl", sector) ~ "International Shipping",
+            grepl("trn_",sector,ignore.case=T)~"transport",
+            grepl("comm |resid ",sector,ignore.case=T)~"building",
+            grepl("electricity|elec_|electricity |csp_backup",sector,ignore.case=T)~"electricity",
+            grepl("H2",sector,ignore.case=T)~"hydrogen",
+            grepl("cement|N fertilizer|industrial|ind ",sector,ignore.case=T)~"industry",
+            grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids|wholesale gas|delivered gas|delivered biomass",sector,ignore.case=T)~"industry",
+            grepl("Beef|Dairy|Pork|Poultry",sector,ignore.case=T)~"livestock",
+            grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",sector,ignore.case=T)~"crops",
+            TRUE~sector)) %>%
+        dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
+                        aggregate, ghg, sector, classPalette1, classPalette2,
+                        origScen, origQuery, origUnits, origX) %>%
+        dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T))) %>% dplyr::ungroup() %>%
+        dplyr::filter(!is.na(value))
     }
-  } # end CO2 sequestration query
 
-  # add CO2 by sector to data if emissCO2BySector param is chosen
-  if("emissCO2BySector" %in% paramsSelectx){
-    # LUC
-    tblEmissCO2BySector_LU <- tblLUEmiss %>%
-      dplyr::rename(class1 = sector, class2 = ghg) %>%
-      dplyr::mutate(classLabel1 = "sector",
+
+
+    # add CO2 by sector to data if emissCO2BySector param is chosen
+    if("emissCO2BySector" %in% paramsSelectx){
+      # LUC
+      tblEmissCO2BySector_LU <- tblLUEmiss %>%
+        dplyr::rename(class1 = sector, class2 = ghg) %>%
+        dplyr::mutate(classLabel1 = "sector",
+                        classLabel2 = "ghg")
+
+      # other sectors
+      tblEmissCO2BySector_CO2 <- tblCO2EmissAgg %>%
+        dplyr::rename(class1 = sector, class2 = ghg) %>%
+        dplyr::mutate(classLabel1 = "sector",
                       classLabel2 = "ghg")
 
     # other sectors
@@ -4169,7 +3796,7 @@ readgcam <- function(gcamdatabase = NULL,
                     classLabel2 = "ghg")
 
     # other sectors
-    tblEmissCO2BySectorNoBio_CO2 <- tblCO2EmissNoBio %>%
+    tblEmissCO2BySectorNoBio_CO2 <- tblCO2EmissNoBioAgg %>%
       dplyr::rename(class1 = sector, class2 = ghg) %>%
       dplyr::mutate(classLabel1 = "sector",
                     classLabel2 = "ghg")
@@ -4183,21 +3810,17 @@ readgcam <- function(gcamdatabase = NULL,
   }
 
 
-  #..................................................
-  ## nonCO2 by sector/gas ===========================
-  #..................................................
-
+  ## emissGHGBySectorGWPAR5 ===========================
   # need nonCO2 for GHGBySector and GHGByGas
-  if(any(c("emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5") %in% paramsSelectx)){
+  if(any(c("emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissGHGBySectorBuildingsGWPAR5", "emissGHGBySectorPowerGWPAR5") %in% paramsSelectx)){
       queryx <- "nonCO2 emissions by sector"
       if (queryx %in% queriesx) {
-        tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+        tbl <- rgcam::getQuery(dataProjLoaded, queryx)
         if (!is.null(regionsSelect)) {
           tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
         }
         #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
         tbl <- tbl %>%
-          dplyr::filter(ghg!="CO2")%>%
           dplyr::filter(scenario %in% scenOrigNames)%>%
           dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
           dplyr::mutate(ghg = dplyr::case_when ((grepl("HFC", ghg)) ~ "HFCs",
@@ -4214,28 +3837,15 @@ readgcam <- function(gcamdatabase = NULL,
           #dplyr::left_join(emiss_sector_mapping, by=c('class2' = 'class1')) %>%
           #dplyr::mutate(class2=agg_sector) %>%
           #dplyr::select(-agg_sector) %>%
-          dplyr::mutate(
-            sector=dplyr::case_when(
-              grepl("refining",sector,ignore.case=T)~"refining",
-              grepl("regional biomass|regional biomassOil|regional corn for ethanol|biomass" ,sector,ignore.case=T)~"biomass",
-              grepl("trn_",sector,ignore.case=T)~"transport",
-              grepl("comm |resid ",sector,ignore.case=T)~"building",
-              grepl("electricity|elec_|electricity |csp_backup",sector,ignore.case=T)~"electricity",
-              grepl("H2",sector,ignore.case=T)~"hydrogen",
-              grepl("cement|N fertilizer|industrial|ind ",sector,ignore.case=T)~"industry",
-              grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids",sector,ignore.case=T)~"industry",
-              grepl("Beef|Dairy|Pork|Poultry",sector,ignore.case=T)~"livestock",
-              grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",sector,ignore.case=T)~"crops",
-              TRUE~sector)) %>%
           dplyr::left_join(gcamextractor::GWP,by="ghg") %>%
           dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
-          dplyr::filter(!ghg=='CO2') %>%
+          dplyr::filter(ghg!='CO2') %>%
           dplyr::mutate(origValue=value,
                         value=value*GWPAR5*Convert,
                         origUnits=Units,
                         origUnits = dplyr::case_when(ghg=="Other"~"Units",TRUE~origUnits),
-                        units="GHG Emissions GWPAR5 (MTCO2eq)")%>%
-          dplyr::mutate(sources = "Sources",
+                        units="GHG Emissions GWPAR5 (MTCO2eq)",
+                        sources = "Sources",
                         origScen = scenario,
                         origQuery = queryx,
                         origX = year, subRegion=region,
@@ -4248,16 +3858,38 @@ readgcam <- function(gcamdatabase = NULL,
                         classPalette1 = "pal_all") %>%
           dplyr::select(scenario, region, subRegion, sources, x, xLabel, vintage, units, value,
                         aggregate, ghg, sector, classPalette1, classPalette2,
-                        origScen, origQuery, origValue, origUnits, origX)%>%
-          dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
-                          aggregate, ghg, sector, classPalette1, classPalette2,
-                          origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
-          dplyr::filter(!is.na(value))
+                        origScen, origQuery, origValue, origUnits, origX)
+
         tblNonCO2Emiss <- tbl
       } else {
+        print("NonCO2 WAS NOT IN QUERIES")
         tblNonCO2Emiss <- tibble::tibble()
         # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
       }
+
+      # Aggregate Sectors
+      if(any(c("emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5") %in% paramsSelectx)){
+          #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
+        print(str(tblNonCO2Emiss))
+        tblNonCO2EmissAgg <- tblNonCO2Emiss %>%
+            dplyr::mutate(
+              sector=dplyr::case_when(
+                grepl("refining",sector,ignore.case=T)~"refining",
+                grepl("regional biomass|regional biomassOil|regional corn for ethanol|biomass" ,sector,ignore.case=T)~"biomass",
+                grepl("trn_",sector,ignore.case=T)~"transport",
+                grepl("comm |resid ",sector,ignore.case=T)~"building",
+                grepl("electricity|elec_|electricity |csp_backup",sector,ignore.case=T)~"electricity",
+                grepl("H2",sector,ignore.case=T)~"hydrogen",
+                grepl("cement|N fertilizer|industrial|ind ",sector,ignore.case=T)~"industry",
+                grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids",sector,ignore.case=T)~"industry",
+                grepl("Beef|Dairy|Pork|Poultry",sector,ignore.case=T)~"livestock",
+                grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",sector,ignore.case=T)~"crops",
+                TRUE~sector)) %>%
+            dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
+                            aggregate, ghg, sector, classPalette1, classPalette2,
+                            origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+            dplyr::filter(!is.na(value))
+        }
 
       # nonCO2 emissions for GCAM USA if relevant
       queryx <- "nonCO2 emissions by sector USA"
@@ -4331,7 +3963,8 @@ readgcam <- function(gcamdatabase = NULL,
       }
   } # end nonCO2 query
 
-  ## nonCO2 by resource production ===========================
+
+  ## emissGHGByResProdGWPAR5 ===========================
   # need nonCO2 res prod for GHGBySector and GHGByGas
   if(any(c("emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissGHGByResProdGWPAR5") %in% paramsSelectx)){
     #rlang::inform(paste0("Running param: ", paramx,"..."))
@@ -4406,7 +4039,7 @@ readgcam <- function(gcamdatabase = NULL,
   # add GHG by sector to data if emissGHGBySectorGWPAR5 param is chosen
   if("emissGHGBySectorGWPAR5" %in% paramsSelectx){
     tblGHGEmissBySector <- dplyr::bind_rows(
-      tblLUEmiss, tblCO2Emiss, tblNonCO2Emiss, tblNonCO2EmissUSA,
+      tblLUEmiss, tblCO2EmissAgg, tblNonCO2EmissAgg, tblNonCO2EmissUSA,
       tblNonCO2EmissRes) %>%
       dplyr::rename(class1 = sector, class2 = ghg) %>%
       dplyr::mutate(classLabel1 = "sector",
@@ -4420,7 +4053,7 @@ readgcam <- function(gcamdatabase = NULL,
   # add GHG by gas to data if emissGHGByGasGWPAR5 param is chosen
   if("emissGHGByGasGWPAR5" %in% paramsSelectx){
     tblGHGEmissByGas <- dplyr::bind_rows(
-      tblLUEmiss, tblCO2Emiss, tblNonCO2Emiss, tblNonCO2EmissUSA,
+      tblLUEmiss, tblCO2EmissAgg, tblNonCO2EmissAgg, tblNonCO2EmissUSA,
       tblNonCO2EmissRes) %>%
       dplyr::rename(class1 = ghg, class2 = sector) %>%
       dplyr::mutate(classLabel1 = "ghg",
@@ -4434,7 +4067,7 @@ readgcam <- function(gcamdatabase = NULL,
   # add GHG by sector (no bio) to data if emissGHGBySectorNoBioGWPAR5 param is chosen
   if("emissGHGBySectorNoBioGWPAR5" %in% paramsSelectx){
     tblGHGEmissBySectorNoBio <- dplyr::bind_rows(
-      tblLUEmiss, tblCO2EmissNoBio, tblNonCO2Emiss, tblNonCO2EmissUSA,
+      tblLUEmiss, tblCO2EmissNoBioAgg, tblNonCO2EmissAgg, tblNonCO2EmissUSA,
       tblNonCO2EmissRes) %>%
       dplyr::rename(class1 = sector, class2 = ghg) %>%
       dplyr::mutate(classLabel1 = "sector",
@@ -4448,7 +4081,7 @@ readgcam <- function(gcamdatabase = NULL,
   # add GHG by gas (no bio) to data if emissGHGByGasNoBioGWPAR5 param is chosen
   if("emissGHGByGasNoBioGWPAR5" %in% paramsSelectx){
     tblGHGEmissByGasNoBio <- dplyr::bind_rows(
-      tblLUEmiss, tblCO2EmissNoBio, tblNonCO2Emiss, tblNonCO2EmissUSA,
+      tblLUEmiss, tblCO2EmissNoBioAgg, tblNonCO2EmissAgg, tblNonCO2EmissUSA,
       tblNonCO2EmissRes) %>%
       dplyr::rename(class1 = ghg, class2 = sector) %>%
       dplyr::mutate(classLabel1 = "ghg",
@@ -4459,8 +4092,293 @@ readgcam <- function(gcamdatabase = NULL,
     datax <- dplyr::bind_rows(datax, tblGHGEmissByGasNoBio)
   }
 
-  ## Cumulative global emissions ===========================
 
+  # paramx <- "emissLUC"
+  # if(paramx %in% paramsSelectx){
+  #   rlang::inform(paste0("Running param: ", paramx,"..."))
+  #   # Land Use Change Emission (future)
+  #   queryx <- "Land Use Change Emission (future)"
+  #   if (queryx %in% queriesx) {
+  #     tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+  #     if (!is.null(regionsSelect)) {
+  #       tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+  #     }
+  #     tbl <- tbl %>%
+  #       dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
+  #       dplyr::mutate(origValue=value,value=value*Convert*gcamextractor::convert$conv_C_CO2,
+  #                     origUnits=Units,units="Emissions LUC - (MTCO2eq)") %>%
+  #       dplyr::filter(scenario %in% scenOrigNames)%>%
+  #       dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+  #       dplyr::mutate(param = "emissLUC",
+  #                     sources = "Sources",
+  #                     origScen = scenario,
+  #                     origQuery = queryx,
+  #                     origUnits = Units,
+  #                     origX = year, subRegion=region,
+  #                     scenario = scenNewNames,
+  #                     value = value,
+  #                     origValue = origValue,
+  #                     units = "LUC CO2 Emissions (MTCO2eq)",
+  #                     vintage = paste("Vint_", year, sep = ""),
+  #                     x = year,
+  #                     xLabel = "Year",
+  #                     aggregate = "sum",
+  #                     class1 = "class1",
+  #                     classLabel1 = "Land Type",
+  #                     classPalette1 = "pal_all",
+  #                     class2 = "class2",
+  #                     classLabel2 = "classLabel2",
+  #                     classPalette2 = "classPalette2") %>%
+  #       dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+  #                     aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+  #                     origScen, origQuery, origValue, origUnits, origX)%>%
+  #       dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+  #                       aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+  #                       origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+  #       dplyr::filter(!is.na(value)) %>%
+  #       dplyr::mutate(class1='LUC')
+  #     tblLUEmiss<-tbl
+  #     datax <- dplyr::bind_rows(datax, tbl)
+  #   } else {
+  #     # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+  #   }}
+
+
+
+
+  #
+  #   # GHG emissions (non CO2) by subsector, using AR5 GWP values USA
+  #   queryx <- "nonCO2 emissions by sector USA"
+  #   if (queryx %in% queriesx) {
+  #     tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+  #     if (!is.null(regionsSelect)) {
+  #       tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+  #     }
+  #     #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
+  #     tblUSA <- tbl %>%
+  #       dplyr::filter(ghg!="CO2")%>%
+  #       dplyr::filter(scenario %in% scenOrigNames)%>%
+  #       dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+  #       dplyr::mutate(class1=ghg, class2=sector) %>%
+  #       dplyr::mutate(class1 = dplyr::case_when ((grepl("HFC", class1)) ~ "HFCs",
+  #                                                (grepl("SF6", class1)) ~ "SF6",
+  #                                                (grepl("CO2", class1)) ~ "CO2",
+  #                                                (grepl("N2O", class1)) ~ "N2O",
+  #                                                (grepl("CH4", class1)) ~ "CH4",
+  #                                                (grepl("SO2", class1)) ~ "SO2",
+  #                                                (grepl("NH3", class1)) ~ "NH3",
+  #                                                (grepl("CF4", class1)) ~ "CF4",
+  #                                                (grepl("C2F6", class1)) ~ "C2F6",
+  #                                                TRUE ~ "Other"))%>%
+  #       dplyr::filter(!class1 %in% c('SO2', 'NH3', 'Other'),
+  #                     !(class1 == "SF6" & grepl("grid",region,ignore.case = T)),
+  #                     !(class1 %in% c("CH4","HFCs","N2O") & region=="USA")) %>%
+  #       #dplyr::left_join(emiss_sector_mapping, by=c('class2' = 'class1')) %>%
+  #       #dplyr::mutate(class2=agg_sector) %>%
+  #       #dplyr::select(-agg_sector) %>%
+  #       dplyr::mutate(
+  #         class2=dplyr::case_when(
+  #           grepl("refining",class2,ignore.case=T)~"refining",
+  #           grepl("regional biomass|regional biomassOil|regional corn for ethanol|biomass" ,class2,ignore.case=T)~"biomass",
+  #           grepl("trn_",class2,ignore.case=T)~"transport",
+  #           grepl("comm |resid ",class2,ignore.case=T)~"building",
+  #           grepl("electricity|elec_|electricity |csp_backup",class2,ignore.case=T)~"electricity",
+  #           grepl("H2",class2,ignore.case=T)~"hydrogen",
+  #           grepl("cement|N fertilizer|industrial|ind ",class2,ignore.case=T)~"industry",
+  #           grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids",class2,ignore.case=T)~"industry",
+  #           grepl("Beef|Dairy|Pork|Poultry",class2,ignore.case=T)~"livestock",
+  #           grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",class2,ignore.case=T)~"crops",
+  #           TRUE~class2))%>%
+  #       dplyr::left_join(gcamextractor::GWP%>%dplyr::rename(class1=ghg),by="class1")%>%
+  #       dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
+  #       #dplyr::filter(!class1=='CO2') %>%
+  #       dplyr::mutate(origValue=value,
+  #                     value=value*GWPAR5*Convert,
+  #                     origUnits=Units,
+  #                     origUnits = dplyr::case_when(class1=="Other"~"Units",TRUE~origUnits),
+  #                     units="GHG Emissions GWPAR5 (MTCO2eq)")%>%
+  #       dplyr::mutate(param = "emissNonCO2BySectorGWPAR5",
+  #                     sources = "Sources",
+  #                     origScen = scenario,
+  #                     origQuery = queryx,
+  #                     origX = year, subRegion=region,
+  #                     scenario = scenNewNames,
+  #                     vintage = paste("Vint_", year, sep = ""),
+  #                     x = year,
+  #                     xLabel = "Year",
+  #                     aggregate = "sum",
+  #                     classLabel1 = "GHG",
+  #                     classPalette1 = "pal_all",
+  #                     classLabel2 = "sector",
+  #                     classPalette2 = "pal_all") %>%
+  #       dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+  #                     aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+  #                     origScen, origQuery, origValue, origUnits, origX)%>%
+  #       dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+  #                       aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+  #                       origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+  #       dplyr::filter(!is.na(value))
+  #   } else {
+  #     tblUSA <- tibble::tibble()
+  #     # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+  #   }
+  #
+  #   # Combine Core and USA
+  #   if(nrow(tblCore)>0){scenariosCore <- unique(tblCore$scenario)}else{
+  #     scenariosCore <- NULL
+  #   }
+  #
+  #   tblUSA <- tblUSA %>%
+  #     dplyr::filter(!scenario %in% scenariosCore)
+  #
+  #   datax <- dplyr::bind_rows(datax, tblCore, tblUSA)
+  #
+  # }
+
+
+  # paramx <- "emissNonCO2BySector"
+  # if(paramx %in% paramsSelectx){
+  #   rlang::inform(paste0("Running param: ", paramx,"..."))
+  #
+  #   # GHG emissions (non CO2) by subsector values
+  #   queryx <- "nonCO2 emissions by sector"
+  #   if (queryx %in% queriesx) {
+  #     tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+  #     if (!is.null(regionsSelect)) {
+  #       tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+  #     }
+  #     tblCore <- tbl %>%
+  #       dplyr::filter(ghg!="CO2")%>%
+  #       dplyr::filter(scenario %in% scenOrigNames)%>%
+  #       dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+  #       dplyr::mutate(class1=sector, class2=ghg) %>%
+  #       dplyr::mutate(origValue=value,
+  #                     value=value,
+  #                     origUnits=Units,
+  #                     units=Units)%>%
+  #       dplyr::mutate(param = "emissNonCO2BySector",
+  #                     sources = "Sources",
+  #                     origScen = scenario,
+  #                     origQuery = queryx,
+  #                     origX = year, subRegion=region,
+  #                     scenario = scenNewNames,
+  #                     vintage = paste("Vint_", year, sep = ""),
+  #                     x = year,
+  #                     xLabel = "Year",
+  #                     aggregate = "sum",
+  #                     classLabel1 = "Sector",
+  #                     classPalette1 = "pal_all",
+  #                     classLabel2 = "GHG",
+  #                     classPalette2 = "pal_all") %>%
+  #       dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+  #                     aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+  #                     origScen, origQuery, origValue, origUnits, origX)%>%
+  #       dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+  #                       aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+  #                       origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+  #       dplyr::filter(!is.na(value))
+  #   } else {
+  #     tblCore <- tibble::tibble()
+  #     # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+  #   }
+  #
+  #   # GHG emissions (non CO2) by subsector values USA
+  #   queryx <- "nonCO2 emissions by sector USA"
+  #   if (queryx %in% queriesx) {
+  #     tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+  #     tblUSA <- tbl %>%
+  #       dplyr::filter(ghg!="CO2")%>%
+  #       dplyr::filter(scenario %in% scenOrigNames)%>%
+  #       dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+  #       dplyr::mutate(class1=ghg, class2=sector) %>%
+  #       dplyr::mutate(origValue=value,
+  #                     value=value,
+  #                     origUnits=Units,
+  #                     units=Units)%>%
+  #       dplyr::mutate(param = "emissNonCO2BySector",
+  #                     sources = "Sources",
+  #                     origScen = scenario,
+  #                     origQuery = queryx,
+  #                     origX = year, subRegion=region,
+  #                     scenario = scenNewNames,
+  #                     vintage = paste("Vint_", year, sep = ""),
+  #                     x = year,
+  #                     xLabel = "Year",
+  #                     aggregate = "sum",
+  #                     classLabel1 = "GHG",
+  #                     classPalette1 = "pal_all",
+  #                     classLabel2 = "sector",
+  #                     classPalette2 = "pal_all",
+  #                     class1 = paste0(class1," (",units,")")) %>%
+  #       dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+  #                     aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+  #                     origScen, origQuery, origValue, origUnits, origX)%>%
+  #       dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+  #                       aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+  #                       origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+  #       dplyr::filter(!is.na(value))
+  #   } else {
+  #     tblUSA <- tibble::tibble()
+  #     # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+  #   }
+  #
+  #   # GHG emissions (non CO2) by subsector values USA
+  #   queryx <- "nonCO2 emissions by sector USA nonUS"
+  #   if (queryx %in% queriesx) {
+  #     tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+  #     tblUSAnonUS <- tbl %>%
+  #       dplyr::filter(ghg!="CO2")%>%
+  #       dplyr::filter(scenario %in% scenOrigNames)%>%
+  #       dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+  #       dplyr::mutate(class1=ghg, class2=sector) %>%
+  #       dplyr::mutate(origValue=value,
+  #                     value=value,
+  #                     origUnits=Units,
+  #                     units=Units)%>%
+  #       dplyr::mutate(param = "emissNonCO2BySector",
+  #                     sources = "Sources",
+  #                     origScen = scenario,
+  #                     origQuery = queryx,
+  #                     origX = year, subRegion=region,
+  #                     scenario = scenNewNames,
+  #                     vintage = paste("Vint_", year, sep = ""),
+  #                     x = year,
+  #                     xLabel = "Year",
+  #                     aggregate = "sum",
+  #                     classLabel1 = "GHG",
+  #                     class1 = paste0(class1," (",units,")"),
+  #                     classPalette1 = "pal_all",
+  #                     classLabel2 = "sector",
+  #                     classPalette2 = "pal_all") %>%
+  #       dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+  #                     aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+  #                     origScen, origQuery, origValue, origUnits, origX)%>%
+  #       dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+  #                       aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+  #                       origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+  #       dplyr::filter(!is.na(value))
+  #   } else {
+  #     tblUSAnonUS <- tibble::tibble()
+  #     # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+  #   }
+  #
+  #   # Combine Core and USA
+  #   if(nrow(tblCore)>0){scenariosCore <- unique(tblCore$scenario)}else{
+  #     scenariosCore <- NULL
+  #   }
+  #
+  #   tblUSA <- tblUSA %>%
+  #     dplyr::filter(!scenario %in% scenariosCore)
+  #
+  #   tblUSAnonUS <- tblUSAnonUS %>%
+  #     dplyr::filter(!scenario %in% scenariosCore)
+  #
+  #   datax <- dplyr::bind_rows(datax, tblCore, tblUSA, tblUSAnonUS)
+  #
+  # }
+
+
+  ## emissCO2CumGlobal2010to2100s ===========================
   if(any(c("emissCO2CumGlobal2010to2100","emissCO2CumGlobal2010to2100RCP") %in% paramsSelectx)){
 
     paramx <- "emissCO2CumGlobal2010to2100"
@@ -4711,11 +4629,355 @@ readgcam <- function(gcamdatabase = NULL,
     }}
 
 
+  ## co2SequestrationBySector -----------------------------
+  if(any(c("co2SequestrationBySector") %in% paramsSelectx)){
+    queryx <- "CO2 sequestration by sector"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(
+          origValue=value,
+          value=value*gcamextractor::convert$conv_C_CO2*(-1), # convert from MTC to MTCO2eq and make negative
+          origUnits=Units,
+          units="CO2 emissions - (MTCO2)",
+          sources = "Sources",
+          origScen = scenario,
+          origQuery = queryx,
+          origX = year, subRegion=region,
+          scenario = scenNewNames,
+          vintage = paste("Vint_", year, sep = ""),
+          x = year,
+          xLabel = "Year",
+          aggregate = "sum",
+          classPalette1 = "pal_all",
+          classPalette2 = "pal_all",
+          ghg = "CO2") %>%
+        dplyr::select(scenario, region, subRegion, sources, x, xLabel, vintage, units, value,
+                      aggregate, ghg, sector, classPalette1, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)
+      tblCO2Seq <- tbl
+      datax <- dplyr::bind_rows(datax, tblCO2Seq)
+    }
+  } # end CO2 sequestration query
+
+
+  ## Sectoral details ======================================
+
+  # emissCO2BySubsector
+  # need CO2 by subsector for emissGHGBySectorTransportGWPAR5
+  if(any(c("emissGHGBySectorTransportGWPAR5", "emissGHGBySectorIndustryGWPAR5") %in% paramsSelectx)){
+    queryx <- "CO2 emissions by subsector"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(
+          origValue=value,
+          value=value*44/12, # convert from MTC to MTCO2eq
+          origUnits=Units,
+          units="CO2 emissions - (MTCO2)",
+          sources = "Sources",
+          origScen = scenario,
+          origQuery = queryx,
+          origX = year, subRegion=region,
+          scenario = scenNewNames,
+          vintage = paste("Vint_", year, sep = ""),
+          x = year,
+          xLabel = "Year",
+          aggregate = "sum",
+          classPalette1 = "pal_all",
+          classPalette2 = "pal_all",
+          ghg = "CO2") %>%
+        dplyr::select(scenario, region, subRegion, sources, x, xLabel, vintage, units, value,
+                      aggregate, ghg, sector, subsector, classPalette1, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)
+      tblCO2EmissSubsec <- tbl
+    }
+  }
+
+  # emiss nonCO2 by subsector
+  # need for emissGHGBySectorTransportGWPAR5
+  if(any(c("emissGHGBySectorTransportGWPAR5", "emissGHGBySectorIndustryGWPAR5") %in% paramsSelectx)){
+    queryx <- "nonCO2 emissions by subsector"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(ghg = dplyr::case_when ((grepl("HFC", ghg)) ~ "HFCs",
+                                              (grepl("SF6", ghg)) ~ "SF6",
+                                              (grepl("CO2", ghg)) ~ "CO2",
+                                              (grepl("N2O", ghg)) ~ "N2O",
+                                              (grepl("CH4", ghg)) ~ "CH4",
+                                              (grepl("SO2", ghg)) ~ "SO2",
+                                              (grepl("NH3", ghg)) ~ "NH3",
+                                              (grepl("CF4", ghg)) ~ "CF4",
+                                              (grepl("C2F6", ghg)) ~ "C2F6",
+                                              TRUE ~ "Other"))%>%
+        dplyr::left_join(gcamextractor::GWP,by="ghg") %>%
+        dplyr::left_join(gcamextractor::conv_GgTg_to_MTC,by="Units") %>%
+        dplyr::filter(ghg!='CO2') %>%
+        dplyr::mutate(origValue=value,
+                      value=value*GWPAR5*Convert,
+                      origUnits=Units,
+                      origUnits = dplyr::case_when(ghg=="Other"~"Units",TRUE~origUnits),
+                      units="GHG Emissions GWPAR5 (MTCO2eq)",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      classPalette2 = "pal_all",
+                      classPalette1 = "pal_all") %>%
+        dplyr::select(scenario, region, subRegion, sources, x, xLabel, vintage, units, value,
+                      aggregate, ghg, sector, subsector, classPalette1, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)
+
+      tblNonCO2EmissSubsec <- tbl
+    } else {
+      tblNonCO2EmissSubsec <- tibble::tibble()
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  ### Power ##########################################
+  paramx <- "emissGHGBySectorPowerGWPAR5"
+  if(paramx %in% paramsSelectx) {
+    # CO2 emissions
+    tblCO2EmissPower <- tblCO2Emiss %>%
+      dplyr::filter(grepl("elec", sector)) %>%
+      dplyr::mutate(sector = dplyr::case_when(
+        grepl("biomass", sector) ~ paste0(ghg, "_biomass"),
+        grepl("coal", sector) ~ paste0(ghg, "_coal"),
+        grepl("gas", sector) ~ paste0(ghg, "_natural gas"),
+        grepl("refined liquids", sector) ~ paste0(ghg, "_refined liquids"),
+        ghg != "CO2" ~ ghg,
+        T ~ paste0(sector, "_", ghg))) %>%
+      dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
+                      aggregate, ghg, sector, classPalette1, classPalette2,
+                      origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+      dplyr::filter(!is.na(value)) %>%
+      dplyr::rename(class1 = sector, class2 = ghg) %>%
+      dplyr::mutate(classLabel1 = "sector",
+                    classLabel2 = "ghg")
+
+    # NonCO2 emissions
+    tblNonCO2EmissPower <- tblNonCO2Emiss %>%
+      dplyr::filter(grepl("elec", sector)) %>%
+      dplyr::mutate(sector = dplyr::case_when(
+        grepl("biomass", sector) ~ paste0(ghg, "_biomass"),
+        grepl("coal", sector) ~ paste0(ghg, "_coal"),
+        grepl("gas", sector) ~ paste0(ghg, "_natural gas"),
+        grepl("refined liquids", sector) ~ paste0(ghg, "_refined liquids"),
+        ghg != "CO2" ~ ghg,
+        T ~ paste0(sector, "_", ghg))) %>%
+      dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
+                      aggregate, ghg, sector, classPalette1, classPalette2,
+                      origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+      dplyr::filter(!is.na(value)) %>%
+      dplyr::rename(class1 = sector, class2 = ghg) %>%
+      dplyr::mutate(classLabel1 = "sector",
+                    classLabel2 = "ghg")
+
+    # all CO2
+    tblEmissGHGPower <- dplyr::bind_rows(tblCO2EmissPower,
+                                         tblNonCO2EmissPower) %>%
+      dplyr::mutate(param = "emissGHGBySectorPowerGWPAR5",
+                    units="GHG emissions - (MTCO2eq)")
+    datax <- dplyr::bind_rows(datax, tblEmissGHGPower)
+  }
+
+  ### Buildings ############################################
+  paramx <- "emissGHGBySectorBuildingsGWPAR5"
+  if(paramx %in% paramsSelectx) {
+      # CO2 emissions
+      tblCO2EmissBuild <- tblCO2EmissNoBio %>%
+        dplyr::filter(grepl("comm|resid", sector)) %>%
+        dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
+                        aggregate, ghg, sector, classPalette1, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value)) %>%
+        dplyr::rename(class1 = sector, class2 = ghg) %>%
+        dplyr::mutate(classLabel1 = "sector",
+                      classLabel2 = "ghg")
+
+      # NonCO2 emissions
+      tblNonCO2EmissBuild <- tblNonCO2Emiss %>%
+        dplyr::filter(grepl("comm|resid", sector)) %>%
+        dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
+                        aggregate, ghg, sector, classPalette1, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value)) %>%
+        dplyr::rename(class1 = sector, class2 = ghg) %>%
+        dplyr::mutate(classLabel1 = "sector",
+                      classLabel2 = "ghg")
+
+      # all CO2
+      tblEmissGHGBuild <- dplyr::bind_rows(tblCO2EmissBuild,
+                                           tblNonCO2EmissBuild) %>%
+        dplyr::mutate(param = "emissGHGBySectorBuildingsGWPAR5",
+                      units="GHG emissions - (MTCO2eq)")
+      datax <- dplyr::bind_rows(datax, tblEmissGHGBuild)
+  }
+
+  paramx <- "serviceOutputByTechBuildings"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "building service output by tech"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames,
+                      grepl("comm|resid", sector))%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(
+          class1 = paste0(sector, " (", technology, ")"),
+          param = "serviceOutputByTechBuildings",
+          sources = "Sources",
+          origScen = scenario,
+          origQuery = queryx,
+          origValue = value,
+          origUnits = Units,
+          origX = year, subRegion=region,
+          scenario = scenNewNames,
+          units = Units,
+          vintage = paste("Vint_", year, sep = ""),
+          x = year,
+          xLabel = "Year",
+          aggregate = "sum",
+          classLabel1 = "technology",
+          classPalette1 = "pal_all",
+          class2 = "class2",
+          classLabel2 = "classLabel2",
+          classPalette2 = "classPalette2")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+  ### Transport #############################################
+  paramx <- "emissGHGBySectorTransportGWPAR5"
+  if(paramx %in% paramsSelectx) {
+    # CO2 emissions
+    tblCO2EmissTrn <- tblCO2EmissSubsec %>%
+      dplyr::filter(grepl("trn", sector)) %>%
+      dplyr::mutate(sector = dplyr::case_when(
+        subsector %in% c("Car", "Large Car and Truck", "Mini Car") ~ "4W LDV",
+        subsector %in% c("Heavy truck", "Light truck", "Medium truck") ~ "Freight road",
+        T ~ subsector)) %>%
+      dplyr::select(-subsector) %>%
+      dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
+                      aggregate, ghg, sector, classPalette1, classPalette2,
+                      origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+      dplyr::filter(!is.na(value)) %>%
+      dplyr::rename(class1 = sector, class2 = ghg) %>%
+      dplyr::mutate(classLabel1 = "sector",
+                    classLabel2 = "ghg")
+
+    # NonCO2 emissions
+    tblNonCO2EmissTrn <- tblNonCO2EmissSubsec %>%
+      dplyr::filter(grepl("trn", sector)) %>%
+      dplyr::mutate(sector = dplyr::case_when(
+        subsector %in% c("Car", "Large Car and Truck", "Mini Car") ~ "4W LDV",
+        subsector %in% c("Heavy truck", "Light truck", "Medium truck") ~ "Freight road",
+        T ~ subsector)) %>%
+      dplyr::select(-subsector) %>%
+      dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
+                      aggregate, ghg, sector, classPalette1, classPalette2,
+                      origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+      dplyr::filter(!is.na(value)) %>%
+      dplyr::rename(class1 = sector, class2 = ghg) %>%
+      dplyr::mutate(classLabel1 = "sector",
+                    classLabel2 = "ghg")
+
+    # all CO2
+    tblEmissGHGTrn <- dplyr::bind_rows(tblCO2EmissTrn,
+                                       tblNonCO2EmissTrn) %>%
+      dplyr::mutate(param = "emissGHGBySectorTransportGWPAR5",
+                    units="GHG emissions - (MTCO2eq)")
+    datax <- dplyr::bind_rows(datax, tblEmissGHGTrn)
+  }
+
+  ### Industry #############################################
+  paramx <- "emissGHGBySectorIndustryGWPAR5"
+  if(paramx %in% paramsSelectx) {
+    # CO2 emissions
+    tblCO2EmissInd <- tblCO2EmissSubsec %>%
+      dplyr::filter(grepl("ind|N fertilizer|cement", sector)) %>%
+      dplyr::mutate(sector = dplyr::case_when(
+        sector == "industrial energy use" ~ subsector,
+        sector == "industrial feedstocks" ~ sector,
+        grepl("cement", sector) ~ "cement",
+        grepl("industrial processes", sector) ~ "industrial processes",
+        grepl("N fertilizer", sector) ~ "N fertilizer",
+        T ~ paste0(sector, "_", subsector))) %>%
+      dplyr::select(-subsector) %>%
+      dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
+                      aggregate, ghg, sector, classPalette1, classPalette2,
+                      origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+      dplyr::filter(!is.na(value)) %>%
+      dplyr::rename(class1 = sector, class2 = ghg) %>%
+      dplyr::mutate(classLabel1 = "sector",
+                    classLabel2 = "ghg")
+
+    # NonCO2 emissions
+    tblNonCO2EmissInd <- tblNonCO2EmissSubsec %>%
+      dplyr::filter(grepl("ind|N fertilizer|cement", sector)) %>%
+      dplyr::mutate(sector = dplyr::case_when(
+        sector == "industrial energy use" ~ subsector,
+        sector == "industrial feedstocks" ~ sector,
+        grepl("cement", sector) ~ "cement",
+        grepl("industrial processes", sector) ~ "industrial processes",
+        grepl("N fertilizer", sector) ~ "N fertilizer",
+        T ~ paste0(sector, "_", subsector))) %>%
+      dplyr::select(-subsector) %>%
+      dplyr::group_by(scenario, region, subRegion, sources, x, xLabel, vintage, units,
+                      aggregate, ghg, sector, classPalette1, classPalette2,
+                      origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+      dplyr::filter(!is.na(value)) %>%
+      dplyr::rename(class1 = sector, class2 = ghg) %>%
+      dplyr::mutate(classLabel1 = "sector",
+                    classLabel2 = "ghg")
+
+    # all CO2
+    tblEmissGHGInd <- dplyr::bind_rows(tblCO2EmissInd,
+                                       tblNonCO2EmissInd) %>%
+      dplyr::mutate(param = "emissGHGBySectorIndustryGWPAR5",
+                    units="GHG emissions - (MTCO2eq)")
+    datax <- dplyr::bind_rows(datax, tblEmissGHGInd)
+  }
+
   # Transport -----------------------------
 
-
-  ## Service output by mode ===========================
-
+  ## transportPassengerVMTByMode ===========================
   paramx<-"transportPassengerVMTByMode"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
@@ -4778,6 +5040,8 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+
+  ## transportFreightVMTByMode =================================================
   paramx<-"transportFreightVMTByMode"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
@@ -4830,6 +5094,8 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+
+  ## transportPassengerGHGByMode ===============================================
   paramx<-"transportPassengerGHGByMode"
   # GHG emissions by passenger transport mode
   if(paramx %in% paramsSelectx){
@@ -4908,6 +5174,8 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+
+  ## transportFreightGHGByMode =================================================
   paramx<-"transportFreightGHGByMode"
   # GHG emissions by freight transport mode
   if(paramx %in% paramsSelectx){
@@ -4981,6 +5249,8 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+
+  ## energyPrimaryRefLiqProdEJ =================================================
   paramx<-"energyPrimaryRefLiqProdEJ"
   # Freight VMT (services) by fuel
   if(paramx %in% paramsSelectx){
@@ -5046,6 +5316,8 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+
+  ## transportPassengerVMTByFuel ===============================================
   paramx<-"transportPassengerVMTByFuel"
   # Passenger VMT (services) by fuel
   if(paramx %in% paramsSelectx){
@@ -5064,6 +5336,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(sector %in% vmt_array, !technology %in% c('Cycle', 'Walk', '2W', '4W', 'LDV', 'road')) %>%
         dplyr::mutate(technology=gsub("NG","gas", technology),
                       technology=gsub("FCEV","hydrogen", technology),
+                      technology=gsub("Hydrogen","hydrogen", technology),
                       technology=gsub("BEV","electricity", technology),
                       technology=gsub("Electric","electricity", technology),
                       technology=gsub("Liquids","liquids", technology),
@@ -5116,12 +5389,14 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+
+  ## transportPassengerVMTByTech ===============================================
   paramx<-"transportPassengerVMTByTech"
   # Passenger VMT (services) by fuel
   if(paramx %in% paramsSelectx){
     rlang::inform(paste0("Running param: ", paramx,"..."))
     queryx <- "transport service output by tech"
-    vmt_array <- c( "trn_pass", "trn_pass_road", "trn_pass_road_LDV",
+    vmt_array <- c("trn_aviation_intl", "trn_pass", "trn_pass_road", "trn_pass_road_LDV",
                    "trn_pass_road_LDV_2W", "trn_pass_road_LDV_4W")
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
@@ -5133,14 +5408,14 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
         dplyr::filter(sector %in% vmt_array, !technology %in% c('Cycle', 'Walk', '2W', '4W', 'LDV', 'road')) %>%
         dplyr::mutate(technology=dplyr::case_when(
-          subsector == "Bus" & technology == "BEV" ~ "Electric bus",
-          subsector == "Bus" & technology %in% c("Liquids", "NG") ~ "Non-electric bus",
+          subsector == "Bus" & technology %in% c("BEV", "FCEV") ~ "Electric bus",
+          subsector == "Bus" & technology %in% c("Liquids", "NG", "Hybrid Liquids") ~ "Non-electric bus",
           subsector %in% c("2W and 3W", "Car", "Large Car and Truck", "Mini Car") & technology %in% c("BEV", "FCEV") ~ "Electric LDV",
           subsector %in% c("2W and 3W", "Car", "Large Car and Truck", "Mini Car") & technology == "Hybrid Liquids" ~ "Hybrid LDV",
           subsector %in% c("2W and 3W", "Car", "Large Car and Truck", "Mini Car") & technology %in% c("Liquids", "NG") ~ "Other LDV",
           subsector == "Passenger Rail" & technology %in% c("Electric", "Tech-Adv-Electric") ~ "Electric rail",
           subsector == "Passenger Rail" & technology %in% c("Liquids", "Tech-Adv-Liquid") ~ "Non-electric Rail",
-          subsector == "Domestic Aviation" ~ "Airplane",
+          grepl("Aviation", subsector) ~ "Airplane",
           subsector == "HSR" ~ "HSR",
           T ~ paste0(subsector, "_", technology)),
                       param = "transportPassengerVMTByTech",
@@ -5190,6 +5465,8 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+
+  ## transportFreightVMTByFuel =================================================
   paramx<-"transportFreightVMTByFuel"
   # Freight VMT (services) by fuel
   if(paramx %in% paramsSelectx){
@@ -5207,8 +5484,11 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(sector %in% vmt_array, !technology %in% c('road')) %>%
         dplyr::mutate(technology=gsub("NG","gas", technology),
                       technology=gsub("Liquids","liquids", technology),
+                      technology=gsub("Hybrid liquids","liquids", technology),
+                      technology=gsub("Hybrid Liquids","liquids", technology),
                       technology=gsub("Electric","electricity", technology),
                       technology=gsub("BEV","electricity", technology),
+                      technology=gsub("FCEV","electricity", technology),
                       technology=gsub("Coal","coal", technology),
                       param = "transportFreightVMTByFuel",
                       sources = "Sources",
@@ -5257,6 +5537,8 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+
+  ## transportFreightVMTByTech =================================================
   paramx<-"transportFreightVMTByTech"
   # Freight VMT (services) by tech
   if(paramx %in% paramsSelectx){
@@ -5275,10 +5557,10 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::mutate(technology = dplyr::case_when(
           subsector == "Domestic Ship" ~ "Shipping",
           subsector == "Freight Rail" & technology == "Coal" ~ "Coal Rail",
-          subsector == "Freight Rail" & technology %in% c("Electric", "Adv-Electric") ~ "Electric Rail",
-          subsector == "Freight Rail" & technology %in% c("Liquids", "Adv-Liquid") ~ "Liquids Rail",
-          sector == "trn_freight_road" & technology == "BEV" ~ "Electric truck",
-          sector == "trn_freight_road" & technology == "Liquids" ~ "Liquids truck",
+          subsector == "Freight Rail" & technology %in% c("Electric", "FCEV", "BEV") ~ "Electric Rail",
+          subsector == "Freight Rail" & technology %in% c("Liquids", "Hybrid Liquids") ~ "Liquids Rail",
+          sector == "trn_freight_road" & technology %in% c("BEV", "FCEV") ~ "Electric truck",
+          sector == "trn_freight_road" & technology %in% c("Liquids", "Hybrid Liquids") ~ "Liquids truck",
           sector == "trn_freight_road" & technology == "NG" ~ "NG truck",
           T ~ paste0(subsector, "_", technology)
         ),
@@ -5329,6 +5611,8 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+
+  ## energyFinalSubsecByFuelTranspEJ ===========================================
   paramx<-"energyFinalSubsecByFuelTranspEJ"
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
@@ -5442,6 +5726,453 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
 
       datax <- dplyr::bind_rows(datax, tblMod)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  # Water ----------------------------------------------------------------------
+
+  ## watConsumBySec ============================================================
+  paramx <- "watConsumBySec"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    # water consumption by sector
+    queryx <- "water consumption by state, sector, basin (includes desal)"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if(nrow(tbl)>0){
+        # If GCAM USA then remove "USA" region and use states
+        # if(any(gcamextractor::regions_US52 %in% unique(tbl$region))){
+        #   tbl <- tbl %>% dplyr::filter(region!="USA") # Remove region USA and use states instead
+        # }
+      }
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(sector=dplyr::case_when(
+          grepl("desalination",technology,ignore.case=T)~"desalination",
+          sector=="water_td_an_C"~"animal",
+          sector=="water_td_dom_C"~"domestic",
+          sector=="water_td_muni_C"~"domestic",
+          sector=="water_td_elec_C"~"electric",
+          sector=="water_td_ind_C"~"industry",
+          sector=="water_td_pri_C"~"primary",
+          grepl("_irr_",sector)~"irrigation",
+          TRUE~sector)) %>%
+        dplyr::mutate(param = "watConsumBySec",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      value = value,
+                      units = "Water Consumption by Sector (km3)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = sector,
+                      classLabel1 = "Sector",
+                      classPalette1 = "pal_all",
+                      class2 = subsector,
+                      classLabel2 = "basin",
+                      classPalette2 = "pal_all")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  ## watWithdrawBySec ==========================================================
+  paramx<- "watWithdrawBySec"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    # water consumption by sector
+    queryx <- "water withdrawals by state, sector, basin (includes desal)"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      # if(nrow(tbl)>0){
+      #   # If GCAM USA then remove "USA" region and use states
+      #   if(any(gcamextractor::regions_US52 %in% unique(tbl$region))){
+      #     tbl <- tbl %>% dplyr::filter(region!="USA") # Remove region USA and use states instead
+      #   }
+      # }
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(sector=dplyr::case_when(
+          grepl("desalination",technology,ignore.case=T)~"desalination",
+          sector=="water_td_an_W"~"livestock",
+          sector=="water_td_dom_W"~"municipal",
+          sector=="water_td_muni_W"~"municipal",
+          sector=="water_td_elec_W"~"electricity",
+          sector=="water_td_ind_W"~"industry",
+          sector=="water_td_pri_W"~"mining",
+          grepl("_irr_",sector)~"agriculture",
+          TRUE~sector)) %>%
+        dplyr::mutate(param = "watWithdrawBySec",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      value = value,
+                      units = "Water Withdrawal by Sector (km3)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = sector,
+                      classLabel1 = "Sector",
+                      classPalette1 = "pal_wet",
+                      class2 = subsector,
+                      classLabel2 = "basin",
+                      classPalette2 = "pal_all")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  ## watWithdrawByCrop =========================================================
+  paramx <- "watWithdrawByCrop"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    # water withdrawals by sector
+    queryx <- "water withdrawals by crop"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      # Need to add in conveyance losses for USA when running GCAM USA
+      # gcamusa.CONVEYANCE_LOSSES <- 0.829937455747218 from constants.R
+      if(nrow(tbl)>0){
+        if(any(unique(tbl$region) %in% gcamextractor::regions_US52)){
+          tbl <- tbl %>%
+            dplyr::mutate(value = dplyr::case_when(region=="USA"~value/0.829937455747218,
+                                                   TRUE~value)) %>%
+            dplyr::filter(!region %in% gcamextractor::regions_US52)
+        }
+      }
+      if (!is.null(regionsSelect)) {
+        if(any(regionsSelect %in% gcamextractor::regions_US52)){
+          tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
+        } else {
+          tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
+        }
+      }
+      tbl <- tbl %>%
+        dplyr::filter(sector!="industry", sector!="mining" , sector!="municipal"
+                      , sector!="electricity" , sector!="livestock", !grepl("water_td_",sector))%>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(param = "watWithdrawByCrop",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      value = value,
+                      units = "Water Withdrawals by Crop (km3)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = sector,
+                      classLabel1 = "Crop",
+                      classPalette1 = "pal_all",
+                      class2 = "class2",
+                      classLabel2 = "classLabel2",
+                      classPalette2 = "classPalette2")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  ## watBioPhysCons ============================================================
+  paramx <- "watBioPhysCons"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    # biophysical water demand by crop type and land region
+    queryx <- "biophysical water demand by crop type and land region"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(param = "watBioPhysCons",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      value = value,
+                      units = "Biophysical Water Consumption (km3)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = sector,
+                      classLabel1 = "Crop",
+                      classPalette1 = "pal_16",
+                      class2 = "class2",
+                      classLabel2 = "classLabel2",
+                      classPalette2 = "classPalette2") %>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  ## watIrrWithdrawBasin =======================================================
+  paramx <- "watIrrWithdrawBasin"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    # water withdrawals by water mapping source
+    queryx <- "water withdrawals by water mapping source"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(grepl("_irr_",input))%>%
+        dplyr::mutate(input=gsub("water_td_irr_","",input),
+                      input=gsub("_W","",input))%>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(param = "watIrrWithdrawBasin",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      value = value,
+                      units = "Irrigation Water Withdrawal (km3)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = input,
+                      classLabel1 = "Basin",
+                      classPalette1 = "pal_16",
+                      class2 = "class2",
+                      classLabel2 = "classLabel2",
+                      classPalette2 = "classPalette2") %>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  ## watIrrConsBasin ===========================================================
+  paramx <- "watIrrConsBasin"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    # water consumption by water mapping source
+    queryx <- "water consumption by water mapping source"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(grepl("_irr_",input))%>%
+        dplyr::mutate(input=gsub("water_td_irr_","",input),
+                      input=gsub("_C","",input))%>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(param = "watIrrConsBasin",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      value = value,
+                      units = "Irrigation Water Consumption (km3)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = input,
+                      classLabel1 = "Basin",
+                      classPalette1 = "pal_16",
+                      class2 = "class2",
+                      classLabel2 = "classLabel2",
+                      classPalette2 = "classPalette2") %>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  ## watSupRunoffBasin =========================================================
+  paramx <- "watSupRunoffBasin"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    # water consumption by water mapping source
+    queryx <- "Basin level available runoff"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::mutate(subRegion=gsub(" ","_",gsub("\\_.*","",basin)))%>%
+        dplyr::select(-basin)%>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(param = "watSupRunoffBasin",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year,
+                      scenario = scenNewNames,
+                      value = value,
+                      units = "Runoff (km3)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1="class1",
+                      classLabel1 = "runoff",
+                      classPalette1 = "pal_wet",
+                      class2 = "class2",
+                      classLabel2 = "classLabel2",
+                      classPalette2 = "pal_wet") %>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
+  ## waterWithdrawROGW =========================================================
+  paramx <- "waterWithdrawROGW"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    # water consumption by water mapping source
+    queryx <- "Water withdrawals by water source (runoff vs. groundwater)"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        if(any(regionsSelect %in% gcamextractor::regions_US52)){
+          tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
+        } else {
+          tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
+        }
+      }
+      tbl <- tbl %>%
+        dplyr::mutate(subRegion=gsub(" ","_",gsub("\\_.*","",resource)))%>%
+        dplyr::select(-resource)%>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(param = "waterWithdrawROGW",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year,
+                      scenario = scenNewNames,
+                      value = value,
+                      units = "km3",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1=subresource,
+                      classLabel1 = "source",
+                      classPalette1 = "pal_all",
+                      class2 = "class2",
+                      classLabel2 = "classLabel2",
+                      classPalette2 = "pal_all") %>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
     } else {
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
