@@ -82,6 +82,9 @@ Or pick an individual param from the list:
 # transport
 "transportPassengerVMTByMode", "transportFreightVMTByMode", "transportPassengerVMTByFuel", "transportFreightVMTByFuel",
 
+# buildings
+"serviceOutputByTechBuildings", "buildingFloorspace",
+
 # water
 "watConsumBySec", "watWithdrawBySec", "watWithdrawByCrop", "watBioPhysCons", "watIrrWithdrawBasin","watIrrConsBasin",
 
@@ -103,7 +106,9 @@ Or pick an individual param from the list:
 "emissByGasGWPAR5FFI", "emissByGasGWPAR5LUC", "emissBySectorGWPAR5LUC",
 "emissNonCO2ByResProdGTPAR5", "emissBySectorGTPAR5FFI","emissMethaneBySourceGTPAR5",
 "emissByGasGTPAR5FFI", "emissByGasGTPAR5LUC","emissBySectorGTPAR5LUC",
-"emissCO2BySectorNoBio"}
+"emissCO2BySectorNoBio",
+
+# hydrogen}
 
 \item{folder}{Default = getwd(). Path to directory for outputs}
 
