@@ -6255,7 +6255,6 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(scenario %in% scenOrigNames) %>%
         dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
         dplyr::mutate(
-          class1 = subsector,
           param = "hydrogenProdByTech",
           sources = "Sources",
           origScen = scenario,
@@ -6270,6 +6269,7 @@ readgcam <- function(gcamdatabase = NULL,
           x = year,
           xLabel = "Year",
           aggregate = "sum",
+          class1 = subsector,
           classLabel1 = "subsector",
           classPalette1 = "pal_all",
           class2 = technology,
@@ -6288,18 +6288,236 @@ readgcam <- function(gcamdatabase = NULL,
     }}
 
   ## hydrogenUtilizationByTech =================================================
-
-  ## hydrogenInputsByTech ======================================================
+  paramx <- "hydrogenUtilizationByTech"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "hydrogen utilization by technology"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames) %>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(
+          param = "hydrogenUtilizationByTech",
+          sources = "Sources",
+          origScen = scenario,
+          origQuery = queryx,
+          origValue = value,
+          origUnits = Units,
+          origX = year,
+          subRegion=region,
+          scenario = scenNewNames,
+          units = Units,
+          vintage = paste("Vint_", year, sep = ""),
+          x = year,
+          xLabel = "Year",
+          aggregate = "sum",
+          class1 = sector,
+          classLabel1 = "sector",
+          classPalette1 = "pal_all",
+          class2 = subsector,
+          classLabel2 = "subsector",
+          classPalette2 = "classPalette2")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
 
   ## hydrogenPricesBySector ====================================================
+  paramx <- "hydrogenPricesBySector"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "hydrogen prices by sector"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames) %>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(
+          param = "hydrogenPricesBySector",
+          sources = "Sources",
+          origScen = scenario,
+          origQuery = queryx,
+          origValue = value,
+          origUnits = Units,
+          origX = year,
+          subRegion=region,
+          scenario = scenNewNames,
+          units = Units,
+          vintage = paste("Vint_", year, sep = ""),
+          x = year,
+          xLabel = "Year",
+          aggregate = "sum",
+          class1 = fuel,
+          classLabel1 = "fuel",
+          classPalette1 = "pal_all",
+          class2 = "class2",
+          classLabel2 = "classLabel2",
+          classPalette2 = "classPalette2")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
 
   ## hydrogenCostsByTech =======================================================
+  paramx <- "hydrogenCostsByTech"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "hydrogen costs by tech"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames) %>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(
+          param = "hydrogenCostsByTech",
+          sources = "Sources",
+          origScen = scenario,
+          origQuery = queryx,
+          origValue = value,
+          origUnits = Units,
+          origX = year,
+          subRegion=region,
+          scenario = scenNewNames,
+          units = Units,
+          vintage = paste("Vint_", year, sep = ""),
+          x = year,
+          xLabel = "Year",
+          aggregate = "sum",
+          class1 = paste0(sector, "_", subsector),
+          classLabel1 = "sector_subsector",
+          classPalette1 = "pal_all",
+          class2 = technology,
+          classLabel2 = "technology",
+          classPalette2 = "classPalette2")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+  ## hydrogenInputsByTech ======================================================
+  paramx <- "hydrogenInputsByTech"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "hydrogen inputs by tech"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames) %>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(
+          param = "hydrogenInputsByTech",
+          sources = "Sources",
+          origScen = scenario,
+          origQuery = queryx,
+          origValue = value,
+          origUnits = Units,
+          origX = year,
+          subRegion=region,
+          scenario = scenNewNames,
+          units = Units,
+          vintage = paste("Vint_", year, sep = ""),
+          x = year,
+          xLabel = "Year",
+          aggregate = "sum",
+          class1 = paste0(sector, "_", subsector, "_", technology),
+          classLabel1 = "sector_subsector_technology",
+          classPalette1 = "pal_all",
+          class2 = fuel,
+          classLabel2 = "fuel",
+          classPalette2 = "classPalette2")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
 
   ## hydrogenOutputsByTech =====================================================
+  paramx <- "hydrogenOutputsByTech"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "hydrogen outputs by technology"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::filter(scenario %in% scenOrigNames) %>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(
+          param = "hydrogenOutputsByTech",
+          sources = "Sources",
+          origScen = scenario,
+          origQuery = queryx,
+          origValue = value,
+          origUnits = Units,
+          origX = year,
+          subRegion=region,
+          scenario = scenNewNames,
+          units = Units,
+          vintage = paste("Vint_", year, sep = ""),
+          x = year,
+          xLabel = "Year",
+          aggregate = "sum",
+          class1 = paste0(sector, "_", subsector),
+          classLabel1 = "sector_subsector",
+          classPalette1 = "pal_all",
+          class2 = technology,
+          classLabel2 = "technology",
+          classPalette2 = "classPalette2")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
 
   } # Close datax assignments
-
-
 
 
   if(nrow(datax)>0){
