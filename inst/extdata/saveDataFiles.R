@@ -136,6 +136,7 @@ map_param_query <- tibble::tribble(
 
   # Buildings
   "buildings", "serviceOutputByTechBuildings", "building service output by tech", "pal_hot", "no",
+  "buildings", "buildingFloorspace", "building floorspace", "pal_hot", "no",
 
   # Water
   "water","watConsumBySec", "water consumption by state, sector, basin (includes desal)","pal_wet","no",
@@ -198,6 +199,13 @@ map_param_query <- tibble::tribble(
   #"emissions","emissGHGByGasGTPAR5", c("nonCO2 emissions by resource production","nonCO2 emissions by sector", "Land Use Change Emission (future)"),"pal_hot","no",
   #"emissions","emissBySectorGTPAR5FFI",  c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
   #"emissions","emissBySectorGTPAR5LUC", c("nonCO2 emissions by resource production","nonCO2 emissions by sector"),"pal_hot","no",
+  # Hydrogen
+  "hydrogen", "hydrogenProdByTech", "hydrogen production by tech", "pal_hot", "no",
+  "hydrogen", "hydrogenUtilizationByTech", "hydrogen utilization by technology", "pal_hot", "no",
+  "hydrogen", "hydrogenInputsByTech", "hydrogen inputs by tech", "pal_hot", "no",
+  "hydrogen", "hydrogenPricesBySector", "hydrogen prices by sector", "pal_hot", "no",
+  "hydrogen", "hydrogenCostsByTech", "hydrogen costs by tech", "pal_hot", "no",
+  "hydrogen", "hydrogenOutputsByTech", "hydrogen outputs by technology", "pal_hot", "no"
 ); map_param_query
 
 use_data(map_param_query, version=3, overwrite=T)
@@ -823,21 +831,21 @@ regions_gcam_basins <- c( "Adriatic_Sea_Greece_Black_Sea_Coast","Africa_East_Cen
 use_data(regions_gcam_basins, version=3, overwrite=T)
 
 
-# Test Data
-library(gcamextractor)
-library(dplyr)
-
-# Tests using .proj file =======================================================
-# Test arguments
-paramsSelect_i = (map_param_query$group%>%unique())[!(map_param_query$group%>%unique()) %in% c("cerf","go")]
-
-gcamData <- gcamextractor::readgcam(queryFile = NULL,
-                                    dataProjFile = gcamextractor::example_gcamv54_argentina_colombia_2025_proj,
-                                    scenOrigNames = 'Reference',
-                                    scenNewNames = 'Ref',
-                                    paramsSelect = paramsSelect_i,
-                                    regionsSelect = 'Colombia')
-
-gcamextractor_test_data <- gcamData$data
-use_data(gcamextractor_test_data, version=3, overwrite=T)
-
+# # Test Data
+# library(gcamextractor)
+# library(dplyr)
+#
+# # Tests using .proj file =======================================================
+# # Test arguments
+# paramsSelect_i = (map_param_query$group%>%unique())[!(map_param_query$group%>%unique()) %in% c("cerf","go")]
+#
+# gcamData <- gcamextractor::readgcam(queryFile = NULL,
+#                                     dataProjFile = gcamextractor::example_gcamv54_argentina_colombia_2025_proj,
+#                                     scenOrigNames = 'Reference',
+#                                     scenNewNames = 'Ref',
+#                                     paramsSelect = paramsSelect_i,
+#                                     regionsSelect = 'Colombia')
+#
+# gcamextractor_test_data <- gcamData$data
+# use_data(gcamextractor_test_data, version=3, overwrite=T)
+#
