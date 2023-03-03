@@ -1543,6 +1543,16 @@
   </emissionsQueryBuilder>
  </aQuery>
  <aQuery>
+  <all-regions/>
+  <emissionsQueryBuilder title="CO2 sequestration by tech">
+   <axis1 name="subsector">subsector</axis1>
+   <axis2 name="Year">emissions-sequestered</axis2>
+   <xPath buildList="true" dataName="emissions" group="false" sumAll="false">*[@type = 'sector' ]/*[@type='subsector']/*[@type='technology']//
+            CO2/emissions-sequestered/node()</xPath>
+   <comments/>
+  </emissionsQueryBuilder>
+ </aQuery>
+ <aQuery>
   <region name="AK"/>
   <region name="AL"/>
   <region name="AR"/>
@@ -1685,6 +1695,33 @@
    <axis1 name="building">gcam-consumer[@name]</axis1>
    <axis2 name="Year">floorspace[@year]</axis2>
    <xPath buildList="true" dataName="floorspace" group="false" sumAll="false">gcam-consumer//floorspace/node()</xPath>
+   <comments/>
+  </supplyDemandQuery>
+ </aQuery>
+ <aQuery>
+  <all-regions/>
+  <supplyDemandQuery title="energy consumption by tech">
+   <axis1 name="input">input</axis1>
+   <axis2 name="Year">demand-physical[@vintage]</axis2>
+   <xPath buildList="true" dataName="input" group="false" sumAll="false">*[@type='sector']/*[@type='subsector']/*[@type='technology']/*[@type='input']/demand-physical/node()</xPath>
+   <comments/>
+  </supplyDemandQuery>
+ </aQuery>
+ <aQuery>
+  <all-regions/>
+  <marketQuery title="prices of all markets">
+   <axis1 name="market">market</axis1>
+   <axis2 name="Year">market</axis2>
+   <xPath buildList="true" dataName="price" group="false" sumAll="false">Marketplace/market[true()]/price/node()</xPath>
+   <comments/>
+  </marketQuery>
+ </aQuery>
+ <aQuery>
+  <all-regions/>
+  <supplyDemandQuery title="CO2 emissions by tech">
+   <axis1 name="technology">technology[@name]</axis1>
+   <axis2 name="Year">emissions[@year]</axis2>
+   <xPath buildList="true" dataName="output" group="false" sumAll="false">*[@type='sector']/*[@type='subsector']//*[@type='technology']/CO2[@type='GHG' and @name='CO2']/emissions/node()</xPath>
    <comments/>
   </supplyDemandQuery>
  </aQuery>

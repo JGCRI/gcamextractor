@@ -83,6 +83,7 @@
 #'
 #'
 #' @param saveData Default = "T". Set to F if do not want to save any data to file.
+#' @param exogenousNoBio Default = FALSE. For "no bio" emissions queries, should negative biomass CO2 emissions accounting be done exogenously rather than using the 'CO2 emissions by sector (no bio)' query?
 #' @return A list with the scenarios in the gcam database, queries in the queryxml file and a
 #' tibble with gcam data formatted for gcamextractor charts aggregated to different categories.
 #' These include data, dataAggParam, dataAggClass1, dataAggClass2.
@@ -105,7 +106,8 @@ readgcam <- function(gcamdatabase = NULL,
                      paramsSelect = "diagnostic",
                      folder = getwd(),
                      nameAppend = "",
-                     saveData = T
+                     saveData = T,
+                     exogenousNoBio = F
 ){
 
 
@@ -122,6 +124,7 @@ readgcam <- function(gcamdatabase = NULL,
   # folder=paste(getwd(), "/outputs", sep = "")
   # nameAppend=""
   # saveData = T
+  # exogenousNoBio = F
 
   #................
   # Initialize variables by setting to NULL
@@ -3718,12 +3721,75 @@ readgcam <- function(gcamdatabase = NULL,
   ## emissCO2BySectorNoBio ===========================
   # need CO2 for CO2BySectorNoBio, GHGBySectorNoBio, and GHGByGasNoBio
   if(any(c("emissCO2BySectorNoBio", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissGHGBySectorBuildingsGWPAR5") %in% paramsSelectx)){
-    queryx <- "CO2 emissions by sector (no bio)"
-    if (queryx %in% queriesx) {
-      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+
+    queryx <- c("CO2 emissions by tech", "energy consumption by tech",
+                "outputs by tech", "prices of all markets",
+                "CO2 sequestration by tech", "CO2 emissions by sector (no bio)")
+    if(all(queryx %in% queriesx)){
+    # if exogenous no bio accounting is needed, get the necessary queries and
+    # do the accounting
+    if(exogenousNoBio){
+        # get all the queries needed
+        emiss.by.tech <- rgcam::getQuery(dataProjLoaded, "CO2 emissions by tech")
+        energy.consump.by.tech <- rgcam::getQuery(dataProjLoaded, "energy consumption by tech")
+        output.by.tech <- rgcam::getQuery(dataProjLoaded, "outputs by tech")
+        market.prices <- rgcam::getQuery(dataProjLoaded, "prices of all markets")
+        co2.sequestration <- rgcam::getQuery(dataProjLoaded, "CO2 sequestration by tech")
+
+        # run the no bio accounting
+        co2_by_sector_noBio <-
+          allocate_biomass_emiss_reductions(energy.consump.by.tech,
+                                            output.by.tech,
+                                            market.prices,
+                                            emiss.by.tech,
+                                            c("regional biomass", "regional biomassOil",
+                                              "regional sugar for ethanol"))
+
+
+      # filter CO2 sequestration for biomass techs and aggregate to sector level
+      co2_sequestration_bio_sector <- co2.sequestration %>%
+        #dplyr::select(-Units) %>%
+        dplyr::filter(grepl("bio|cellulosic", technology)) %>%
+        dplyr::group_by(scenario, region, year, sector, Units) %>%
+        dplyr::summarise(value = sum(value)) %>%
+        dplyr::ungroup()
+
+      # add biomass CO2 sequestration (BECCS)
+      co2_by_sector_noBio_plus_seq <-
+        co2_by_sector_noBio %>%
+        dplyr::mutate(year = as.numeric(year)) %>%
+        dplyr::full_join(co2_sequestration_bio_sector) %>%
+        dplyr::group_by(scenario, region, year, sector) %>%
+        dplyr::summarise(value = sum(value)) %>%
+        dplyr::ungroup() %>%
+        # remove elec_biomass since it should cancel out to 0 (may be small rounding errors)
+        dplyr::filter(!grepl("elec_biomass", sector))
+
+      # add biomass CO2 sequestration as negative emissions (multiple BECCS categories)
+      co2_by_sector_final <-
+        co2_sequestration_bio_sector %>%
+        dplyr::mutate(value = -value,
+                      sector = dplyr::case_when(grepl("elec", sector) ~ "BECCS_elec",
+                                                grepl("refin", sector) ~ "BECCS_refining",
+                                                grepl("H2", sector) ~ "BECCS_H2",
+                                                T ~ sector)) %>%
+        dplyr::full_join(co2_by_sector_noBio_plus_seq)
+
+      tbl <- co2_by_sector_final
+
+    } # end using exogenous no bio accounting
+
+    # if exogenous no bio accounting is not needed, just use the no bio query
+    else{
+      queryx <- "CO2 emissions by sector (no bio)"
+        tbl <- rgcam::getQuery(dataProjLoaded, queryx) # Tibble
+    } # end using no bio query
+
+      # filter to selected region
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
+
       #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
       tbl <- tbl %>%
         dplyr::filter(scenario %in% scenOrigNames)%>%
@@ -3735,7 +3801,8 @@ readgcam <- function(gcamdatabase = NULL,
           units="CO2 emissions - (MTCO2)",
           sources = "Sources",
           origScen = scenario,
-          origQuery = queryx,
+          origQuery = dplyr::case_when(exogenousNoBio ~ "CO2 emissions by tech",
+                                       T ~ "CO2 emissions by sector (no bio)"),
           origX = year, subRegion=region,
           scenario = scenNewNames,
           vintage = paste("Vint_", year, sep = ""),
@@ -3749,25 +3816,28 @@ readgcam <- function(gcamdatabase = NULL,
                       aggregate, ghg, sector, classPalette1, classPalette2,
                       origScen, origQuery, origValue, origUnits, origX)
       tblCO2EmissNoBio <- tbl
+
     }
 
   } # end CO2 by sector (no bio) query
+
 
   # Aggregate sectors
   if(any(c("emissCO2BySectorNoBio", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasNoBioGWPAR5") %in% paramsSelectx)){
       tblCO2EmissNoBioAgg <- tblCO2EmissNoBio %>%
         dplyr::mutate(
           sector=dplyr::case_when(
-            grepl("refining",sector,ignore.case=T)~"refining",
+            grepl("BECCS", sector) ~ "BECCS",
+            #grepl("refining",sector,ignore.case=T)~"refining",
             grepl("regional biomass|regional biomassOil|regional corn for ethanol|regional sugar for ethanol", sector,ignore.case=T)~"biomass",
-            grepl("trn_aviation_intl", sector)~"International Aviation",
-            grepl("trn_shipping_intl", sector) ~ "International Shipping",
-            grepl("trn_",sector,ignore.case=T)~"transport",
-            grepl("comm |resid ",sector,ignore.case=T)~"building",
-            grepl("electricity|elec_|electricity |csp_backup",sector,ignore.case=T)~"electricity",
-            grepl("H2",sector,ignore.case=T)~"hydrogen",
-            grepl("cement|N fertilizer|industrial|ind |alumin|",sector,ignore.case=T)~"industry",
-            grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids|wholesale gas|delivered gas|delivered biomass",sector,ignore.case=T)~"industry",
+            #grepl("trn_aviation_intl", sector)~"International Aviation",
+            #grepl("trn_shipping_intl", sector) ~ "International Shipping",
+            grepl("trn_",sector,ignore.case=T)~"Transportation",
+            grepl("comm |resid ",sector,ignore.case=T)~"Buildings",
+            grepl("electricity|elec_|electricity |csp_backup",sector,ignore.case=T)~"Electricity",
+            grepl("H2",sector,ignore.case=T)~"Industry",
+            grepl("cement|N fertilizer|industrial|ind|alumin|refin|iron|chemical|construction|mining|agri",sector,ignore.case=T)~"Industry",
+            grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids|wholesale gas|delivered gas|delivered biomass",sector,ignore.case=T)~"Industry",
             grepl("Beef|Dairy|Pork|Poultry",sector,ignore.case=T)~"livestock",
             grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",sector,ignore.case=T)~"crops",
             TRUE~sector)) %>%
