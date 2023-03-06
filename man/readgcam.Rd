@@ -19,7 +19,8 @@ readgcam(
   paramsSelect = "diagnostic",
   folder = getwd(),
   nameAppend = "",
-  saveData = T
+  saveData = T,
+  exogenousNoBio = F
 )
 }
 \arguments{
@@ -115,6 +116,8 @@ Or pick an individual param from the list:
 \item{nameAppend}{Default="". Name to append to saved files.}
 
 \item{saveData}{Default = "T". Set to F if do not want to save any data to file.}
+
+\item{exogenousNoBio}{Default = FALSE. For "no bio" emissions queries, should negative biomass CO2 emissions accounting be done exogenously rather than using the 'CO2 emissions by sector (no bio)' query?}
 }
 \value{
 A list with the scenarios in the gcam database, queries in the queryxml file and a
