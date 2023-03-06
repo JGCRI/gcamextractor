@@ -15,9 +15,20 @@
 #' @author TRW
 #' @export
 
+
+
 prepare_sector_carbon_flows <- function(energy.consumption.by.tech,
                                         service.output.by.tech,
                                         market.prices){
+
+  #................
+  # Initialize variables by setting to NULL
+  #................
+
+  NULL -> Units -> scenario -> market -> input -> sector -> value -> PrimaryFuelCO2Coef ->
+    q.in -> in.Ccoef -> region -> subsector -> technology -> year -> C.in -> q.out ->
+    out.Ccoef -> C.in.subSector -> C.out -> C.in.ratio -> C.out.adj -> market.name ->
+    FQ.input -> FQ.sector
 
   # ----------------------------------------
   # get energy demanded by tech
@@ -154,6 +165,14 @@ prepare_sector_carbon_flows <- function(energy.consumption.by.tech,
 #' @export
 
 generate_sector_output_coefs <- function(curr.FQinput, data) {
+
+  #................
+  # Initialize variables by setting to NULL
+  #................
+
+  NULL -> FQ.input -> year -> q.in -> region -> sector -> FQ.sector -> market.name ->
+    input -> C.in -> C.out -> q.total -> share -> carbon.ratio -> coef
+
   # subset the current input
   data.subset <- data %>%
     dplyr::filter(FQ.input == curr.FQinput)
@@ -280,6 +299,12 @@ allocate_biomass_emiss_reductions <- function(energy.consumption.by.tech,
                                               market.prices,
                                               emiss.by.tech,
                                               bio.sectors){
+
+  #................
+  # Initialize variables by setting to NULL
+  #................
+
+  NULL -> scenario -> region -> sector -> subsector -> technology -> year -> value
 
   # ------------------------------
   # get sector carbon flows

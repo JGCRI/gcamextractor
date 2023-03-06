@@ -142,7 +142,8 @@ readgcam <- function(gcamdatabase = NULL,
     transport -> gcamdata -> half.life -> lifetime -> read.csv -> sector_1 -> steepness -> PrimaryFuelCO2Coef ->
     PrimaryFuelCO2Coef.name -> country -> grid_region -> 'io-coefficient' -> 'minicam.energy.input' ->
     'remove.fraction' ->  state ->  subsector.name -> 'to.technology' -> coefficient -> tbl_carbon_capture_rate ->
-    gcamdata_files -> aggSector -> tblGHGEmissRes -> segment -> hours -> scenarios_new -> str -> subRegions_new -> x_new
+    gcamdata_files -> aggSector -> tblGHGEmissRes -> segment -> hours -> scenarios_new -> str -> subRegions_new -> x_new ->
+    sector2 -> sector1 -> nodeinput -> scenOrigNames_i
 
   basedir <- getwd()
 
