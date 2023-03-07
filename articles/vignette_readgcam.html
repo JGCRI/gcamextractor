@@ -101,7 +101,7 @@
 
       
 
-      </header><script src="vignette_readgcam_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>User Guide</h1>
@@ -123,18 +123,30 @@
 <!-------------------------->
 <p align="center">
 <img src="vignetteFigs/divider.png" width="1400"></p>
-<p><code>gcamextractor</code> is a package to extract GCAM data into standardized data tables which can be used downstream in other models. <code>gcamextractor</code> uses <code>rgcam</code> to connect to GCAM databases and then processes the data into more commonly used units as well as re-organizes the data into tables with common column names. This allows all the data to be saved in combined tables. Additionally, <code>gcamextractor</code> aggregates data by parameter, class 1 and class 2. This allows users to quickly plot and analyze data at different degrees of detail.</p>
-<p><code><a href="../reference/readgcam.html">gcamextractor::readgcam</a></code> will return a list as csv files as well directly as a list of R tables containing:</p>
+<p><code>gcamextractor</code> is a package to extract GCAM data into
+standardized data tables which can be used downstream in other models.
+<code>gcamextractor</code> uses <code>rgcam</code> to connect to GCAM
+databases and then processes the data into more commonly used units as
+well as re-organizes the data into tables with common column names. This
+allows all the data to be saved in combined tables. Additionally,
+<code>gcamextractor</code> aggregates data by parameter, class 1 and
+class 2. This allows users to quickly plot and analyze data at different
+degrees of detail.</p>
+<p><code><a href="../reference/readgcam.html">gcamextractor::readgcam</a></code> will return a list as csv files
+as well directly as a list of R tables containing:</p>
 <ul>
 <li>data: a dataframe with the original data</li>
-<li>dataAggParam: a dataframe with the data aggregated to the parameter</li>
+<li>dataAggParam: a dataframe with the data aggregated to the
+parameter</li>
 <li>dataAggClass1: a dataframe with the data aggregated to class 1</li>
 <li>dataAggclass2: a dataframe with the data aggregated to class 2</li>
-<li>dataAll: a dataframe with the original data as well as original queries and values before any conversions</li>
+<li>dataAll: a dataframe with the original data as well as original
+queries and values before any conversions</li>
 <li>scenarios: A list of the scenarios</li>
 <li>queries: A list of the queries used to extract the data</li>
 </ul>
-<p>The figure below shows the workflow of how <code>gcamextractor</code> connects to a GCAM database and its outputs.</p>
+<p>The figure below shows the workflow of how <code>gcamextractor</code>
+connects to a GCAM database and its outputs.</p>
 <p><br></p>
 <p align="center">
 <img src="vignetteFigs/gcamextractor_workflow.jpg" width="1400"></p>
@@ -173,7 +185,13 @@
 <!-------------------------->
 <p align="center">
 <img src="vignetteFigs/divider.png" width="1400"></p>
-<p>Initial extraction of GCAM data can take a while and so <code>gcamextractor</code> also includes the option to save the raw extracted outputs as <code>.Proj</code> files which can be shared and read in as well. A default example <code>.Proj</code> file <code>gcamextractor::exmapleGCAMproj</code> is included with the package. The following script shows how this can be read into <code>gcamextractor</code>.</p>
+<p>Initial extraction of GCAM data can take a while and so
+<code>gcamextractor</code> also includes the option to save the raw
+extracted outputs as <code>.Proj</code> files which can be shared and
+read in as well. A default example <code>.Proj</code> file
+<code>gcamextractor::exmapleGCAMproj</code> is included with the
+package. The following script shows how this can be read into
+<code>gcamextractor</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JGCRI/gcamextractor" class="external-link">gcamextractor</a></span><span class="op">)</span></span>
 <span></span>
@@ -189,7 +207,14 @@
 <!-------------------------->
 <p align="center">
 <img src="vignetteFigs/divider.png" width="1400"></p>
-<p>The following figure shows the column headers of the <code>dataAll</code> outputs from gcamextractor. Other tables have a subset of these columns, such as in the case of <code>data</code> which only keeps relevant columns and drops columns such as <code>origScen</code> and <code>origQuery</code> which refer to the original data in GCAM. Other tables such as <code>dataAggClass1</code> removes the <code>class 2</code> columns and then aggregates the data over <code>class 1</code> variables.</p>
+<p>The following figure shows the column headers of the
+<code>dataAll</code> outputs from gcamextractor. Other tables have a
+subset of these columns, such as in the case of <code>data</code> which
+only keeps relevant columns and drops columns such as
+<code>origScen</code> and <code>origQuery</code> which refer to the
+original data in GCAM. Other tables such as <code>dataAggClass1</code>
+removes the <code>class 2</code> columns and then aggregates the data
+over <code>class 1</code> variables.</p>
 <p align="center">
 <img src="vignetteFigs/example_structure.png" width="1400"></p>
 <!-------------------------->
@@ -202,7 +227,18 @@
 <!-------------------------->
 <p align="center">
 <img src="vignetteFigs/divider.png" width="1400"></p>
-<p>Users can get a list of all available params and queries as shown below. The <a href="https://jgcri.github.io/gcamextractor/articles/vignette_parameters.html" class="external-link">parameters</a> page lists details on each parameter, how it was calculated and cites any sources when available. <code><a href="../reference/map_param_query.html">gcamextractor::map_param_query</a></code> gives a list of all parameters and the corresponding queries used to extract that data from GCAM. Additionally, <code><a href="../reference/map_param_query.html">gcamextractor::map_param_query</a></code> also groups the various parameters into higher level groups which can then be called in the <code>paramSelect</code> argument of <code>gcamextractor</code> to extractor all the params in those groups. The groups also include curated parameters for particular models such as <code>CERF</code> and <code>GO</code>.</p>
+<p>Users can get a list of all available params and queries as shown
+below. The <a href="https://jgcri.github.io/gcamextractor/articles/vignette_parameters.html" class="external-link">parameters</a>
+page lists details on each parameter, how it was calculated and cites
+any sources when available. <code><a href="../reference/map_param_query.html">gcamextractor::map_param_query</a></code>
+gives a list of all parameters and the corresponding queries used to
+extract that data from GCAM. Additionally,
+<code><a href="../reference/map_param_query.html">gcamextractor::map_param_query</a></code> also groups the various
+parameters into higher level groups which can then be called in the
+<code>paramSelect</code> argument of <code>gcamextractor</code> to
+extractor all the params in those groups. The groups also include
+curated parameters for particular models such as <code>CERF</code> and
+<code>GO</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JGCRI/gcamextractor" class="external-link">gcamextractor</a></span><span class="op">)</span></span>
 <span></span>
@@ -232,7 +268,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
