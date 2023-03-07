@@ -13,10 +13,13 @@ paramsSelect_i=(gcamextractor::map_param_query %>% dplyr::filter(group=="diagnos
 length(paramsSelect_i)
 
 # GCAM 6.0
-data <- readgcam(gcamdatabase = "C:/gcam/gcam-v6.0-Windows-Release-Package/output/database_basexdb",
+data <- readgcam(gcamdatabase = "C:/gcam/gcam-v6.0-Windows-Release-Package/output/database_basexdb_ssp235",
                  folder = "test_gcamv6p0",
-                 paramsSelect = "All",
-                 saveData = F)
+                 paramsSelect = "hydrogen",
+                 saveData = T)
+
+data$data$param%>%unique()
+
 # GCAM 5.4
 data <- readgcam(gcamdatabase = "C:/gcam/gcam-v5.4-Windows-Release-Package/output/database_basexdb",
                  folder = "test_gcamv5p4",
@@ -93,9 +96,9 @@ library(gcamextractor); library(dplyr)
 # List of params in gcamextractor
 params <- gcamextractor::params; params %>% sort()
 
-gcamdatabase_i = "C:/Z/projects/current/00_IM3/pic_checks/databases/database_rcp85cooler_ssp3_rcp85gdp"
+gcamdatabase_i = "C:/Z/projects/current/00_IM3/pic_checks/database_rcp85hotter_ssp5"
 gcamdata_folder_i = "C:/gcam/gcam-usa-im3/input/gcamdata"
-rgcam::localDBConn("C:/Z/projects/current/00_IM3/pic_checks/databases/","database_rcp85cooler_ssp3_rcp85gdp")
+rgcam::localDBConn("C:/Z/projects/current/00_IM3/pic_checks/","database_rcp85hotter_ssp5")
 reReadData_i = T
 dataProjFile_i = "dataProj_cerf.proj"
 regionsSelect_i = c("Global","USA",rmap::mapping_US52,"Alaska grid","California grid","Central East grid","Central Northeast grid",
@@ -105,10 +108,10 @@ regionsSelect_i = c("Global","USA",rmap::mapping_US52,"Alaska grid","California 
 folder_i="cerf_test"
 
 # Issue #20
-paramsSelect_i = c("elec_capacity_factor_usa_in")
+paramsSelect_i = c("elec_heat_rate_BTUperkWh")
 
-scenOrigNames_i = c("rcp85cooler_ssp3_rcp85gdp") # make sure these exist (See outputs of the rgcam::localDBConn)
-scenNewNames_i = c("rcp85cooler_ssp3")
+scenOrigNames_i = c("rcp85hotter_ssp5") # make sure these exist (See outputs of the rgcam::localDBConn)
+scenNewNames_i = c("rcp85hotter_ssp5")
 
 dataGCAM <- readgcam(reReadData = reReadData_i,
                      gcamdatabase = gcamdatabase_i,

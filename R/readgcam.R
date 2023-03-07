@@ -611,6 +611,11 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::rename(sector1=tbl_sector_names[1],
                       sector2=tbl_sector_names[2])
 
+      # Remove future vitnages from past years
+      tbl <- tbl %>%
+        dplyr::mutate(vint_year = as.numeric(gsub("vintage=","",`io-coefficient`))) %>%
+        dplyr::filter(vint_year <= year)
+
       tbl <- tbl %>%
         # remove secondary inputs
         dplyr::filter(!grepl("backup", input),
