@@ -3720,8 +3720,8 @@ readgcam <- function(gcamdatabase = NULL,
   }
 
   ## emissCO2BySectorNoBio ===========================
-  # need CO2 for CO2BySectorNoBio, GHGBySectorNoBio, and GHGByGasNoBio
-  if(any(c("emissCO2BySectorNoBio", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissGHGBySectorBuildingsGWPAR5") %in% paramsSelectx)){
+  # need for CO2BySectorNoBio, GHGBySectorNoBio, and GHGByGasNoBio
+  if(any(c("emissCO2BySectorNoBio", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissGHGBySectorBuildingsGWPAR5", "emissCO2IndirectNoBio") %in% paramsSelectx)){
 
     queryx <- c("CO2 emissions by tech", "energy consumption by tech",
                 "outputs by tech", "prices of all markets",
@@ -3762,19 +3762,21 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::full_join(co2_sequestration_bio_sector) %>%
         dplyr::group_by(scenario, region, year, sector) %>%
         dplyr::summarise(value = sum(value)) %>%
-        dplyr::ungroup() %>%
+        dplyr::ungroup()
         # remove elec_biomass since it should cancel out to 0 (may be small rounding errors)
-        dplyr::filter(!grepl("elec_biomass", sector))
+        #dplyr::filter(!grepl("elec_biomass", sector))
 
       # add biomass CO2 sequestration as negative emissions (multiple BECCS categories)
       co2_by_sector_final <-
         co2_sequestration_bio_sector %>%
-        dplyr::mutate(value = -value,
-                      sector = dplyr::case_when(grepl("elec", sector) ~ "BECCS_elec",
-                                                grepl("refin", sector) ~ "BECCS_refining",
-                                                grepl("H2", sector) ~ "BECCS_H2",
-                                                T ~ sector)) %>%
-        dplyr::full_join(co2_by_sector_noBio_plus_seq)
+        dplyr::mutate(value = -value) %>%
+        dplyr::full_join(co2_by_sector_noBio_plus_seq) %>%
+        dplyr::mutate(sector = dplyr::case_when(grepl("elec_biomass", sector) & value < 0 ~ "BECCS_elec",
+                                                grepl("refin", sector) & value < 0 ~ "BECCS_refining",
+                                                grepl("H2", sector) & value < 0 ~ "BECCS_H2",
+                                                grepl("alumina", sector) & value < 0 ~ "BECCS_alumina",
+                                                T ~ sector))
+
 
       tbl <- co2_by_sector_final
 
@@ -3849,6 +3851,11 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::filter(!is.na(value))
     }
 
+
+  # if emissCO2IndirectNoBio is chosen, do the direct-indirect decomposition
+  if("emissCO2IndirectNoBio" %in% paramsSelectx){
+
+  }
 
 
     # add CO2 by sector to data if emissCO2BySector param is chosen
