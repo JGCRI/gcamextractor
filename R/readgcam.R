@@ -3764,18 +3764,18 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::summarise(value = sum(value)) %>%
         dplyr::ungroup()
         # remove elec_biomass since it should cancel out to 0 (may be small rounding errors)
-        #dplyr::filter(!grepl("elec_biomass", sector))
+        dplyr::filter(!grepl("elec_biomass", sector))
 
       # add biomass CO2 sequestration as negative emissions (multiple BECCS categories)
       co2_by_sector_final <-
         co2_sequestration_bio_sector %>%
-        dplyr::mutate(value = -value) %>%
-        dplyr::full_join(co2_by_sector_noBio_plus_seq) %>%
-        dplyr::mutate(sector = dplyr::case_when(grepl("elec_biomass", sector) & value < 0 ~ "BECCS_elec",
+        dplyr::mutate(value = -value,
+                      sector = dplyr::case_when(grepl("elec_biomass", sector) & value < 0 ~ "BECCS_elec",
                                                 grepl("refin", sector) & value < 0 ~ "BECCS_refining",
                                                 grepl("H2", sector) & value < 0 ~ "BECCS_H2",
                                                 grepl("alumina", sector) & value < 0 ~ "BECCS_alumina",
-                                                T ~ sector))
+                                                T ~ sector)) %>%
+        dplyr::full_join(co2_by_sector_noBio_plus_seq)
 
 
       tbl <- co2_by_sector_final

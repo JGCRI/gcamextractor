@@ -81,6 +81,7 @@ prepare_sector_carbon_flows <- function(energy.consumption.by.tech,
   # get energy outputs by technology
   # ----------------------------------------
   output.d <- service.output.by.tech %>%
+    dplyr::filter(Units == "EJ") %>%
     dplyr::select(-Units) %>%
     dplyr::rename(q.out = value)
 
