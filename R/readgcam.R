@@ -3767,7 +3767,7 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::full_join(co2_sequestration_bio_sector) %>%
         dplyr::group_by(scenario, region, year, sector) %>%
         dplyr::summarise(value = sum(value)) %>%
-        dplyr::ungroup()
+        dplyr::ungroup() %>%
         # remove elec_biomass since it should cancel out to 0 (may be small rounding errors)
         dplyr::filter(!grepl("elec_biomass", sector))
 
