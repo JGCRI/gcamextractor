@@ -1017,6 +1017,17 @@
                @name='refined liquids industrial')]/demand-physical/node()</xPath>
    <comments/>
   </supplyDemandQuery>
+  <supplyDemandQuery title="industry final energy by tech and fuel">
+                        <axis1 name="technology">technology</axis1>
+                        <axis2 name="Year">demand-physical[@vintage]</axis2>
+                        <xPath buildList="true" dataName="input" group="false" sumAll="false">*[@type='sector' and (@name='industry' or (exists(child::keyword[@final-energy='industry'])))]/
+               *[@type='subsector']/*[@type='technology']/
+               *[@type='input' and (@name='delivered biomass' or @name='delivered coal' or
+               @name='H2 wholesale delivery' or @name='H2 wholesale dispensing' or @name='H2 industrial' or
+               @name='elect_td_ind' or @name='wholesale gas' or
+               @name='refined liquids industrial')]/demand-physical/node()</xPath>
+                        <comments/>
+                    </supplyDemandQuery>
  </aQuery>
  <aQuery>
   <all-regions/>

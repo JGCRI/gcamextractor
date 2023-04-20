@@ -2489,22 +2489,22 @@ readgcam <- function(gcamdatabase = NULL,
   # Total final energy by aggregate end-use sector
   if(paramx %in% paramsSelectx){
     rlang::inform(paste0("Running param: ", paramx,"..."))
-    queryx <- "industry final energy by fuel"
+    queryx <- "industry final energy by tech and fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
       if (!is.null(regionsSelect)) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
-        dplyr::rename(sector=input) %>%
+        dplyr::rename(fuel=input) %>%
         dplyr::filter(scenario %in% scenOrigNames)%>%
         dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(sector=gsub("elect_td_ind","electricity",sector),
-                      sector=gsub("wholesale gas","gas",sector),
-                      sector=gsub("delivered biomass","bioenergy",sector),
-                      sector=gsub("delivered coal","coal",sector),
-                      sector=gsub("refined liquids industrial","liquids",sector),
-                      sector=gsub("H2 enduse","hydrogen",sector),
+        dplyr::mutate(fuel=gsub("elect_td_ind","electricity",fuel),
+                      fuel=gsub("wholesale gas","gas",fuel),
+                      fuel=gsub("delivered biomass","bioenergy",fuel),
+                      fuel=gsub("delivered coal","coal",fuel),
+                      fuel=gsub("refined liquids industrial","liquids",fuel),
+                      fuel=dplyr::case_when(grepl("H2", fuel) ~ "hydrogen", T ~ fuel),
                       param = "energyFinalSubsecByFuelIndusEJ",
                       sources = "Sources",
                       origScen = scenario,
@@ -2518,10 +2518,65 @@ readgcam <- function(gcamdatabase = NULL,
                       x = year,
                       xLabel = "Year",
                       aggregate = "sum",
-                      class1 = sector,
+                      class1 = fuel,
                       classLabel1 = "Fuel",
                       classPalette1 = "pal_all",
-                      class2 = sector,
+                      class2 = fuel,
+                      classLabel2 = "classLabel2",
+                      classPalette2 = "classPalette2")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+  ## energyFinalSubsecByFuelIndusEJ ============================================
+  paramx<-"energyFinalSubsecByFuelAndCCSIndusEJ"
+  # Total final energy by aggregate end-use sector
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "industry final energy by tech and fuel"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::rename(fuel=input) %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(fuel=gsub("elect_td_ind","electricity",fuel),
+                      fuel=gsub("wholesale gas","gas",fuel),
+                      fuel=gsub("delivered biomass","bioenergy",fuel),
+                      fuel=gsub("delivered coal","coal",fuel),
+                      fuel=gsub("refined liquids industrial","liquids",fuel),
+                      fuel=dplyr::case_when(grepl("H2", fuel) ~ "hydrogen", T ~ fuel),
+                      fuel = dplyr::case_when(grepl("CCS", technology) & !grepl("elec", fuel) ~ paste0(fuel, " CCS"),
+                                                T ~ fuel),
+                      param = "energyFinalSubsecByFuelAndCCSIndusEJ",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      units = "Industry Final Energy by Fuel (EJ)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = fuel,
+                      classLabel1 = "Fuel",
+                      classPalette1 = "pal_all",
+                      class2 = fuel,
                       classLabel2 = "classLabel2",
                       classPalette2 = "classPalette2")%>%
         dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
@@ -5547,7 +5602,7 @@ readgcam <- function(gcamdatabase = NULL,
                       technology=gsub("Hybrid Liquids","liquids", technology),
                       technology=gsub("Electric","electricity", technology),
                       technology=gsub("BEV","electricity", technology),
-                      technology=gsub("FCEV","electricity", technology),
+                      technology=gsub("FCEV","hydrogen", technology),
                       technology=gsub("Coal","coal", technology),
                       param = "transportFreightVMTByFuel",
                       sources = "Sources",
