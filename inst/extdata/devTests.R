@@ -102,7 +102,7 @@ gcamdata_folder_i = "C:/gcam/gcam-usa-im3/input/gcamdata"
 rgcam::localDBConn("C:/Z/projects/current/00_IM3/pic_checks/","database_rcp85hotter_ssp5")
 reReadData_i = T
 dataProjFile_i = "dataProj_cerf.proj"
-regionsSelect_i = c("Global","USA",rmap::mapping_US52,"Alaska grid","California grid","Central East grid","Central Northeast grid",
+regionsSelect_i = c("Global","USA",gcamextractor::map_state_to_gridregion$state%>%unique(),"PR","Alaska grid","California grid","Central East grid","Central Northeast grid",
                     "Central Northwest grid", "Central Southwest grid","Florida grid","Hawaii grid",
                     "Mid-Atlantic grid","New England grid","New York grid","Northwest grid",
                     "Southeast grid","Southwest grid","Texas grid")
