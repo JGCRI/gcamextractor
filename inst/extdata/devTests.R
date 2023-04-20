@@ -12,10 +12,11 @@ params <- gcamextractor::params; params
 paramsSelect_i=(gcamextractor::map_param_query %>% dplyr::filter(group=="diagnostic"))$param; paramsSelect_i
 length(paramsSelect_i)
 
+
 # GCAM 6.0
 data <- readgcam(gcamdatabase = "C:/gcam/gcam-v6.0-Windows-Release-Package/output/database_basexdb_ssp235",
                  folder = "test_gcamv6p0",
-                 paramsSelect = "hydrogen",
+                 paramsSelect = c("gdp","pop","agProdByCrop","landAlloc","elecByTechTWh","watWithdrawBySec","emissCO2BySector"),
                  saveData = T)
 
 data$data$param%>%unique()
@@ -108,7 +109,7 @@ regionsSelect_i = c("Global","USA",rmap::mapping_US52,"Alaska grid","California 
 folder_i="cerf_test"
 
 # Issue #20
-paramsSelect_i = c("elec_heat_rate_BTUperkWh")
+paramsSelect_i = c("cerf")
 
 scenOrigNames_i = c("rcp85hotter_ssp5") # make sure these exist (See outputs of the rgcam::localDBConn)
 scenNewNames_i = c("rcp85hotter_ssp5")
