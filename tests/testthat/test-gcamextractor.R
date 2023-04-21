@@ -9,7 +9,7 @@ data_folder <- "im3_test_data"
 gcamextractor::get_example_data(
   write_dir = getwd(),
   dir_name = data_folder,
-  data_link = "https://zenodo.org/record/7849602/files/gcamextractor_im3_gcamusa_test_data.zip?download=1"
+  data_link = "https://zenodo.org/record/7853231/files/gcamextractor_im3_gcamuse_test_data.zip?download=1"
 ) -> data_folder; data_folder;
 
 #data_folder <- "C:/Z/models/gcamextractor/tests/testthat/im3_test_data"
@@ -20,9 +20,9 @@ print(paste0("data_folder : ", data_folder))
 #..........................
 #rgcam::localDBConn(data_folder,"database_rcp85hotter_ssp5_test2025")
 dataGCAM <- gcamextractor::readgcam(reReadData = T,
-                     gcamdatabase = paste0(data_folder,"/database_rcp85hotter_ssp5_test2025"),
+                     #gcamdatabase = paste0(data_folder,"/database_rcp85hotter_ssp5_test2025"),
                      gcamdata_folder = paste0(data_folder,"/gcamdata"),
-                     dataProjFile = "dataProj_cerf.proj",
+                     dataProjFile = paste0(data_folder,"/dataProj_cerf.proj"),
                      regionsSelect = c("Global","USA",gcamextractor::map_state_to_gridregion$state%>%unique(),"PR","Alaska grid","California grid","Central East grid","Central Northeast grid",
                                        "Central Northwest grid", "Central Southwest grid","Florida grid","Hawaii grid",
                                        "Mid-Atlantic grid","New England grid","New York grid","Northwest grid",
