@@ -33,17 +33,6 @@ dataGCAM <- gcamextractor::readgcam(reReadData = T,
 
 test_that("gcamextractor::read_gcam produces expected file contents for im3 gcam-usa cerf", {
 
-    # Diagnostic statements
-    print("..............")
-    print(paste0("Downloaded data: ", data_folder, "/test_outputs/gcamDataTable.csv"))
-    print(paste0("New data: ", data_folder, "/cerf_test/gcamDataTable.csv"))
-    print("..............")
-    print("Printing head(read.csv(paste0(data_folder,'/cerf_test/gcamDataTable.csv')")
-    print(head(read.csv(paste0(data_folder,'/cerf_test/gcamDataTable.csv'))))
-    print("..............")
-    print("Printing head(read.csv(paste0(data_folder,'/test_outputs/gcamDataTable.csv')")
-    print(head(read.csv(paste0(data_folder,'/cerf_test/gcamDataTable.csv'))))
-
     testthat::expect_identical(
       read.csv(paste0(data_folder,"/cerf_test/gcamDataTable.csv")),
       read.csv(paste0(data_folder,"/test_outputs/gcamDataTable.csv")))
