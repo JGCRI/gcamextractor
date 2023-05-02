@@ -33,13 +33,17 @@ dataGCAM <- gcamextractor::readgcam(reReadData = T,
 
 test_that("gcamextractor::read_gcam produces expected file contents for im3 gcam-usa cerf", {
 
-  f_local <- read.csv(paste0(data_folder,"/cerf_test/gcamDataTable.csv")) %>% as.data.frame();
-  f_downloaded <- read.csv(paste0(data_folder,"/test_outputs/gcamDataTable.csv")) %>% as.data.frame();
-  print(head(f_local));
-  print(head(f_downloaded));
+  f_local <- read.csv(paste0(data_folder,"/cerf_test/gcamDataTable.csv")) %>%
+    as.data.frame() %>%
+    arrange(scenario,region,subRegion,param, classLabel1,class1,classLabel2,class2,xLabel,x,vintage,units,value);
+  f_downloaded <- read.csv(paste0(data_folder,"/test_outputs/gcamDataTable.csv")) %>%
+    as.data.frame() %>%
+    arrange(scenario,region,subRegion,param, classLabel1,class1,classLabel2,class2,xLabel,x,vintage,units,value);
+
 
     testthat::expect_equal(nrow(f_downloaded),659790);
     testthat::expect_equal(nrow(f_local),659790);
+    testthat::expect_equal(sum(f_local$value,na.rm=T),sum(f_downloaded$value,na.rm=T));
     testthat::expect_identical(f_local,f_downloaded);
 
   })
