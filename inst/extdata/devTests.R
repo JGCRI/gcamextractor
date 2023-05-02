@@ -109,7 +109,7 @@ regionsSelect_i = c("Global","USA",gcamextractor::map_state_to_gridregion$state%
 folder_i="cerf_test"
 
 # Issue #20
-paramsSelect_i = c("cerf")
+paramsSelect_i = c("elec_heat_rate_BTUperkWh")
 
 scenOrigNames_i = c("rcp85hotter_ssp5") # make sure these exist (See outputs of the rgcam::localDBConn)
 scenNewNames_i = c("rcp85hotter_ssp5")

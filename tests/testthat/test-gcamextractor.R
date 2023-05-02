@@ -40,10 +40,6 @@ test_that("gcamextractor::read_gcam produces expected file contents for im3 gcam
     as.data.frame() %>%
     arrange(scenario,region,subRegion,param, classLabel1,class1,classLabel2,class2,xLabel,x,vintage,units,value);
 
-
-    testthat::expect_equal(nrow(f_downloaded),659790);
-    testthat::expect_equal(nrow(f_local),659790);
-    testthat::expect_equal(sum(f_local$value,na.rm=T),sum(f_downloaded$value,na.rm=T));
     testthat::expect_identical(f_local,f_downloaded);
 
   })

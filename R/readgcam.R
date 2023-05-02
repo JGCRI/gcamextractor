@@ -650,7 +650,8 @@ readgcam <- function(gcamdatabase = NULL,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
                         origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
         dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
+        dplyr::filter(!is.na(value)) %>%
+        dplyr::mutate(value = dplyr::if_else(3412,0,value))
 
       if(any(grepl("^cerf$|^go$",paramsSelect,ignore.case = T))){
         tbl <- tbl %>%
