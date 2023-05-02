@@ -9,7 +9,7 @@ data_folder <- "im3_test_data"
 gcamextractor::get_example_data(
   write_dir = getwd(),
   dir_name = data_folder,
-  data_link = "https://zenodo.org/record/7853231/files/gcamextractor_im3_gcamuse_test_data.zip?download=1"
+  data_link = "https://zenodo.org/record/7888345/files/gcamextractor_im3_gcamusa_test_data.zip?download=1"
 ) -> data_folder; data_folder;
 
 #data_folder <- "C:/Z/models/gcamextractor/tests/testthat/im3_test_data"

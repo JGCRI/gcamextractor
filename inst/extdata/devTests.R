@@ -98,7 +98,7 @@ library(gcamextractor); library(dplyr)
 params <- gcamextractor::params; params %>% sort()
 
 gcamdatabase_i = "C:/Z/projects/current/00_IM3/pic_checks/database_rcp85hotter_ssp5"
-gcamdata_folder_i = "C:/gcam/gcam-usa-im3/input/gcamdata"
+gcamdata_folder_i = "C:/Z/models/gcamextractor/tests/testthat/im3_test_data/gcamdata"
 rgcam::localDBConn("C:/Z/projects/current/00_IM3/pic_checks/","database_rcp85hotter_ssp5")
 reReadData_i = T
 dataProjFile_i = "dataProj_cerf.proj"
@@ -109,7 +109,7 @@ regionsSelect_i = c("Global","USA",gcamextractor::map_state_to_gridregion$state%
 folder_i="cerf_test"
 
 # Issue #20
-paramsSelect_i = c("elec_heat_rate_BTUperkWh")
+paramsSelect_i = c("cerf")
 
 scenOrigNames_i = c("rcp85hotter_ssp5") # make sure these exist (See outputs of the rgcam::localDBConn)
 scenNewNames_i = c("rcp85hotter_ssp5")
