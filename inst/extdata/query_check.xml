@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<queries>
+ <aQuery>
+  <supplyDemandQuery title="Electricity generation by aggregate technology">
+   <axis1 name="technology">technology</axis1>
+   <axis2 name="Year">physical-output[@vintage]</axis2>
+   <xPath buildList="true" dataName="output" group="false" sumAll="false">*[@type = &apos;sector&apos; (: collapse :) and (@name=&apos;electricity&apos; or @name=&apos;elect_td_bld&apos; or @name=&apos;industrial energy use&apos; )]//*[@type = &apos;technology&apos; and not (@name=&apos;elect_td_bld&apos; or @name=&apos;electricity&apos;)]/*[@type=&apos;output&apos; (:collapse:) and (@name=&apos;electricity&apos; or @name=&apos;elect_td_bld&apos;)]/physical-output/node()</xPath>
+   <comments/>
+   <labelRewriteList append-values="false">
+    <level name="technology">
+     <rewrite from="gas (CC CCS)" to="Gas w/CCS"/>
+     <rewrite from="hydro" to="Hydro"/>
+     <rewrite from="biomass (conv)" to="Biomass"/>
+     <rewrite from="rooftop_pv" to="Solar"/>
+     <rewrite from="PV" to="Solar"/>
+     <rewrite from="coal (IGCC)" to="Coal"/>
+     <rewrite from="biomass (conv CCS)" to="Biomass w/CCS"/>
+     <rewrite from="hydrogen cogen" to="CHP"/>
+     <rewrite from="CSP_storage" to="Solar"/>
+     <rewrite from="coal cogen" to="CHP"/>
+     <rewrite from="biomass (IGCC)" to="Biomass"/>
+     <rewrite from="gas cogen" to="CHP"/>
+     <rewrite from="coal (conv pul CCS)" to="Coal w/CCS"/>
+     <rewrite from="biomass (IGCC CCS)" to="Biomass w/CCS"/>
+     <rewrite from="geothermal" to="Geothermal"/>
+     <rewrite from="refined liquids (CC CCS)" to="Oil w/CCS"/>
+     <rewrite from="refined liquids (steam/CT)" to="Oil"/>
+     <rewrite from="gas (CC)" to="Gas"/>
+     <rewrite from="CSP" to="Solar"/>
+     <rewrite from="coal (IGCC CCS)" to="Coal w/CCS"/>
+     <rewrite from="Gen_II_LWR" to="Nuclear"/>
+     <rewrite from="coal (conv pul)" to="Coal"/>
+     <rewrite from="gas (steam/CT)" to="Gas"/>
+     <rewrite from="wind_storage" to="Wind"/>
+     <rewrite from="PV_storage" to="Solar"/>
+     <rewrite from="Gen_III" to="Nuclear"/>
+     <rewrite from="refined liquids (CC)" to="Oil"/>
+     <rewrite from="refined liquids cogen" to="CHP"/>
+     <rewrite from="biomass cogen" to="CHP"/>
+     <rewrite from="wind" to="Wind"/>
+    </level>
+   </labelRewriteList>
+  </supplyDemandQuery>
+ </aQuery>
+</queries>

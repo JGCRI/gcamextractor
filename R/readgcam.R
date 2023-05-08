@@ -153,7 +153,7 @@ readgcam <- function(gcamdatabase = NULL,
     paramsSelect <- c('pop',paramsSelect)
   }
 
-  if(!is.null(regionsSelect)){
+  if(any(!is.null(regionsSelect))){
     if(any(grepl("$all^", regionsSelect, ignore.case = T))){
       regionsSelect <- NULL
     }
@@ -206,7 +206,7 @@ readgcam <- function(gcamdatabase = NULL,
   queriesSelectx <- unique(queriesSelectx [!is.na(queriesSelectx )])
 
   # remove USA queries if not needed
-  if(!is.null(regionsSelect) && !any(c("USA", gcamextractor::regions_US52) %in% regionsSelect)){
+  if(any(!is.null(regionsSelect)) && !any(c("USA", gcamextractor::regions_US52) %in% regionsSelect)){
     queriesSelectx <- queriesSelectx[!grepl("USA", queriesSelectx)]
   }
   print("SELECTED QUERIES:")
@@ -380,8 +380,8 @@ readgcam <- function(gcamdatabase = NULL,
        if(queriesSelectx[j] == XML::xmlGetAttr(xmltop[[i]][[length(xmltop[[i]])]], "title")){
           # include only selected regions when applicable
           # (user has selected regions and original query uses "all-regions")
-          if(!is.null(regionsSelect) &&
-             !regionsSelect %in% c("All", "all", "ALL") &&
+          if(any(!is.null(regionsSelect)) &&
+             any(!grepl("all",regionsSelect, ignore.case = T)) &&
              XML::names.XMLNode(xmltop[[i]])[1] == "all-regions" &&
              !(queriesSelectx[j] == "CO2 emissions by sector" &&
                any(c("emissCO2CumGlobal2010to2100", "emissCO2CumGlobal2010to2100RCP") %in% paramsSelect)) &&
@@ -602,7 +602,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "elec coeff"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
 
@@ -650,7 +650,8 @@ readgcam <- function(gcamdatabase = NULL,
                         aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
                         origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
         dplyr::ungroup()%>%
-        dplyr::filter(!is.na(value))
+        dplyr::filter(!is.na(value)) %>%
+        dplyr::mutate(value = dplyr::if_else(value==3412,0,value))
 
       if(any(grepl("^cerf$|^go$",paramsSelect,ignore.case = T))){
         tbl <- tbl %>%
@@ -688,7 +689,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "elec capacity by tech and vintage"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
       tbl <- tbl %>%
@@ -738,7 +739,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "elec operating costs by tech and vintage"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         if("region" %in% names(tbl)){
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
         } else {
@@ -820,7 +821,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "prices by sector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         if("region" %in% names(tbl)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
         } else {
@@ -969,7 +970,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "elec investment capacity factor"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
 
@@ -1462,7 +1463,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "inputs by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
 
@@ -1562,7 +1563,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "Final energy by detailed end-use sector and fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -1623,7 +1624,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "elec consumption by demand sector"
     if(queryx %in% queriesx){
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -1687,7 +1688,7 @@ readgcam <- function(gcamdatabase = NULL,
                       units = "Electricity Load (GW)") %>%
         dplyr::left_join(gridregion, by = 'subRegion')
 
-      if (!is.null(regionsSelect) &&
+      if (any(!is.null(regionsSelect)) &&
           (any(c("USA", gcamextractor::regions_US52, "All", "ALL", "all") %in% regionsSelect))) {
         tbl <- tbl %>%
           dplyr::filter(region %in% unique(gridregion$grid_region))
@@ -1794,7 +1795,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "elec gen by gen tech USA"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>%
           dplyr::filter(region %in% regionsSelect)
       }
@@ -1833,7 +1834,7 @@ readgcam <- function(gcamdatabase = NULL,
     # queryx <- "elec gen by gen tech cogen USA"
     # if (queryx %in% queriesx) {
     #   tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-    #   if (!is.null(regionsSelect)) {
+    #   if (any(!is.null(regionsSelect))) {
     #     tbl <- tbl %>%
     #       dplyr::filter(region %in% regionsSelect)
     #   }
@@ -1872,7 +1873,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "elec gen by gen tech and cooling tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>%
           dplyr::filter(region %in% regionsSelect) %>%
           dplyr::filter(!region %in% gcamextractor::regions_US52)
@@ -1948,7 +1949,7 @@ readgcam <- function(gcamdatabase = NULL,
       capfactors
       tbl <- tblelecByTechTWh  # Tibble
       #rm(tblelecByTechTWh)
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -1984,7 +1985,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "transport final energy by mode and fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
       tbl <- tbl %>%
@@ -2033,7 +2034,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "total final energy by aggregate sector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -2141,7 +2142,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "total final energy by sector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -2192,7 +2193,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "building final energy by subsector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -2245,7 +2246,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "Final energy by detailed end-use sector and fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -2339,7 +2340,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "Final energy by detailed end-use sector and fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -2429,7 +2430,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "building final energy by fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -2482,7 +2483,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "industry final energy by fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -2536,7 +2537,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "primary energy consumption by region (direct equivalent)"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -2650,7 +2651,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "GDP per capita MER by region"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -2695,7 +2696,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "GDP MER by region"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -2741,7 +2742,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "GDP Growth Rate (Percent)"
     if ("GDP MER by region" %in% queriesx) {
       tbl <- tblgdp  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -2776,7 +2777,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "meat and dairy production by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -2823,7 +2824,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "meat and dairy production by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -2870,7 +2871,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "meat and dairy production by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -2916,7 +2917,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "meat and dairy production by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -2962,7 +2963,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "Population by region"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -3007,7 +3008,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "ag production by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
         } else {
@@ -3061,7 +3062,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "ag production by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
         } else {
@@ -3108,7 +3109,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "ag production by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
         } else {
@@ -3154,7 +3155,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "ag production by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
         } else {
@@ -3202,7 +3203,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "land allocation by crop and water source"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -3248,7 +3249,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "land allocation by crop and water source"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -3294,7 +3295,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "land allocation by crop and water source"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -3340,7 +3341,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "aggregated land allocation"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -3395,7 +3396,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "inputs by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -3441,7 +3442,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "outputs by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -3489,7 +3490,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "detailed land allocation"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -3538,7 +3539,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "land allocation by crop"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -3604,7 +3605,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "Land Use Change Emission (future)"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -3658,7 +3659,7 @@ readgcam <- function(gcamdatabase = NULL,
       queryx <- "CO2 emissions by sector"
       if (queryx %in% queriesx) {
         tbl <- rgcam::getQuery(dataProjLoaded, queryx)
-        if (!is.null(regionsSelect)) {
+        if (any(!is.null(regionsSelect))) {
           tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
         }
         tbl <- tbl %>%
@@ -3720,7 +3721,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "CO2 emissions by sector (no bio)"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
@@ -3836,7 +3837,7 @@ readgcam <- function(gcamdatabase = NULL,
       queryx <- "nonCO2 emissions by sector"
       if (queryx %in% queriesx) {
         tbl <- rgcam::getQuery(dataProjLoaded, queryx)
-        if (!is.null(regionsSelect)) {
+        if (any(!is.null(regionsSelect))) {
           tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
         }
         #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
@@ -3915,7 +3916,7 @@ readgcam <- function(gcamdatabase = NULL,
       queryx <- "nonCO2 emissions by sector USA"
       if (queryx %in% queriesx) {
         tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-        if (!is.null(regionsSelect)) {
+        if (any(!is.null(regionsSelect))) {
           tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
         }
         #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
@@ -3992,7 +3993,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "nonCO2 emissions by resource production"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
@@ -4120,7 +4121,7 @@ readgcam <- function(gcamdatabase = NULL,
   #   queryx <- "Land Use Change Emission (future)"
   #   if (queryx %in% queriesx) {
   #     tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-  #     if (!is.null(regionsSelect)) {
+  #     if (any(!is.null(regionsSelect))) {
   #       tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
   #     }
   #     tbl <- tbl %>%
@@ -4171,7 +4172,7 @@ readgcam <- function(gcamdatabase = NULL,
   #   queryx <- "nonCO2 emissions by sector USA"
   #   if (queryx %in% queriesx) {
   #     tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-  #     if (!is.null(regionsSelect)) {
+  #     if (any(!is.null(regionsSelect))) {
   #       tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
   #     }
   #     #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
@@ -4264,7 +4265,7 @@ readgcam <- function(gcamdatabase = NULL,
   #   queryx <- "nonCO2 emissions by sector"
   #   if (queryx %in% queriesx) {
   #     tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-  #     if (!is.null(regionsSelect)) {
+  #     if (any(!is.null(regionsSelect))) {
   #       tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
   #     }
   #     tblCore <- tbl %>%
@@ -4453,7 +4454,7 @@ readgcam <- function(gcamdatabase = NULL,
                         origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%dplyr::ungroup()%>%
         dplyr::filter(!is.na(value))
       # # For selected region
-      # if (!is.null(regionsSelect)) {
+      # if (any(!is.null(regionsSelect))) {
       #   tblSelect <- tbl %>% dplyr::filter(region %in% regionsSelect)  %>%
       #     dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
       #                     aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
@@ -4593,7 +4594,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "nonCO2 emissions by sector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
@@ -4654,7 +4655,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "CO2 sequestration by sector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
@@ -4695,7 +4696,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "CO2 emissions by subsector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -4731,7 +4732,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "nonCO2 emissions by subsector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       #emiss_sector_mapping <- utils::read.csv(CO2mappingFile, skip=1)
@@ -4962,7 +4963,7 @@ readgcam <- function(gcamdatabase = NULL,
                    "trn_pass_road_LDV_2W", "trn_pass_road_LDV_4W")
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -5025,7 +5026,7 @@ readgcam <- function(gcamdatabase = NULL,
     vmt_array <- c("trn_freight", "trn_freight_road")
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -5079,7 +5080,7 @@ readgcam <- function(gcamdatabase = NULL,
     pass_array <- c("trn_pass", "trn_pass_road", "trn_pass_road_LDV", "trn_pass_road_LDV_4W")
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -5159,7 +5160,7 @@ readgcam <- function(gcamdatabase = NULL,
     freight_array <- c("trn_freight", "trn_freight_road")
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -5233,7 +5234,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "refined liquids production by subsector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -5302,7 +5303,7 @@ readgcam <- function(gcamdatabase = NULL,
                    "trn_pass_road_LDV_2W", "trn_pass_road_LDV_4W")
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -5375,7 +5376,7 @@ readgcam <- function(gcamdatabase = NULL,
                    "trn_pass_road_LDV_2W", "trn_pass_road_LDV_4W")
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -5450,7 +5451,7 @@ readgcam <- function(gcamdatabase = NULL,
     vmt_array <- c("trn_freight", "trn_freight_road")
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -5522,7 +5523,7 @@ readgcam <- function(gcamdatabase = NULL,
     vmt_array <- c("trn_freight", "trn_freight_road")
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -5595,7 +5596,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "transport final energy by fuel"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -5722,7 +5723,7 @@ readgcam <- function(gcamdatabase = NULL,
         #   tbl <- tbl %>% dplyr::filter(region!="USA") # Remove region USA and use states instead
         # }
       }
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -5786,7 +5787,7 @@ readgcam <- function(gcamdatabase = NULL,
       #     tbl <- tbl %>% dplyr::filter(region!="USA") # Remove region USA and use states instead
       #   }
       # }
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -5854,7 +5855,7 @@ readgcam <- function(gcamdatabase = NULL,
             dplyr::filter(!region %in% gcamextractor::regions_US52)
         }
       }
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
         } else {
@@ -5908,7 +5909,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "biophysical water demand by crop type and land region"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -5956,7 +5957,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "water withdrawals by water mapping source"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -6007,7 +6008,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "water consumption by water mapping source"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -6058,7 +6059,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "Basin level available runoff"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -6108,7 +6109,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "Water withdrawals by water source (runoff vs. groundwater)"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         if(any(regionsSelect %in% gcamextractor::regions_US52)){
           tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
         } else {
@@ -6160,7 +6161,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "building service output by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -6206,7 +6207,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "building floorspace"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -6253,7 +6254,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "hydrogen production by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -6299,7 +6300,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "hydrogen utilization by technology"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -6345,7 +6346,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "hydrogen prices by sector"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -6391,7 +6392,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "hydrogen costs by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -6437,7 +6438,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "hydrogen inputs by tech"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -6483,7 +6484,7 @@ readgcam <- function(gcamdatabase = NULL,
     queryx <- "hydrogen outputs by technology"
     if (queryx %in% queriesx) {
       tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
-      if (!is.null(regionsSelect)) {
+      if (any(!is.null(regionsSelect))) {
         tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
       }
       tbl <- tbl %>%
@@ -6614,7 +6615,7 @@ readgcam <- function(gcamdatabase = NULL,
   if(!is.null(scenNewNames)){
     scenarios_expand <- scenarios_expand %>%
       dplyr::rename(scenarios_old=scenarios_new)%>%
-    dplyr::left_join(data.frame(scenarios_old=scenOrigNames_i,
+    dplyr::left_join(data.frame(scenarios_old=scenOrigNames,
                                 scenarios_new=scenNewNames,
                                 by="scenarios_old"))
     }

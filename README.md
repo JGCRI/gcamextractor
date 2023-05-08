@@ -14,7 +14,7 @@
 <br>
 
 <p align="center">
-<a href="https://jgcri.github.io/gcamextractor/articles/vignette_readgcam.html" target="_blank"><img src="https://github.com/JGCRI/jgcricolors/blob/main/vignettes/button_user_guide.PNG?raw=true" alt="https://jgcri.github.io/rmap/articles/vignette_map.html" height="60"/></a>
+<a href="https://jgcri.github.io/gcamextractor/articles/vignette_readgcam.html" target="_blank"><img src="https://github.com/JGCRI/jgcricolors/blob/main/vignettes/button_user_guide.PNG?raw=true" height="60"/></a>
 </p>
 
 

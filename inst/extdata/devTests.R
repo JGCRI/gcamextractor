@@ -12,10 +12,11 @@ params <- gcamextractor::params; params
 paramsSelect_i=(gcamextractor::map_param_query %>% dplyr::filter(group=="diagnostic"))$param; paramsSelect_i
 length(paramsSelect_i)
 
+
 # GCAM 6.0
 data <- readgcam(gcamdatabase = "C:/gcam/gcam-v6.0-Windows-Release-Package/output/database_basexdb_ssp235",
                  folder = "test_gcamv6p0",
-                 paramsSelect = "hydrogen",
+                 paramsSelect = c("gdp","pop","agProdByCrop","landAlloc","elecByTechTWh","watWithdrawBySec","emissCO2BySector"),
                  saveData = T)
 
 data$data$param%>%unique()
@@ -97,18 +98,18 @@ library(gcamextractor); library(dplyr)
 params <- gcamextractor::params; params %>% sort()
 
 gcamdatabase_i = "C:/Z/projects/current/00_IM3/pic_checks/database_rcp85hotter_ssp5"
-gcamdata_folder_i = "C:/gcam/gcam-usa-im3/input/gcamdata"
+gcamdata_folder_i = "C:/Z/models/gcamextractor/tests/testthat/im3_test_data/gcamdata"
 rgcam::localDBConn("C:/Z/projects/current/00_IM3/pic_checks/","database_rcp85hotter_ssp5")
 reReadData_i = T
 dataProjFile_i = "dataProj_cerf.proj"
-regionsSelect_i = c("Global","USA",rmap::mapping_US52,"Alaska grid","California grid","Central East grid","Central Northeast grid",
+regionsSelect_i = c("Global","USA",gcamextractor::map_state_to_gridregion$state%>%unique(),"PR","Alaska grid","California grid","Central East grid","Central Northeast grid",
                     "Central Northwest grid", "Central Southwest grid","Florida grid","Hawaii grid",
                     "Mid-Atlantic grid","New England grid","New York grid","Northwest grid",
                     "Southeast grid","Southwest grid","Texas grid")
 folder_i="cerf_test"
 
 # Issue #20
-paramsSelect_i = c("elec_heat_rate_BTUperkWh")
+paramsSelect_i = c("cerf")
 
 scenOrigNames_i = c("rcp85hotter_ssp5") # make sure these exist (See outputs of the rgcam::localDBConn)
 scenNewNames_i = c("rcp85hotter_ssp5")
