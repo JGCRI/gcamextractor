@@ -1736,4 +1736,57 @@
       <comments />
     </supplyDemandQuery>
   </aQuery>
+  <aQuery>
+    <all-regions/>
+    <supplyDemandQuery title="transport final energy by tech and fuel">
+                    <axis1 name="mode">subsector</axis1>
+                    <axis2 name="Year">demand-physical[@vintage]</axis2>
+                    <xPath buildList="true" dataName="input" group="false" sumAll="false">*[@type='sector' and (@name='transportation' or (exists(child::keyword[@final-energy='transportation'])))]/
+               *[@type='subsector']/*[@type='technology']/*[@type='input' and not(@name='renewable')]/
+               demand-physical[@unit='EJ']/node()</xPath>
+                    <comments/>
+                </supplyDemandQuery>
+  </aQuery>
+  <aQuery>
+    <all-regions/>
+    <supplyDemandQuery title="final energy consumption by sector and fuel">
+                    <axis1 name="input">input</axis1>
+                    <axis2 name="Year">demand-physical[@vintage]</axis2>
+                    <xPath buildList="true" dataName="input" group="false" sumAll="false">*[@type='sector' and ((@name='building' or @name='industry' or @name='transportation') or
+            (exists(child::keyword/@final-energy)))]//*[@type='input' and
+            not(@name='limestone' or @name='process heat cement' or @name='industrial energy use' or
+                @name='industrial feedstocks' or @name='renewable' or contains(@name, 'trn_') or @name='oil-credits')]/
+            demand-physical[@unit='EJ']/node()</xPath>
+                    <comments/>
+                    <labelRewriteList append-values="false">
+                        <level name="input">
+                            <rewrite from="elect_td_bld" to="electricity"/>
+                            <rewrite from="regional coal" to="coal"/>
+                            <rewrite from="H2 industrial" to="hydrogen"/>
+                            <rewrite from="refined liquids enduse" to="refined liquids"/>
+                            <rewrite from="elect_td_trn" to="electricity"/>
+                            <rewrite from="delivered coal" to="coal"/>
+                            <rewrite from="delivered gas" to="gas"/>
+                            <rewrite from="wholesale gas" to="gas"/>
+                            <rewrite from="H2 wholesale dispensing" to="hydrogen"/>
+                            <rewrite from="H2 retail dispensing" to="hydrogen"/>
+                            <rewrite from="regional biomass" to="biomass"/>
+                            <rewrite from="H2 retail delivery" to="hydrogen"/>
+                            <rewrite from="elect_td_ind" to="electricity"/>
+                            <rewrite from="delivered biomass" to="biomass"/>
+                            <rewrite from="refined liquids industrial" to="refined liquids"/>
+                            <rewrite from="H2 wholesale delivery" to="hydrogen"/>
+                        </level>
+                    </labelRewriteList>
+                </supplyDemandQuery>
+  </aQuery>
+  <aQuery>
+		<supplyDemandQuery title="elec prices by sector">
+                    <axis1 name="fuel">sector</axis1>
+                    <axis2 name="Year">cost</axis2>
+                    <xPath buildList="true" dataName="price" group="false" sumAll="false">*[@type='sector' and (@name='electricity' or @name='elect_td_bld' or @name='elect_td_ind'
+               or @name='elect_td_trn')]/cost/text()</xPath>
+                    <comments/>
+                </supplyDemandQuery>
+  </aQuery>
 </queries>
