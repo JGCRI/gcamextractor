@@ -385,7 +385,7 @@ readgcam <- function(gcamdatabase = NULL,
           # include only selected regions when applicable
           # (user has selected regions and original query uses "all-regions")
           if(!is.null(regionsSelect) &&
-             !regionsSelect %in% c("All", "all", "ALL") &&
+             !any(regionsSelect %in% c("All", "all", "ALL")) &&
              XML::names.XMLNode(xmltop[[i]])[1] == "all-regions" &&
              !(queriesSelectx[j] == "CO2 emissions by sector" &&
                any(c("emissCO2CumGlobal2010to2100", "emissCO2CumGlobal2010to2100RCP") %in% paramsSelect)) &&
