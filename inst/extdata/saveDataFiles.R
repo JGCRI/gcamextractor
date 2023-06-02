@@ -22,6 +22,7 @@ map_param_query <- tibble::tribble(
   "energy","energyFinalSubsecBySectorBuildEJ", "building final energy by subsector","pal_hot","no",
   "energy","energyFinalSubsecByFuelBuildEJ", "building final energy by fuel","pal_hot","no",
   "energy","energyFinalSubsecByFuelIndusEJ", "industry final energy by tech and fuel","pal_hot","no",
+  "energy","energyFinalSubsecByFuelIndusEJNoFeedstock", "industry final energy by tech and fuel","pal_hot","no",
   "energy","energyFinalSubsecByFuelAndCCSIndusEJ", "industry final energy by tech and fuel","pal_hot","no",
   "energy","energyFinalByFuelTransportPassEJ", "transport final energy by mode and fuel", "pal_hot", "no",
   "energy","energyFinalByFuelTransportFreightEJ", "transport final energy by mode and fuel", "pal_hot", "no",
