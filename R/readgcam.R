@@ -1150,6 +1150,61 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+  ### energyFinalSubsecByFuelIndusEJNoFeedstock ################################
+  paramx<-"energyFinalSubsecByFuelIndusEJNoFeedstock"
+  # Total final energy by aggregate end-use sector
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "industry final energy by tech and fuel"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (!is.null(regionsSelect)) {
+        tbl <- tbl %>% dplyr::filter(region %in% regionsSelect)
+      }
+      tbl <- tbl %>%
+        dplyr::rename(fuel=input) %>%
+        dplyr::filter(scenario %in% scenOrigNames,
+                      !grepl("feedstock", sector))%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(fuel=gsub("elect_td_ind","electricity",fuel),
+                      fuel=gsub("wholesale gas","gas",fuel),
+                      fuel=gsub("delivered biomass","biomass",fuel),
+                      fuel=gsub("delivered coal","coal",fuel),
+                      fuel=gsub("refined liquids industrial","liquids",fuel),
+                      fuel=dplyr::case_when(grepl("H2", fuel) ~ "hydrogen",
+                                            T ~ fuel),
+                      param = "energyFinalSubsecByFuelIndusEJNoFeedstock",
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year, subRegion=region,
+                      scenario = scenNewNames,
+                      units = "Industry Final Energy by Fuel (EJ)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = fuel,
+                      classLabel1 = "Fuel",
+                      classPalette1 = "pal_all",
+                      class2 = fuel,
+                      classLabel2 = "classLabel2",
+                      classPalette2 = "classPalette2")%>%
+        dplyr::select(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units, value,
+                      aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                      origScen, origQuery, origValue, origUnits, origX)%>%
+        dplyr::group_by(scenario, region, subRegion,    param, sources, class1, class2, x, xLabel, vintage, units,
+                        aggregate, classLabel1, classPalette1,classLabel2, classPalette2,
+                        origScen, origQuery, origUnits, origX)%>%dplyr::summarize_at(dplyr::vars("value","origValue"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()%>%
+        dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
   ### energyFinalSubsecByFuelAndCCSIndusEJ #####################################
   paramx<-"energyFinalSubsecByFuelAndCCSIndusEJ"
   # Total final energy by aggregate end-use sector
@@ -1674,15 +1729,15 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::mutate(
           sector=dplyr::case_when(
             grepl("BECCS", sector) ~ "BECCS",
-            #grepl("refining",sector,ignore.case=T)~"refining",
+            grepl("refining",sector,ignore.case=T)~"refining",
             grepl("regional biomass|regional biomassOil|regional corn for ethanol|regional sugar for ethanol", sector,ignore.case=T)~"biomass",
             #grepl("trn_aviation_intl", sector)~"International Aviation",
             #grepl("trn_shipping_intl", sector) ~ "International Shipping",
             grepl("trn_",sector,ignore.case=T)~"Transportation",
             grepl("comm |resid ",sector,ignore.case=T)~"Buildings",
             grepl("electricity|elec_|electricity |csp_backup",sector,ignore.case=T)~"Electricity",
-            grepl("H2",sector,ignore.case=T)~"Industry",
-            grepl("cement|N fertilizer|industrial|ind|alumin|refin|iron|chemical|construction|mining|agri|desal",sector,ignore.case=T)~"Industry",
+            grepl("H2",sector,ignore.case=T)~"hydrogen",
+            grepl("cement|N fertilizer|industrial|ind|alumin||iron|chemical|construction|mining|agri|desal",sector,ignore.case=T)~"Industry",
             grepl("gas pipeline|gas processing|unconventional oil production|gas to liquids|wholesale gas|delivered gas|delivered biomass",sector,ignore.case=T)~"Industry",
             grepl("Beef|Dairy|Pork|Poultry",sector,ignore.case=T)~"livestock",
             grepl("FiberCrop|MiscCrop|OilCrop|OtherGrain|PalmFruit|Corn|Rice|Root_Tuber|RootTuber|SheepGoat|SugarCrop|UnmanagedLand|Wheat|FodderGrass|FodderHerb",sector,ignore.case=T)~"crops",
