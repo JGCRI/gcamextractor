@@ -716,9 +716,9 @@ readgcam <- function(gcamdatabase = NULL,
           tbl2 <- tbl1 %>%
             dplyr::select(-value) %>%
             tidyr::complete(year=seq(year_i,2100,5), Units, scenario, region, sector1, sector2, input, `io-coefficient`, vint_year) %>%
-            dplyr::left_join(unique_combinations,by = dplyr::join_by(Units, scenario, region, sector1, sector2, input, `io-coefficient`, vint_year))%>%
+            dplyr::left_join(unique_combinations)%>%
             dplyr::filter(keep==1) %>%
-            dplyr::left_join(unique_values,by = dplyr::join_by(Units, scenario, region, sector1, sector2, input, `io-coefficient`, vint_year)); tbl2
+            dplyr::left_join(unique_values); tbl2
 
           tbl <- tbl %>%
             dplyr::bind_rows(tbl2 %>% dplyr::select(-keep)) %>%
