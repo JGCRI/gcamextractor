@@ -97,9 +97,9 @@ library(gcamextractor); library(dplyr)
 # List of params in gcamextractor
 params <- gcamextractor::params; params %>% sort()
 
-gcamdatabase_i = "C:/Z/projects/current/00_IM3/pic_checks/database_rcp85hotter_ssp5"
+gcamdatabase_i = "C:/Z/projects/current/00_IM3/pic_checks/database_rcp45cooler_ssp5"
 gcamdata_folder_i = "C:/Z/models/gcamextractor/tests/testthat/im3_test_data/gcamdata"
-rgcam::localDBConn("C:/Z/projects/current/00_IM3/pic_checks/","database_rcp85hotter_ssp5")
+rgcam::localDBConn("C:/Z/projects/current/00_IM3/pic_checks/","database_rcp45cooler_ssp5")
 reReadData_i = T
 dataProjFile_i = "dataProj_cerf.proj"
 regionsSelect_i = c("Global","USA",gcamextractor::map_state_to_gridregion$state%>%unique(),"PR","Alaska grid","California grid","Central East grid","Central Northeast grid",
@@ -109,19 +109,16 @@ regionsSelect_i = c("Global","USA",gcamextractor::map_state_to_gridregion$state%
 folder_i="cerf_test"
 
 # Issue #20
-paramsSelect_i = c("cerf")
+paramsSelect_i = c("elec_heat_rate_BTUperkWh","elec_cap_usa_GW")#"cerf"
+paramsSelect_i = c("energyFinalSubsecByFuelBuildEJ","energyFinalSubsecByFuelIndusEJ", "energyFinalSubsecByFuelIndusEJ","energyFinalSubsecByFuelTranspEJ")
 
-scenOrigNames_i = c("rcp85hotter_ssp5") # make sure these exist (See outputs of the rgcam::localDBConn)
-scenNewNames_i = c("rcp85hotter_ssp5")
 
 dataGCAM <- readgcam(reReadData = reReadData_i,
                      gcamdatabase = gcamdatabase_i,
                      gcamdata_folder = gcamdata_folder_i,
                      dataProjFile = dataProjFile_i,
-                     regionsSelect = regionsSelect_i,
+                     #regionsSelect = regionsSelect_i,
                      paramsSelect = paramsSelect_i,
-                     scenOrigNames = scenOrigNames_i,
-                     scenNewNames = scenNewNames_i,
                      folder = folder_i)
 
 dataGCAM$data %>% dplyr::select(param,scenario) %>% unique()

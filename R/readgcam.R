@@ -606,15 +606,56 @@ readgcam <- function(gcamdatabase = NULL,
         tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
       }
 
+      # Check
+      #tbl %>% dplyr::filter(sector...6=="gas (CC) (cooling pond)",region=="FL")
+
       tbl_sector_names <- names(tbl)[grepl("^sector",names(tbl))] %>% sort()
       tbl <- tbl %>%
         dplyr::rename(sector1=tbl_sector_names[1],
                       sector2=tbl_sector_names[2])
 
-      # Remove future vitnages from past years
+      # Expand years and vintages from past years
       tbl <- tbl %>%
         dplyr::mutate(vint_year = as.numeric(gsub("vintage=","",`io-coefficient`))) %>%
-        dplyr::filter(vint_year <= year)
+        dplyr::filter(vint_year <= year) %>%
+        dplyr::mutate(year = dplyr::case_when(year<vint_year~vint_year,
+                                              TRUE~year))
+
+
+      # Check
+      # tbl %>% dplyr::filter(sector2=="gas (CC) (cooling pond)",grepl("gas",input),year ==2095,region=="FL")
+
+      # Expand 2015 vintage to exist in future years if it doesnt exist already
+      # For each future year expand out:
+      unique_years <- tbl$year%>%unique()%>%sort(); unique_years
+      unique_years <- unique_years[unique_years>=2015 & unique_years<2100]; unique_years
+      for(year_i in unique_years){
+
+        rlang::inform(paste0("Expanding vintages for year:",year_i," for elec_heat_rate_BTUperkWh..."))
+
+        if(nrow(tbl %>% dplyr::filter(vint_year==year_i & year>year_i))==0){
+
+          tbl1 <- tbl %>% dplyr::filter(vint_year==year_i); tbl1
+
+          unique_combinations <- unique(tbl1[, c("Units", "scenario", "region", "sector1", "sector2", "input", "io-coefficient", "vint_year")]) %>%
+            dplyr::mutate(keep=1); unique_combinations;
+
+          unique_values <- unique(tbl1[, c("Units", "scenario", "region", "sector1", "sector2", "input", "io-coefficient", "vint_year","value")]); unique_values;
+
+          tbl2 <- tbl1 %>%
+            dplyr::select(-value) %>%
+            tidyr::complete(year=seq(year_i,2100,5), Units, scenario, region, sector1, sector2, input, `io-coefficient`, vint_year) %>%
+            dplyr::left_join(unique_combinations,by = join_by(Units, scenario, region, sector1, sector2, input, `io-coefficient`, vint_year))%>%
+            dplyr::filter(keep==1) %>%
+            dplyr::left_join(unique_values,by = join_by(Units, scenario, region, sector1, sector2, input, `io-coefficient`, vint_year)); tbl2
+
+          tbl <- tbl %>%
+            dplyr::bind_rows(tbl2 %>% dplyr::select(-keep)) %>%
+            unique(); tbl
+        } else {rlang::inform(paste0("For year ",year_i," no missing vintages in future years for elec_heat_rate_BTUperkWh."))}
+
+        rlang::inform(paste0("Expansion of vintages for year:",year_i," for elec_heat_rate_BTUperkWh complete."))
+      }
 
       tbl <- tbl %>%
         # remove secondary inputs
@@ -637,7 +678,16 @@ readgcam <- function(gcamdatabase = NULL,
                       x = year,
                       xLabel = "Year",
                       aggregate = "mean",
-                      class1 = gsub("elec_","",input),
+                      class1 = dplyr::case_when(grepl("CSP_resource",input)~"solar",
+                                                grepl("PV_resource",input)~"solar",
+                                                grepl("nuclear",input)~"nuclear",
+                                                grepl("wind",input)~"wind",
+                                                grepl("oil",input)~"refined liquids",
+                                                grepl("refined",input)~"refined liquids",
+                                                grepl("biomass",input)~"biomass",
+                                                grepl("coal",input)~"coal",
+                                                grepl("gas",input)~"gas",
+                                                TRUE~input),
                       classLabel1 = "subsector",
                       classPalette1 = "pal_all",
                       class2 = sector2,
@@ -652,6 +702,9 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::ungroup()%>%
         dplyr::filter(!is.na(value)) %>%
         dplyr::mutate(value = dplyr::if_else(value==3412,0,value))
+
+      # Check
+      # tbl %>% dplyr::filter(x %in% c(2020,2025), class2=="gas (CC) (cooling pond)", subRegion=="DC", grepl("gas",class1))%>%as.data.frame()
 
       if(any(grepl("^cerf$|^go$",paramsSelect,ignore.case = T))){
         tbl <- tbl %>%
@@ -2437,7 +2490,8 @@ readgcam <- function(gcamdatabase = NULL,
         dplyr::rename(sector=input) %>%
         dplyr::filter(scenario %in% scenOrigNames)%>%
         dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
-        dplyr::mutate(sector=gsub("elect_td_bld","electricity",sector),
+        dplyr::mutate(sector=dplyr::case_when(grepl("electricity domestic",sector)~"electricity",TRUE~sector),
+                      sector=gsub("elect_td_bld","electricity",sector),
                       sector=gsub("delivered gas","gas",sector),
                       sector=gsub("delivered biomass","bioenergy",sector),
                       sector=gsub("delivered coal","coal",sector),
