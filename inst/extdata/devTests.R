@@ -110,19 +110,21 @@ folder_i="cerf_test"
 
 # Issue #20
 paramsSelect_i = c("elec_heat_rate_BTUperkWh","elec_cap_usa_GW")#"cerf"
-paramsSelect_i = c("energyFinalSubsecByFuelBuildEJ","energyFinalSubsecByFuelIndusEJ", "energyFinalSubsecByFuelIndusEJ","energyFinalSubsecByFuelTranspEJ")
+#paramsSelect_i = c("energyFinalSubsecByFuelBuildEJ","energyFinalSubsecByFuelIndusEJ", "energyFinalSubsecByFuelIndusEJ","energyFinalSubsecByFuelTranspEJ")
 
 
 dataGCAM <- readgcam(reReadData = reReadData_i,
                      gcamdatabase = gcamdatabase_i,
                      gcamdata_folder = gcamdata_folder_i,
                      dataProjFile = dataProjFile_i,
-                     #regionsSelect = regionsSelect_i,
+                     regionsSelect = regionsSelect_i,
                      paramsSelect = paramsSelect_i,
-                     folder = folder_i)
+                     folder = folder_i,
+                     save=F)
 
 dataGCAM$data %>% dplyr::select(param,scenario) %>% unique()
 (dataGCAM$data)$value%>%range()
+dataGCAM$data%>% dplyr::filter(subRegion=="CO",x %in% c(2025),class2=="gas (CT) (cooling pond)")
 
 # On PIC direct
 library(rgcam)

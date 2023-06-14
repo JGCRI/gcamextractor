@@ -607,23 +607,94 @@ readgcam <- function(gcamdatabase = NULL,
       }
 
       # Check
-      #tbl %>% dplyr::filter(sector...6=="gas (CC) (cooling pond)",region=="FL")
+      #tbl %>% dplyr::filter(sector...6=="gas (CT) (cooling pond)",region=="CO")
 
       tbl_sector_names <- names(tbl)[grepl("^sector",names(tbl))] %>% sort()
       tbl <- tbl %>%
         dplyr::rename(sector1=tbl_sector_names[1],
                       sector2=tbl_sector_names[2])
 
-      # Expand years and vintages from past years
+      # Set years and vintages to appropriate values
       tbl <- tbl %>%
         dplyr::mutate(vint_year = as.numeric(gsub("vintage=","",`io-coefficient`))) %>%
         dplyr::filter(vint_year <= year) %>%
         dplyr::mutate(year = dplyr::case_when(year<vint_year~vint_year,
-                                              TRUE~year))
+                                              TRUE~year)) %>%
+        #dplyr::filter(!grepl("pre_1970|1970s|1980s|1990s|2010s|2000s|retire",sector2)) %>%# remove secondary inputs
+        dplyr::filter(!grepl("backup", input),
+                    !grepl("credits", input),
+                    !grepl("water", input))
 
+      # Separate out rows with single values
+      tbl_singles <-  tbl %>%
+        dplyr::select(-vint_year,-`io-coefficient`) %>% # To be reset later
+        dplyr::group_by(Units, scenario, region, sector1, sector2, input) %>%
+        summarize(count = n()) %>%
+        filter(count == 1); tbl_singles
+
+      tbl_single <- tbl %>%
+        merge(tbl_singles) %>%
+        dplyr::select(-count); tbl_single
+
+      # Separate out rows with multiple values
+      tbl_multi <- tbl %>%
+        dplyr::anti_join(tbl_singles); tbl_multi
+
+      # Extrapolate and copy out missing values for tbl_single
+      tbl_single_expanded <- tbl_single %>%
+        dplyr::select(-vint_year,-`io-coefficient`, -value) %>% # To be reset later
+        dplyr::group_by(Units, scenario, region, sector1, sector2, input) %>%
+        tidyr::complete(year = seq(2010, 2100, 5)) %>%
+        dplyr::left_join(tbl_single %>% dplyr::select(-year,-vint_year,-`io-coefficient`))%>%
+        dplyr::ungroup() %>%
+        dplyr::mutate(vint_year=year,`io-coefficient`=paste0("vintage=",year));
+      tbl_single_expanded %>% as.data.frame() %>% dplyr::arrange(region, year)
 
       # Check
-      # tbl %>% dplyr::filter(sector2=="gas (CC) (cooling pond)",grepl("gas",input),year ==2095,region=="FL")
+      # tbl %>% dplyr::filter(region=="FL",sector2=="biomass (conv) (cooling pond)")
+
+      # Extrapolate and fill out missing values
+      tbl_multi_expanded<- tbl_multi %>%
+        dplyr::select(-vint_year,-`io-coefficient`) %>% # To be reset later
+        dplyr::group_by(Units, scenario, region, sector1, sector2, input) %>%
+        tidyr::complete(year = seq(2010, 2100, 5),fill = list(value = NA)) %>%
+        dplyr::mutate(value = ifelse(is.na(value), approx(year, value, xout = year, rule=2,method = "linear", ties = "mean")$y, value)) %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate(vint_year=year,`io-coefficient`=paste0("vintage=",year));
+      tbl_multi_expanded %>% as.data.frame() %>% dplyr::arrange(region, year)
+
+      # Combine back into single tbl
+      tbl <- tbl_multi_expanded %>%
+        dplyr::bind_rows(tbl_single_expanded);
+
+      # Missing Regions ---------------------------
+      # Expand out to all missing regions
+      tbl_regions_expanded_na <- tbl %>%
+        dplyr::select(-vint_year,-`io-coefficient`) %>% # To be reset later
+        dplyr::group_by(Units, scenario, sector1, sector2, year, input) %>%
+        tidyr::complete(region = unique(tbl$region),fill = list(value = NA)) %>%
+        dplyr::filter(is.na(value));  tbl_regions_expanded_na
+
+      # Take mean across remaining regions
+      tbl_regions_mean <- tbl %>%
+        dplyr::select(-vint_year,-`io-coefficient`, -region) %>% # To be reset later
+        dplyr::group_by(Units, scenario, sector1, sector2, year, input) %>%
+        dplyr::summarize(value=mean(value)); tbl_regions_mean
+
+      # Assign regional means to missing regional values
+      tbl_regions_expanded <- tbl_regions_expanded_na %>%
+        dplyr::select(-value) %>%
+        dplyr::left_join(tbl_regions_mean)%>%
+        dplyr::mutate(vint_year=year,`io-coefficient`=paste0("vintage=",year)); tbl_regions_expanded
+
+      # Join back into main tbl
+      tbl <- tbl %>%
+        dplyr::bind_rows(tbl_regions_expanded)
+
+      # Check
+      # tbl %>% dplyr::filter(year %in% c(2025),sector2=="biomass (conv) (cooling pond)"  )
+      # tbl %>% dplyr::filter(region=="ND",year %in% c(2025),sector2=="biomass (conv) (cooling pond)"  )
+      # tbl %>% dplyr::filter(sector2=="gas (CT) (cooling pond)",grepl("gas",input),year ==2025,region=="CO")
 
       # Expand 2015 vintage to exist in future years if it doesnt exist already
       # For each future year expand out:
@@ -658,10 +729,6 @@ readgcam <- function(gcamdatabase = NULL,
       }
 
       tbl <- tbl %>%
-        # remove secondary inputs
-        dplyr::filter(!grepl("backup", input),
-               !grepl("credits", input),
-               !grepl("water", input)) %>%
         dplyr::mutate(param = paramx,
                       sources = "Sources",
                       origScen = scenario,
