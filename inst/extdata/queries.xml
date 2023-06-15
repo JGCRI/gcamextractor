@@ -1702,4 +1702,14 @@
      <comments/>
     </supplyDemandQuery>
   </aQuery>
+  <aQuery>
+    <all-regions/>
+                <supplyDemandQuery title="fertilizer consumption by ag tech">
+                    <axis1 name="sector">sector</axis1>
+                    <axis2 name="Year">demand-physical[@vintage]</axis2>
+                    <xPath buildList="true" dataName="input" group="false" sumAll="false">*[@type='sector' and not (@name='Exports_fertilizer')]/
+               *[@type='subsector']/*[@type='technology']/*[@type='input' and (@name='N fertilizer')]/demand-physical/node()</xPath>
+                    <comments/>
+                </supplyDemandQuery>
+  </aQuery>
 </queries>

@@ -77,11 +77,17 @@ map_param_query <- tibble::tribble(
   "cerf","elec_carbon_capture_escl_rate_fraction",NA,"pal_hot",c("/outputs/L223.TechCarbonCapture_Dispatch",
                                                             "/outputs/L2233.GlobalTechCapture_elec_cool"),
   "cerf","elec_heat_rate_BTUperkWh","elec coeff","pal_hot","no",
-  "go","elec_heat_rate_BTUperkWh","elec coeff","pal_hot","no",
-  "go","elec_fuel_price_2015USDperMBTU","prices by sector","pal_hot","no",
   # #"cerf","carbon_tax_USDperTon","pal_hot","no",
   # #"cerf", unit_size,"pal_hot","no",
   # #"cerf", discount_rate,
+
+  # GO
+  "go","elec_heat_rate_BTUperkWh","elec coeff","pal_hot","no",
+  "go","elec_fuel_price_2015USDperMBTU","prices by sector","pal_hot","no",
+  # Demeter
+  "demeter","landAllocDetail","detailed land allocation","pal_green","no",
+  "demeter","agProdByCrop", "ag production by tech","pal_green","no",
+  "demeter","fertConsByAgTech", "fertilizer consumption by ag tech","pal_green","no",
   # Energy
   "energy","energyPrimaryByFuelEJ","primary energy consumption by region (direct equivalent)","pal_hot","no",
   "energy","energyPrimaryRefLiqProdEJ", "refined liquids production by subsector","pal_hot","no",
@@ -156,6 +162,8 @@ map_param_query <- tibble::tribble(
   "ag","agProdBiomass", "ag production by tech","pal_green","no",
   "ag","agProdForest", "ag production by tech","pal_green","no",
   "ag","agProdByCrop", "ag production by tech","pal_green","no",
+  # Fertilizer
+  "fertilzier","fertConsByAgTech", "fertilizer consumption by ag tech","pal_green","no",
   #Livestock
   "livestock","livestock_MeatDairybyTechMixed", "meat and dairy production by tech","pal_green","no",
   "livestock","livestock_MeatDairybyTechPastoral", "meat and dairy production by tech","pal_green","no",

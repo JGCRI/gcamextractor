@@ -136,17 +136,48 @@ dataProjLoaded <- rgcam::loadProject("test_proj.proj")
 queryx <- "elec investment capacity factor"
 tbl <- rgcam::getQuery(dataProjLoaded, queryx)
 
-# reReadData = T
-# gcamdatabase = gcamdatabase_i
-# gcamdata_folder = gcamdata_folder_i
-# dataProjFile = dataProjFile_i
-# regionsSelect = regionsSelect_i
-# paramsSelect = paramsSelect_i
-# folder = folder_i
-# queryFile=NULL
-# scenOrigNames = "All"
-# scenNewNames = NULL
+#----------------------
+# Demeter Debug
+#----------------------
 
+library(gcamextractor); library(dplyr)
+
+# List of params in gcamextractor
+params <- gcamextractor::params; params %>% sort()
+gcamdatabase_i = "C:/Z/projects/current/00_IM3/pic_checks/database_rcp45cooler_ssp5"
+#gcamdata_folder_i = "C:/Z/models/gcamextractor/tests/testthat/im3_test_data/gcamdata"
+rgcam::localDBConn("C:/Z/projects/current/00_IM3/pic_checks/","database_rcp45cooler_ssp5")
+reReadData_i = T
+dataProjFile_i = "dataProj_demeter.proj"
+regionsSelect_i = c("Global","USA",gcamextractor::map_state_to_gridregion$state%>%unique(),"PR","Alaska grid","California grid","Central East grid","Central Northeast grid",
+                    "Central Northwest grid", "Central Southwest grid","Florida grid","Hawaii grid",
+                    "Mid-Atlantic grid","New England grid","New York grid","Northwest grid",
+                    "Southeast grid","Southwest grid","Texas grid")
+folder_i="demeter_test"
+
+# Issue #20
+paramsSelect_i = c("demeter")
+#paramsSelect_i = c("demeter")
+#paramsSelect_i = c("energyFinalSubsecByFuelBuildEJ","energyFinalSubsecByFuelIndusEJ", "energyFinalSubsecByFuelIndusEJ","energyFinalSubsecByFuelTranspEJ")
+
+
+dataGCAM <- readgcam(reReadData = reReadData_i,
+                     gcamdatabase = gcamdatabase_i,
+                     #gcamdata_folder = gcamdata_folder_i,
+                     dataProjFile = dataProjFile_i,
+                     #regionsSelect = regionsSelect_i,
+                     paramsSelect = paramsSelect_i,
+                     folder = folder_i,
+                     save=F)
+
+
+dataGCAM$data -> df1
+df1$param%>%unique()
+df1 %>% dplyr::filter(param=="agProdByCrop")
+df1 %>% dplyr::filter(param=="landAllocDetail")
+df1 %>% dplyr::filter(param=="fertConsByAgTech")
+
+#----------------------------------------
 
 # SEASIA Tests
 

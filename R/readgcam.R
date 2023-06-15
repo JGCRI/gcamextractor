@@ -3317,6 +3317,54 @@ readgcam <- function(gcamdatabase = NULL,
       # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
     }}
 
+  paramx <- "fertConsByAgTech"
+  if(paramx %in% paramsSelectx){
+    rlang::inform(paste0("Running param: ", paramx,"..."))
+    queryx <- "fertilizer consumption by ag tech"
+    if (queryx %in% queriesx) {
+      tbl <- rgcam::getQuery(dataProjLoaded, queryx)  # Tibble
+      if (any(!is.null(regionsSelect))) {
+        if(any(regionsSelect %in% gcamextractor::regions_US52)){
+          tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect,"USA"))
+        } else {
+          tbl <- tbl %>% dplyr::filter(region %in% c(regionsSelect))
+        }
+      }
+      tbl <- tbl %>%
+        dplyr::filter(!sector %in% c("N fertilizer")) %>%
+        dplyr::filter(scenario %in% scenOrigNames)%>%
+        dplyr::left_join(tibble::tibble(scenOrigNames, scenNewNames), by = c(scenario = "scenOrigNames")) %>%
+        dplyr::mutate(param = paramx,
+                      sources = "Sources",
+                      origScen = scenario,
+                      origQuery = queryx,
+                      origValue = value,
+                      origUnits = Units,
+                      origX = year,
+                      scenario = scenNewNames,
+                      value = value,
+                      units = "Fertilizer Consumption (Mt N)",
+                      vintage = paste("Vint_", year, sep = ""),
+                      x = year,
+                      xLabel = "Year",
+                      aggregate = "sum",
+                      class1 = sector,
+                      classLabel1 = "Crop",
+                      classPalette1 = "pal_all",
+                      subRegion=gsub(".*_","",subsector),
+                      class2 = gsub(".*RFD","RFD",technology),
+                      class2 = gsub(".*IRR","IRR",class2),
+                      classLabel2 = "Detail",
+                      classPalette2 = "pal_all")%>%
+        dplyr::select(origScen,origQuery, origValue, origUnits, origX, region, subRegion,    param, scenario,
+                      value, units, vintage, x, xLabel, aggregate, class1, classLabel1, classPalette1,
+                      class2, classLabel2, classPalette2)%>%dplyr::filter(!is.na(value))
+      datax <- dplyr::bind_rows(datax, tbl)
+    } else {
+      # if(queryx %in% queriesSelectx){rlang::inform(paste("Query '", queryx, "' not found in database", sep = ""))}
+    }}
+
+
   paramx <- "landIrrRfd"
   if(paramx %in% paramsSelectx){
     rlang::inform(paste0("Running param: ", paramx,"..."))

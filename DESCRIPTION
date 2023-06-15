@@ -10,7 +10,8 @@ Authors@R: c(person("Zarrar", "Khan", email = "zarrar.khan@pnnl.gov", role = c("
 Description: Description of your R package gcamextractor.
 URL: https://github.com/JGCRI/gcamextractor
 BugReports: https://github.com/JGCRI/gcamextractor/issues
-Depends: R (>= 2.10)
+Depends: 
+    R (>= 3.5)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
