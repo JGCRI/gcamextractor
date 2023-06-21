@@ -88,6 +88,7 @@ map_param_query <- tibble::tribble(
   "demeter","landAllocDetail","detailed land allocation","pal_green","no",
   "demeter","agProdByCrop", "ag production by tech","pal_green","no",
   "demeter","fertConsByAgTech", "fertilizer consumption by ag tech","pal_green","no",
+  "demeter","agProdForest", "ag production by tech","pal_green","no",
   # Energy
   "energy","energyPrimaryByFuelEJ","primary energy consumption by region (direct equivalent)","pal_hot","no",
   "energy","energyPrimaryRefLiqProdEJ", "refined liquids production by subsector","pal_hot","no",

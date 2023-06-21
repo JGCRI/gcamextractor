@@ -3250,7 +3250,7 @@ readgcam <- function(gcamdatabase = NULL,
                       origX = year,
                       scenario = scenNewNames,
                       value = value,
-                      units = "Ag Production (billion m3)",
+                      units = "Forest Production (billion m3)",
                       vintage = paste("Vint_", year, sep = ""),
                       x = year,
                       xLabel = "Year",
@@ -3260,7 +3260,8 @@ readgcam <- function(gcamdatabase = NULL,
                       classPalette1 = "pal_all",
                       class2 = "class2",
                       classLabel2 = "classLabel2",
-                      classPalette2 = "classPalette2")%>%
+                      classPalette2 = "classPalette2",
+                      subRegion= region)%>%
         dplyr::select(origScen,origQuery, origValue, origUnits, origX, region, subRegion,    param, scenario,
                       value, units, vintage, x, xLabel, aggregate, class1, classLabel1, classPalette1,
                       class2, classLabel2, classPalette2)%>%dplyr::filter(!is.na(value))

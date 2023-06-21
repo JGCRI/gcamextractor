@@ -147,7 +147,7 @@ params <- gcamextractor::params; params %>% sort()
 gcamdatabase_i = "C:/Z/projects/current/00_IM3/pic_checks/database_rcp45cooler_ssp5"
 #gcamdata_folder_i = "C:/Z/models/gcamextractor/tests/testthat/im3_test_data/gcamdata"
 rgcam::localDBConn("C:/Z/projects/current/00_IM3/pic_checks/","database_rcp45cooler_ssp5")
-reReadData_i = T
+reReadData_i = F
 dataProjFile_i = "dataProj_demeter.proj"
 regionsSelect_i = c("Global","USA",gcamextractor::map_state_to_gridregion$state%>%unique(),"PR","Alaska grid","California grid","Central East grid","Central Northeast grid",
                     "Central Northwest grid", "Central Southwest grid","Florida grid","Hawaii grid",
@@ -176,6 +176,7 @@ df1$param%>%unique()
 df1 %>% dplyr::filter(param=="agProdByCrop")
 df1 %>% dplyr::filter(param=="landAllocDetail")
 df1 %>% dplyr::filter(param=="fertConsByAgTech")
+df1 %>% dplyr::filter(param=="agProdForest")
 
 #----------------------------------------
 
