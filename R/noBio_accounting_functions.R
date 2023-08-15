@@ -11,6 +11,7 @@
 #' @param energy.consumption.by.tech rgcam output from energy consumption by tech query. Columns must be 'Units', 'scenario', 'region', 'sector', 'subsector', 'technology', 'input', 'year', and 'value'
 #' @param service.output.by.tech rgcam output from output by tech query. Columns must be 'Units', 'scenario', 'region', 'sector', 'subsector', 'technology', 'output', 'year', and 'value'
 #' @param market.prices rgcam output from prices of all markets query. Columns must be 'Units', 'scenario', 'year', 'market', 'value'
+#' @param sep_feedstocks separate refined liquids industrial feedstocks from refined liquids industrial and assign C coef of 0
 #' @return dataframe of carbon inputs and outputs
 #' @author TRW
 #' @export
@@ -19,7 +20,8 @@
 
 prepare_sector_carbon_flows <- function(energy.consumption.by.tech,
                                         service.output.by.tech,
-                                        market.prices){
+                                        market.prices,
+                                        sep_feedstocks){
 
   #................
   # Initialize variables by setting to NULL
@@ -84,6 +86,67 @@ prepare_sector_carbon_flows <- function(energy.consumption.by.tech,
     dplyr::filter(Units == "EJ") %>%
     dplyr::select(-Units) %>%
     dplyr::rename(q.out = value)
+
+  # ----------------------------------------
+  # separate feedstocks from refined liquids industrial
+  # ----------------------------------------
+  if(sep_feedstocks){
+    # calculate refined liquids energy inputs to industrial feedstocks
+    refining_to_feedstock_input <- input.d %>%
+      dplyr::filter(input == "refined liquids industrial",
+                    grepl("feedstock", sector)) %>%
+      dplyr::group_by(scenario, year) %>%
+      dplyr::summarize(q.in = sum(q.in),
+                       region = market.name,
+                       market.name = market.name) %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(input = "refining",
+                    sector = "refined liquids industrial feedstocks",
+                    subsector = "refined liquids industrial feedstocks",
+                    technology = "refined liquids industrial feedstocks") %>%
+      unique()
+
+
+    # subtract industrial feedstock energy from refined liquids industrial energy
+    adjusted_ref_liq_ind_input <- input.d %>%
+      dplyr::filter(input == "refining", sector == "refined liquids industrial") %>%
+      rbind(refining_to_feedstock_input) %>%
+      dplyr::select(-c(subsector, technology)) %>%
+      tidyr::pivot_wider(names_from = sector, values_from = q.in) %>%
+      dplyr::mutate(q.in = `refined liquids industrial` - `refined liquids industrial feedstocks`) %>%
+      dplyr::select(scenario, input, region, year, market.name, q.in) %>%
+      dplyr::mutate(sector = "refined liquids industrial",
+                    subsector = "refined liquids industrial",
+                    technology = "refined liquids industrial")
+
+    # change industrial feedstock sectors' inputs to new refined liquids industrial feedstocks sector
+    adjusted_ind_feed_input <- input.d %>%
+      dplyr::filter(input == "refined liquids industrial",
+                    grepl("feedstock", sector)) %>%
+      dplyr::mutate(input = "refined liquids industrial feedstocks")
+
+    # remove adjusted rows from original inputs and bind together with new rows
+    input.d <- input.d %>%
+      dplyr::filter(!(input == "refined liquids industrial" & grepl("feedstock", sector)),
+                    !(input == "refining" & sector == "refined liquids industrial")) %>%
+      rbind(adjusted_ind_feed_input, adjusted_ref_liq_ind_input)
+
+    # replace outputs with adjusted ones and add new outputs
+    feedstock_output <- refining_to_feedstock_input %>%
+      dplyr::rename(q.out = q.in) %>%
+      dplyr::select(-c(input, market.name)) %>%
+      dplyr::mutate(output = technology)
+
+    adjusted_ref_liq_ind_output <- adjusted_ref_liq_ind_input %>%
+      dplyr::rename(q.out = q.in) %>%
+      dplyr::select(-c(input, market.name)) %>%
+      dplyr::mutate(output = technology)
+
+    output.d <- output.d %>%
+      dplyr::filter(sector != "refined liquids industrial") %>%
+      rbind(adjusted_ref_liq_ind_output, feedstock_output)
+
+  }
 
 
   # ----------------------------------------
@@ -291,6 +354,7 @@ apply_coefs <- function(curr.FQ.sector, curr.emiss, coefs) {
 #' @param market.prices rgcam output from prices of all markets query. Columns must be 'Units', 'scenario', 'year', 'market', and 'value'
 #' @param emiss.by.tech rgcam output from CO2 emissions by tech query. Columns must be 'Units', 'scenario', 'region', 'sector', 'subsector', 'technology', 'ghg', 'year', and 'value'
 #' @param bio.sectors biomass sectors to account for (e.g. 'regional biomass')
+#' @param exclude_feedstocks prevent biomass emissions adjustment from being applied to refined liquids industrial feedstocks
 #' @return dataframe of CO2 emissions by sector with biomass negative emissions accounted for
 #' @author TRW
 #' @export
@@ -299,7 +363,8 @@ allocate_biomass_emiss_reductions <- function(energy.consumption.by.tech,
                                               service.output.by.tech,
                                               market.prices,
                                               emiss.by.tech,
-                                              bio.sectors){
+                                              bio.sectors,
+                                              exclude_feedstocks = F){
 
   #................
   # Initialize variables by setting to NULL
@@ -312,7 +377,8 @@ allocate_biomass_emiss_reductions <- function(energy.consumption.by.tech,
   # ------------------------------
   sector_carbon_flows <- prepare_sector_carbon_flows(energy.consumption.by.tech,
                                                      service.output.by.tech,
-                                                     market.prices)
+                                                     market.prices,
+                                                     exclude_feedstocks)
 
 
   # ------------------------------

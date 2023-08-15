@@ -84,6 +84,7 @@
 #'
 #' @param saveData Default = "T". Set to F if do not want to save any data to file.
 #' @param exogenousNoBio Default = FALSE. For "no bio" emissions queries, should negative biomass CO2 emissions accounting be done exogenously rather than using the 'CO2 emissions by sector (no bio)' query?
+#' @param exclude_feedstocks Default = FALSE. If doing exogenous no bio accounting, should refinded liquids industrial feedstocks be excluded from no bio accounting?
 #' @return A list with the scenarios in the gcam database, queries in the queryxml file and a
 #' tibble with gcam data formatted for gcamextractor charts aggregated to different categories.
 #' These include data, dataAggParam, dataAggClass1, dataAggClass2.
@@ -107,7 +108,8 @@ readgcam <- function(gcamdatabase = NULL,
                      folder = getwd(),
                      nameAppend = "",
                      saveData = T,
-                     exogenousNoBio = F
+                     exogenousNoBio = F,
+                     exclude_feedstocks = F
 ){
 
 
@@ -1501,7 +1503,7 @@ readgcam <- function(gcamdatabase = NULL,
 
   ### emissLUC #################################################################
   # need LUC for CO2BySector, GHGBYSector, and GHGByGas
-  if(any(c("emissCO2BySector", "emissCO2BySectorNoBio", "emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissLUC") %in% paramsSelectx)){
+  if(any(c("emissCO2BySector", "emissCO2BySectorNoBio", "emissCO2ByDetailedSectorNoBio", "emissGHGBySectorGWPAR5", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasGWPAR5", "emissGHGByGasNoBioGWPAR5", "emissLUC") %in% paramsSelectx)){
 
     queryx <- "Land Use Change Emission (future)"
     if (queryx %in% queriesx) {
@@ -1619,7 +1621,7 @@ readgcam <- function(gcamdatabase = NULL,
   ### emissCO2BySectorNoBio ####################################################
   # need for CO2BySectorNoBio, GHGBySectorNoBio, and GHGByGasNoBio
   if(any(c("emissCO2BySectorNoBio", "emissGHGBySectorNoBioGWPAR5", "emissGHGByGasNoBioGWPAR5",
-           "emissGHGBySectorBuildingsGWPAR5") %in% paramsSelectx)){
+           "emissGHGBySectorBuildingsGWPAR5", "emissCO2ByDetailedSectorNoBio") %in% paramsSelectx)){
 
     queryx <- c("CO2 emissions by tech", "energy consumption by tech",
                 "outputs by tech", "prices of all markets",
@@ -1642,7 +1644,8 @@ readgcam <- function(gcamdatabase = NULL,
                                             market.prices,
                                             emiss.by.tech,
                                             c("regional biomass", "regional biomassOil",
-                                              "regional sugar for ethanol"))
+                                              "regional sugar for ethanol"),
+                                            exclude_feedstocks)
 
 
       # filter CO2 sequestration for biomass techs and aggregate to sector level
@@ -1776,6 +1779,26 @@ readgcam <- function(gcamdatabase = NULL,
       dplyr::mutate(param = "emissCO2BySector",
              units="CO2 emissions - (MTCO2)")
     datax <- dplyr::bind_rows(datax, tblEmissCO2BySector)
+    }
+
+  if("emissCO2ByDetailedSectorNoBio" %in% paramsSelectx){
+    # LUC
+    tblEmissCO2BySector_LU <- tblLUEmiss %>%
+      dplyr::rename(class1 = sector, class2 = ghg) %>%
+      dplyr::mutate(classLabel1 = "sector",
+                    classLabel2 = "ghg")
+
+    # other sectors
+    tblEmissCO2BySectorNoBio_CO2 <- tblCO2EmissNoBio %>%
+      dplyr::rename(class1 = sector, class2 = ghg) %>%
+      dplyr::mutate(classLabel1 = "sector",
+                    classLabel2 = "ghg")
+    # all CO2
+    tblEmissCO2BySectorNoBio <- dplyr::bind_rows(tblEmissCO2BySector_LU,
+                                                 tblEmissCO2BySectorNoBio_CO2) %>%
+      dplyr::mutate(param = "emissCO2ByDetailedSectorNoBio",
+                    units="CO2 emissions - (MTCO2)")
+    datax <- dplyr::bind_rows(datax, tblEmissCO2BySectorNoBio)
   }
 
   # add CO2 by sector (no bio) to data if emissCO2BySectorNoBio param is chosen
