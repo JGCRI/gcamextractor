@@ -29,6 +29,7 @@
 #' @param regionsAggregateNames Default = NULL. Vector of names for aggregated regions. Length must be 1 if regionsAggregate
 #' is a vector or match the length of the list given by regionsAggregate. Example: c('South America', 'North America')
 #' @param paramsSelect Default = "diagnostic".
+#' @param removeVintages Default = "FALSE".
 #'
 #' Choose "All" or paramSet from "energy", "electricity", "transport",
 #' "water" , "socioecon" ,"ag" , "livestock" ,"land"  ,"emissions".
@@ -105,7 +106,8 @@ readgcam <- function(gcamdatabase = NULL,
                      paramsSelect = "diagnostic",
                      folder = getwd(),
                      nameAppend = "",
-                     saveData = T
+                     saveData = T,
+                     removeVintages=F
 ){
 
 
@@ -6926,7 +6928,9 @@ readgcam <- function(gcamdatabase = NULL,
 
   }
 
+
     # Aggregate across Class 2
+  if(!removeVintage){
     dataxAggsums<-datax%>%
       dplyr::filter(aggregate=="sum")%>%
       dplyr::select(-c(class1,classLabel1,classPalette1, origQuery, origUnits))%>%
@@ -6939,20 +6943,44 @@ readgcam <- function(gcamdatabase = NULL,
       dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
       dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))%>%
       dplyr::ungroup()
-    dataxAggClass<-dplyr::bind_rows(dataxAggsums,dataxAggmeans)%>%dplyr::ungroup()
+    dataxAggClass<-dplyr::bind_rows(dataxAggsums,dataxAggmeans)%>%dplyr::ungroup()} else {
+      dataxAggsums<-datax%>%
+        dplyr::filter(aggregate=="sum")%>%
+        dplyr::select(-c(class1,classLabel1,classPalette1, origQuery, origUnits, vintage))%>%
+        dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
+        dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T))) %>%
+        dplyr::ungroup()
+      dataxAggmeans<-datax%>%
+        dplyr::filter(aggregate=="mean")%>%
+        dplyr::select(-c(class1,classLabel1,classPalette1, origQuery, origUnits, vintage))%>%
+        dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
+        dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))%>%
+        dplyr::ungroup()
+      dataxAggClass<-dplyr::bind_rows(dataxAggsums,dataxAggmeans)%>%dplyr::ungroup()
+    }
 
     dataAggClass2 = dataxAggClass %>% dplyr::rename(class=class2,classLabel=classLabel2,classPalette=classPalette2) %>% unique()
 
 
 
     if(saveData){
+
+      if(!removeVintage){
       utils::write.csv(dataxAggClass %>%
                          dplyr::rename(class=class2,classLabel=classLabel2,classPalette=classPalette2)%>%
                          dplyr::select("scenario","region","subRegion","param","classLabel","class","classLabel",
-                                       "xLabel","x","vintage","units","value"),
+                                       "xLabel","x","vintage","aggregate","units","value"),
+                       file = gsub("//","/",paste(folder,
+                                                  "/gcamDataTable_aggClass2",
+                                                  nameAppend,".csv", sep = "")),row.names = F)} else {
+          utils::write.csv(dataxAggClass %>%
+                         dplyr::rename(class=class2,classLabel=classLabel2,classPalette=classPalette2)%>%
+                         dplyr::select("scenario","region","subRegion","param","classLabel","class","classLabel",
+                                       "xLabel","x","aggregate","units","value"),
                        file = gsub("//","/",paste(folder,
                                                   "/gcamDataTable_aggClass2",
                                                   nameAppend,".csv", sep = "")),row.names = F)
+                                                  }
 
       rlang::inform(paste("GCAM data aggregated to class 2 saved to: ",gsub("//","/",paste(folder,
                                 "/gcamDataTable_aggClass2",
@@ -6961,31 +6989,56 @@ readgcam <- function(gcamdatabase = NULL,
       }
 
     # Aggregate across Class 1
-    dataxAggsums<-datax%>%
-      dplyr::filter(aggregate=="sum")%>%
-      dplyr::select(-c(class2,classLabel2,classPalette2, origQuery, origUnits))%>%
-      dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
-      dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T)))%>%
-      dplyr::ungroup()
-    dataxAggmeans<-datax%>%
-      dplyr::filter(aggregate=="mean")%>%
-      dplyr::select(-c(class2,classLabel2,classPalette2, origQuery, origUnits))%>%
-      dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
-      dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))%>%
-      dplyr::ungroup()
-    dataxAggClass<-dplyr::bind_rows(dataxAggsums,dataxAggmeans)%>%dplyr::ungroup()
+    if(!removeVintage){
+       dataxAggsums<-datax%>%
+        dplyr::filter(aggregate=="sum")%>%
+        dplyr::select(-c(class2,classLabel2,classPalette2, origQuery, origUnits))%>%
+        dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
+        dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()
+      dataxAggmeans<-datax%>%
+        dplyr::filter(aggregate=="mean")%>%
+        dplyr::select(-c(class2,classLabel2,classPalette2, origQuery, origUnits))%>%
+        dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
+        dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))%>%
+        dplyr::ungroup()
+      dataxAggClass<-dplyr::bind_rows(dataxAggsums,dataxAggmeans)%>%dplyr::ungroup()} else {
+        dataxAggsums<-datax%>%
+          dplyr::filter(aggregate=="sum")%>%
+          dplyr::select(-c(class2,classLabel2,classPalette2, origQuery, origUnits, vintage))%>%
+          dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
+          dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T)))%>%
+          dplyr::ungroup()
+        dataxAggmeans<-datax%>%
+          dplyr::filter(aggregate=="mean")%>%
+          dplyr::select(-c(class2,classLabel2,classPalette2, origQuery, origUnits, vintage))%>%
+          dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
+          dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))%>%
+          dplyr::ungroup()
+        dataxAggClass<-dplyr::bind_rows(dataxAggsums,dataxAggmeans)%>%dplyr::ungroup()
+      }
+
 
     dataAggClass1 = dataxAggClass  %>% dplyr::rename(class=class1,classLabel=classLabel1,classPalette=classPalette1) %>% unique()
 
     if(saveData){
 
+      if(!removeVintage){
     utils::write.csv(dataxAggClass  %>%
                        dplyr::rename(class=class1,classLabel=classLabel1,classPalette=classPalette1) %>%
                        dplyr::select("scenario","region","subRegion","param","classLabel","class","classLabel",
-                                     "xLabel","x","vintage","units","value"),
+                                     "xLabel","x","vintage","aggregate","units","value"),
                      file = gsub("//","/",paste(folder,
                                                 "/gcamDataTable_aggClass1",
-                                                nameAppend,".csv", sep = "")),row.names = F)
+                                                nameAppend,".csv", sep = "")),row.names = F)} else {
+    utils::write.csv(dataxAggClass  %>%
+                           dplyr::rename(class=class1,classLabel=classLabel1,classPalette=classPalette1) %>%
+                           dplyr::select("scenario","region","subRegion","param","classLabel","class","classLabel",
+                                         "xLabel","x","aggregate","units","value"),
+                         file = gsub("//","/",paste(folder,
+                                                    "/gcamDataTable_aggClass1",
+                                                    nameAppend,".csv", sep = "")),row.names = F)
+                                                }
 
     rlang::inform(paste("GCAM data aggregated to class 1 saved to: ",gsub("//","/",paste(folder,
                                                                                    "/gcamDataTable_aggClass1",
@@ -6994,6 +7047,7 @@ readgcam <- function(gcamdatabase = NULL,
     }
 
     # Aggregate across Param
+    if(!removeVintage){
     dataxAggsums<-datax%>%
       dplyr::filter(aggregate=="sum")%>%
       dplyr::select(-c(class2,classLabel2,classPalette2,class1,classLabel1))%>%
@@ -7006,17 +7060,40 @@ readgcam <- function(gcamdatabase = NULL,
       dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
       dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))%>%
       dplyr::ungroup()
-    dataxAggClass<-dplyr::bind_rows(dataxAggsums,dataxAggmeans)%>%dplyr::ungroup()
+    dataxAggClass<-dplyr::bind_rows(dataxAggsums,dataxAggmeans)%>%dplyr::ungroup()} else {
+      dataxAggsums<-datax%>%
+        dplyr::filter(aggregate=="sum")%>%
+        dplyr::select(-c(class2,classLabel2,classPalette2,class1,classLabel1, vintage))%>%
+        dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
+        dplyr::summarize_at(c("value"),list(~sum(.,na.rm = T)))%>%
+        dplyr::ungroup()
+      dataxAggmeans<-datax%>%
+        dplyr::filter(aggregate=="mean")%>%
+        dplyr::select(-c(class2,classLabel2,classPalette2,class1,classLabel1, vintage))%>%
+        dplyr::group_by_at(dplyr::vars(-value,-origValue))%>%
+        dplyr::summarize_at(c("value"),list(~mean(.,na.rm = T)))%>%
+        dplyr::ungroup()
+      dataxAggClass<-dplyr::bind_rows(dataxAggsums,dataxAggmeans)%>%dplyr::ungroup()
+    }
 
     dataAggParam = dataxAggClass %>% dplyr::rename(classPalette=classPalette1) %>% unique()
 
     if(saveData){
+
+    if(!removeVintage){
     utils::write.csv(dataxAggClass %>%
                        dplyr::rename(classPalette=classPalette1) %>%
-                       dplyr::select("scenario","region","subRegion","param","xLabel","x","vintage","units","value"),
+                       dplyr::select("scenario","region","subRegion","param","xLabel","x","vintage","aggregate","units","value"),
                      file = gsub("//","/",paste(folder,
                                                 "/gcamDataTable_aggParam",
-                                                nameAppend,".csv", sep = "")),row.names = F)
+                                                nameAppend,".csv", sep = "")),row.names = F)} else {
+      utils::write.csv(dataxAggClass %>%
+                         dplyr::rename(classPalette=classPalette1) %>%
+                         dplyr::select("scenario","region","subRegion","param","xLabel","x","aggregate","units","value"),
+                       file = gsub("//","/",paste(folder,
+                                                  "/gcamDataTable_aggParam",
+                                                  nameAppend,".csv", sep = "")),row.names = F)
+                                                }
 
 
     rlang::inform(paste("GCAM data aggregated to param saved to: ",gsub("//","/",paste(folder,
@@ -7036,17 +7113,32 @@ readgcam <- function(gcamdatabase = NULL,
   rlang::inform(paste0("readgcam run completed."))
 
 
+  if(!removeVintage){
+    listOut <- list(dataAll = datax,
+                    data = datax %>% dplyr::select("scenario","region","subRegion","param","classLabel1","class1","classLabel2","class2",
+                                                   "xLabel","x","vintage","aggregate","units","value"),
+                    dataAggClass1 = dataAggClass1 %>% dplyr::select("scenario","region","subRegion","param","classLabel","class","classLabel",
+                                                                    "xLabel","x","vintage","aggregate","units","value"),
+                    dataAggClass2 = dataAggClass2  %>% dplyr::select("scenario","region","subRegion","param","classLabel","class","classLabel",
+                                                                     "xLabel","x","vintage","aggregate","units","value"),
+                    dataAggParam = dataAggParam %>% dplyr::select("scenario","region","subRegion","param","xLabel","x","vintage","aggregate","units","value"),
+                    scenarios = scenarios,
+                    queries = queries)
+  }else{
+    listOut <- list(dataAll = datax,
+                    data = datax %>% dplyr::select("scenario","region","subRegion","param","classLabel1","class1","classLabel2","class2",
+                                                   "xLabel","x","aggregate","units","value"),
+                    dataAggClass1 = dataAggClass1 %>% dplyr::select("scenario","region","subRegion","param","classLabel","class","classLabel",
+                                                                    "xLabel","x","aggregate","units","value"),
+                    dataAggClass2 = dataAggClass2  %>% dplyr::select("scenario","region","subRegion","param","classLabel","class","classLabel",
+                                                                     "xLabel","x","aggregate","units","value"),
+                    dataAggParam = dataAggParam %>% dplyr::select("scenario","region","subRegion","param","xLabel","x","aggregate","units","value"),
+                    scenarios = scenarios,
+                    queries = queries)
+  }
+
   if(nrow(datax)>0){
-  return(list(dataAll = datax,
-              data = datax %>% dplyr::select("scenario","region","subRegion","param","classLabel1","class1","classLabel2","class2",
-                                             "xLabel","x","vintage","units","value"),
-              dataAggClass1 = dataAggClass1 %>% dplyr::select("scenario","region","subRegion","param","classLabel","class","classLabel",
-                                                              "xLabel","x","vintage","units","value"),
-              dataAggClass2 = dataAggClass2  %>% dplyr::select("scenario","region","subRegion","param","classLabel","class","classLabel",
-                                                               "xLabel","x","vintage","units","value"),
-              dataAggParam = dataAggParam %>% dplyr::select("scenario","region","subRegion","param","xLabel","x","vintage","units","value"),
-              scenarios = scenarios,
-              queries = queries))} else {
+  return(listOut)} else {
                 rlang::warn("No data extracted for chosen arguments.")
               }
 
