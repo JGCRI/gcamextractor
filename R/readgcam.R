@@ -6930,7 +6930,7 @@ readgcam <- function(gcamdatabase = NULL,
 
 
     # Aggregate across Class 2
-  if(!removeVintage){
+  if(!removeVintages){
     dataxAggsums<-datax%>%
       dplyr::filter(aggregate=="sum")%>%
       dplyr::select(-c(class1,classLabel1,classPalette1, origQuery, origUnits))%>%
@@ -6965,7 +6965,7 @@ readgcam <- function(gcamdatabase = NULL,
 
     if(saveData){
 
-      if(!removeVintage){
+      if(!removeVintages){
       utils::write.csv(dataxAggClass %>%
                          dplyr::rename(class=class2,classLabel=classLabel2,classPalette=classPalette2)%>%
                          dplyr::select("scenario","region","subRegion","param","classLabel","class","classLabel",
@@ -6989,7 +6989,7 @@ readgcam <- function(gcamdatabase = NULL,
       }
 
     # Aggregate across Class 1
-    if(!removeVintage){
+    if(!removeVintages){
        dataxAggsums<-datax%>%
         dplyr::filter(aggregate=="sum")%>%
         dplyr::select(-c(class2,classLabel2,classPalette2, origQuery, origUnits))%>%
@@ -7023,7 +7023,7 @@ readgcam <- function(gcamdatabase = NULL,
 
     if(saveData){
 
-      if(!removeVintage){
+      if(!removeVintages){
     utils::write.csv(dataxAggClass  %>%
                        dplyr::rename(class=class1,classLabel=classLabel1,classPalette=classPalette1) %>%
                        dplyr::select("scenario","region","subRegion","param","classLabel","class","classLabel",
@@ -7047,7 +7047,7 @@ readgcam <- function(gcamdatabase = NULL,
     }
 
     # Aggregate across Param
-    if(!removeVintage){
+    if(!removeVintages){
     dataxAggsums<-datax%>%
       dplyr::filter(aggregate=="sum")%>%
       dplyr::select(-c(class2,classLabel2,classPalette2,class1,classLabel1))%>%
@@ -7080,7 +7080,7 @@ readgcam <- function(gcamdatabase = NULL,
 
     if(saveData){
 
-    if(!removeVintage){
+    if(!removeVintages){
     utils::write.csv(dataxAggClass %>%
                        dplyr::rename(classPalette=classPalette1) %>%
                        dplyr::select("scenario","region","subRegion","param","xLabel","x","vintage","aggregate","units","value"),
@@ -7113,7 +7113,7 @@ readgcam <- function(gcamdatabase = NULL,
   rlang::inform(paste0("readgcam run completed."))
 
 
-  if(!removeVintage){
+  if(!removeVintages){
     listOut <- list(dataAll = datax,
                     data = datax %>% dplyr::select("scenario","region","subRegion","param","classLabel1","class1","classLabel2","class2",
                                                    "xLabel","x","vintage","aggregate","units","value"),
